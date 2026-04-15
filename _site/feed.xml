@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Jason Duffett</title>
+  <subtitle>these things I do</subtitle>
+  <link href="https://jasonduffett.net/feed.xml" rel="self" />
+  <link href="https://jasonduffett.net/" />
+  <updated>2026-04-02T00:00:00Z</updated>
+  <id>https://jasonduffett.net/</id>
+  <author>
+    <name>Jason Duffett</name>
+  </author>
+  
+  
+  <entry>
+    <title>Hardening TLS on NetScaler VPX, revisited</title>
+    <link href="https://jasonduffett.net/tech/hardening-tls-on-netscaler-vpx/" />
+    <updated>2026-04-02T00:00:00Z</updated>
+    <id>https://jasonduffett.net/tech/hardening-tls-on-netscaler-vpx/</id>
+    <content type="html">&lt;p&gt;Every few years I end up back in the NetScaler console, staring at the same cipher-suite dialog and trying to remember which knobs actually matter. This is the note I wish I&#39;d written last time.&lt;/p&gt;
+&lt;p&gt;The goal is simple: an &lt;strong&gt;A+&lt;/strong&gt; on SSL Labs, without locking out the two or three clients that still matter to the business. Everything below assumes VPX 14.x with the default front-end vserver.&lt;/p&gt;
+&lt;h2&gt;Start from a known baseline&lt;/h2&gt;
+&lt;p&gt;Before changing anything, capture the current profile. It makes rollback a one-liner and gives you something to diff against later:&lt;/p&gt;
+&lt;pre class=&quot;language-bash&quot;&gt;&lt;code class=&quot;language-bash&quot;&gt;show ssl vserver vs_www_443 &lt;span class=&quot;token operator&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;grep&lt;/span&gt; &lt;span class=&quot;token parameter variable&quot;&gt;-i&lt;/span&gt; cipher
+show ssl profile ns_default_ssl_profile_frontend&lt;/code&gt;&lt;/pre&gt;
+&lt;blockquote&gt;
+&lt;p&gt;If you skip this step you &lt;em&gt;will&lt;/em&gt; regret it the first time a partner calls to say their integration stopped working at 3 a.m.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2&gt;The cipher group I actually ship&lt;/h2&gt;
+&lt;p&gt;After some back-and-forth with SSL Labs I settled on a small, explicit group rather than one of the built-in bundles. TLS 1.3 first, then a short TLS 1.2 tail for legacy callers:&lt;/p&gt;
+&lt;pre class=&quot;language-bash&quot;&gt;&lt;code class=&quot;language-bash&quot;&gt;&lt;span class=&quot;token function&quot;&gt;add&lt;/span&gt; ssl cipher cg_2026_modern
+&lt;span class=&quot;token builtin class-name&quot;&gt;bind&lt;/span&gt; ssl cipher cg_2026_modern &lt;span class=&quot;token parameter variable&quot;&gt;-cipherName&lt;/span&gt; TLS1.3-AES256-GCM-SHA384 &lt;span class=&quot;token parameter variable&quot;&gt;-cipherPriority&lt;/span&gt; &lt;span class=&quot;token number&quot;&gt;1&lt;/span&gt;
+&lt;span class=&quot;token builtin class-name&quot;&gt;bind&lt;/span&gt; ssl cipher cg_2026_modern &lt;span class=&quot;token parameter variable&quot;&gt;-cipherName&lt;/span&gt; TLS1.3-AES128-GCM-SHA256 &lt;span class=&quot;token parameter variable&quot;&gt;-cipherPriority&lt;/span&gt; &lt;span class=&quot;token number&quot;&gt;2&lt;/span&gt;
+&lt;span class=&quot;token builtin class-name&quot;&gt;bind&lt;/span&gt; ssl cipher cg_2026_modern &lt;span class=&quot;token parameter variable&quot;&gt;-cipherName&lt;/span&gt; TLS1.2-ECDHE-RSA-AES256-GCM-SHA384 &lt;span class=&quot;token parameter variable&quot;&gt;-cipherPriority&lt;/span&gt; &lt;span class=&quot;token number&quot;&gt;3&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Bind it to the vserver, re-run &lt;a href=&quot;https://www.ssllabs.com/ssltest/&quot;&gt;SSL Labs&lt;/a&gt;, and you should be done. If you aren&#39;t, the next section is the usual culprit.&lt;/p&gt;
+&lt;hr /&gt;
+&lt;p&gt;&lt;em&gt;Next post: a ukulele arrangement of Wichita Lineman — because balance.&lt;/em&gt;&lt;/p&gt;
+</content>
+  </entry>
+  
+  
+  <entry>
+    <title>A ukulele arrangement of Wichita Lineman</title>
+    <link href="https://jasonduffett.net/music/wichita-lineman-ukulele/" />
+    <updated>2026-03-14T00:00:00Z</updated>
+    <id>https://jasonduffett.net/music/wichita-lineman-ukulele/</id>
+    <content type="html">&lt;p&gt;Jimmy Webb&#39;s &lt;em&gt;Wichita Lineman&lt;/em&gt; is a three-minute masterclass in longing. The chord changes do most of the work — all I&#39;ve tried to do is get out of their way.&lt;/p&gt;
+&lt;p&gt;I&#39;ve arranged it for a soprano uke in &lt;strong&gt;low-G&lt;/strong&gt;. Standard tuning works, but the low string gives the verses somewhere to sit.&lt;/p&gt;
+&lt;h2&gt;The shape of it&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Verse:&lt;/strong&gt; F — C/E — Dm — Bb — F — C — F&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Refrain:&lt;/strong&gt; Bb — F — Gm — C — F&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Play the verse fingerstyle, thumb on the low string, fingers walking through the top three. When the refrain arrives, let the strum open up — but only just.&lt;/p&gt;
+&lt;h2&gt;Notes&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;The signature line (&amp;quot;&lt;em&gt;and I need you more than want you&lt;/em&gt;&amp;quot;) sits on the B♭. Hold it a beat longer than feels right.&lt;/li&gt;
+&lt;li&gt;The string-bend that Glen Campbell plays at the end of each verse translates surprisingly well to a pull-off on the A-string, fret 3 → fret 1.&lt;/li&gt;
+&lt;li&gt;Don&#39;t try to sing it at Campbell&#39;s key. Capo up two frets and give your throat a fighting chance.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;I&#39;ll post a recording when I&#39;m less embarrassed by mine.&lt;/p&gt;
+</content>
+  </entry>
+  
+  
+  <entry>
+    <title>PowerShell one-liners I keep reaching for</title>
+    <link href="https://jasonduffett.net/tech/powershell-one-liners/" />
+    <updated>2025-11-09T00:00:00Z</updated>
+    <id>https://jasonduffett.net/tech/powershell-one-liners/</id>
+    <content type="html">&lt;p&gt;A small personal cheatsheet — the commands I type two or three times a week and would rather not rediscover every time.&lt;/p&gt;
+&lt;h2&gt;Find which process is holding a port&lt;/h2&gt;
+&lt;pre class=&quot;language-powershell&quot;&gt;&lt;code class=&quot;language-powershell&quot;&gt;&lt;span class=&quot;token function&quot;&gt;Get-NetTCPConnection&lt;/span&gt; &lt;span class=&quot;token operator&quot;&gt;-&lt;/span&gt;LocalPort 443 &lt;span class=&quot;token punctuation&quot;&gt;|&lt;/span&gt;
+  &lt;span class=&quot;token function&quot;&gt;Select-Object&lt;/span&gt; LocalAddress&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt; State&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt; OwningProcess&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+    @&lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;n=&lt;span class=&quot;token string&quot;&gt;&quot;Process&quot;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;;&lt;/span&gt;e=&lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;Get-Process&lt;/span&gt; &lt;span class=&quot;token operator&quot;&gt;-&lt;/span&gt;Id &lt;span class=&quot;token variable&quot;&gt;$_&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;OwningProcess&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;Name&lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Nicer than &lt;code&gt;netstat -ano | findstr&lt;/code&gt; because you get the process name in the same line.&lt;/p&gt;
+&lt;h2&gt;The last thousand events from one log&lt;/h2&gt;
+&lt;pre class=&quot;language-powershell&quot;&gt;&lt;code class=&quot;language-powershell&quot;&gt;&lt;span class=&quot;token function&quot;&gt;Get-WinEvent&lt;/span&gt; &lt;span class=&quot;token operator&quot;&gt;-&lt;/span&gt;LogName System &lt;span class=&quot;token operator&quot;&gt;-&lt;/span&gt;MaxEvents 1000 &lt;span class=&quot;token punctuation&quot;&gt;|&lt;/span&gt;
+  &lt;span class=&quot;token function&quot;&gt;Where-Object&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;token variable&quot;&gt;$_&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;LevelDisplayName &lt;span class=&quot;token operator&quot;&gt;-in&lt;/span&gt; &lt;span class=&quot;token string&quot;&gt;&#39;Error&#39;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;token string&quot;&gt;&#39;Warning&#39;&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;|&lt;/span&gt;
+  &lt;span class=&quot;token function&quot;&gt;Format-Table&lt;/span&gt; TimeCreated&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt; Id&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt; ProviderName&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt; Message &lt;span class=&quot;token operator&quot;&gt;-&lt;/span&gt;AutoSize&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;I tend to paste this into a fresh window when a box starts misbehaving — quick situational awareness before I go digging.&lt;/p&gt;
+&lt;h2&gt;Hash a file the same way everywhere&lt;/h2&gt;
+&lt;pre class=&quot;language-powershell&quot;&gt;&lt;code class=&quot;language-powershell&quot;&gt;&lt;span class=&quot;token function&quot;&gt;Get-FileHash&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&#92;installer&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;msi &lt;span class=&quot;token operator&quot;&gt;-&lt;/span&gt;Algorithm SHA256 &lt;span class=&quot;token punctuation&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;Select-Object&lt;/span&gt; &lt;span class=&quot;token operator&quot;&gt;-&lt;/span&gt;ExpandProperty Hash&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Pipes nicely into &lt;code&gt;| Set-Clipboard&lt;/code&gt; on Windows 11, which is how I paste hashes into change tickets.&lt;/p&gt;
+&lt;p&gt;None of these are clever. They&#39;re just the ones I&#39;ve given up trying to remember.&lt;/p&gt;
+</content>
+  </entry>
+  
+  
+  <entry>
+    <title>Recording the uke with a $40 lavalier</title>
+    <link href="https://jasonduffett.net/music/recording-uke-lavalier/" />
+    <updated>2025-09-18T00:00:00Z</updated>
+    <id>https://jasonduffett.net/music/recording-uke-lavalier/</id>
+    <content type="html">&lt;p&gt;I spent a long time convincing myself I needed a large-diaphragm condenser, a proper interface, and an acoustically-treated corner. Then I recorded a passable demo with a Rode smartLav+ clipped to the headstock of my soprano and my phone in aeroplane mode on a book.&lt;/p&gt;
+&lt;p&gt;Here&#39;s what I&#39;ve learned after twenty or thirty takes that way.&lt;/p&gt;
+&lt;h2&gt;Placement&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Clip the lav to the headstock&lt;/strong&gt;, not the body. The headstock is quieter (less boom) and the mic ends up roughly a foot from the soundhole.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Angle it across the strings&lt;/strong&gt;, not towards the soundhole. Pointing straight at the hole exaggerates low-mid honk.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Slack the cable.&lt;/strong&gt; If the cable is taut it transmits finger noise up the fretting hand like a telegraph.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2&gt;The phone&lt;/h2&gt;
+&lt;p&gt;An iPhone&#39;s voice-memo app records 16-bit / 44.1 kHz mono, which is fine. The bigger wins:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Turn on &lt;strong&gt;aeroplane mode&lt;/strong&gt;. No notifications, no LTE buzz.&lt;/li&gt;
+&lt;li&gt;Record a ten-second room-tone clip at the start of every session. It makes noise reduction in post much more forgiving.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Never let the phone touch the floor&lt;/strong&gt; — footsteps will end up in the take.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2&gt;Post&lt;/h2&gt;
+&lt;p&gt;I use Audacity. Two moves cover most of it:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;Noise reduction&lt;/strong&gt; sampled from that room-tone clip (12 dB, sensitivity 6, frequency smoothing 3).&lt;/li&gt;
+&lt;li&gt;A gentle &lt;strong&gt;high-pass at 80 Hz&lt;/strong&gt; to get rid of the rumble the lav picks up.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;That&#39;s it. No compression, no EQ beyond the high-pass. A recording made this way won&#39;t get you on the radio, but it&#39;ll happily sit on a blog post next to the chord chart, and that&#39;s what I wanted.&lt;/p&gt;
+</content>
+  </entry>
+  
+</feed>

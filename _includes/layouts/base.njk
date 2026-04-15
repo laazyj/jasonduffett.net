@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="{{ site.language }}">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% if title %}{{ title }} — {{ site.title }}{% else %}{{ site.title }} — {{ site.tagline }}{% endif %}</title>
+  <meta name="description" content="{{ summary or site.description }}" />
+  <link rel="stylesheet" href="/assets/styles.css" />
+  <link rel="alternate" type="application/rss+xml" href="/feed.xml" title="{{ site.title }}" />
+  <meta property="og:title" content="{% if title %}{{ title }}{% else %}{{ site.title }}{% endif %}" />
+  <meta property="og:description" content="{{ summary or site.description }}" />
+  <meta property="og:type" content="{% if layout == 'layouts/post.njk' %}article{% else %}website{% endif %}" />
+  <meta property="og:url" content="{{ site.url }}{{ page.url }}" />
+</head>
+<body>
+  <div class="wrap">
+
+    <header class="site">
+      <a class="brand" href="/">{{ site.title }} <em>— {{ site.tagline }}</em></a>
+      <nav>
+        <a href="/" {% if page.url == "/" %}class="active"{% endif %}>Writing</a>
+        <a href="/tech/" {% if page.url.startsWith and page.url.startsWith("/tech") %}class="active"{% endif %}>Tech</a>
+        <a href="/music/" {% if page.url.startsWith and page.url.startsWith("/music") %}class="active"{% endif %}>Music</a>
+        <a href="/about/" {% if page.url == "/about/" %}class="active"{% endif %}>About</a>
+      </nav>
+    </header>
+
+    {{ content | safe }}
+
+    <footer class="site">
+      <span>&copy; {{ currentYear }} {{ site.author.name }}</span>
+      <span><a href="/feed.xml">RSS</a> · <a href="/about/">About</a></span>
+    </footer>
+
+  </div>
+</body>
+</html>

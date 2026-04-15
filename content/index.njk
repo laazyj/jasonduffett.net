@@ -1,0 +1,9 @@
+---
+layout: layouts/base.njk
+title: ""
+eleventyExcludeFromCollections: true
+---
+<p class="intro"><strong>Hello.</strong> I'm Jason — an infrastructure engineer by day, a ukulele tinkerer by evening. This is where I keep notes on the things I build, break, and play.</p>
+
+{% set posts = collections.posts %}
+{% include "partials/post-list.njk" %}

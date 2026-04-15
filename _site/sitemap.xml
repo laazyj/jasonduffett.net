@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://jasonduffett.net/</loc></url>
+  <url><loc>https://jasonduffett.net/tech/</loc></url>
+  <url><loc>https://jasonduffett.net/music/</loc></url>
+  <url><loc>https://jasonduffett.net/about/</loc></url>
+  
+  <url>
+    <loc>https://jasonduffett.net/tech/hardening-tls-on-netscaler-vpx/</loc>
+    <lastmod>2026-04-02</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://jasonduffett.net/music/wichita-lineman-ukulele/</loc>
+    <lastmod>2026-03-14</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://jasonduffett.net/tech/powershell-one-liners/</loc>
+    <lastmod>2025-11-09</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://jasonduffett.net/music/recording-uke-lavalier/</loc>
+    <lastmod>2025-09-18</lastmod>
+  </url>
+  
+</urlset>

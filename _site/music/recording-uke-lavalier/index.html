@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Recording the uke with a $40 lavalier — Jason Duffett</title>
+  <meta name="description" content="Condenser mics are overkill for a sitting-room recording. A cheap lav clipped to the headstock gets 80% of the way there." />
+  <link rel="stylesheet" href="/assets/styles.css" />
+  <link rel="alternate" type="application/rss+xml" href="/feed.xml" title="Jason Duffett" />
+  <meta property="og:title" content="Recording the uke with a $40 lavalier" />
+  <meta property="og:description" content="Condenser mics are overkill for a sitting-room recording. A cheap lav clipped to the headstock gets 80% of the way there." />
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content="https://jasonduffett.net/music/recording-uke-lavalier/" />
+</head>
+<body>
+  <div class="wrap">
+
+    <header class="site">
+      <a class="brand" href="/">Jason Duffett <em>— these things I do</em></a>
+      <nav>
+        <a href="/" >Writing</a>
+        <a href="/tech/" >Tech</a>
+        <a href="/music/" class="active">Music</a>
+        <a href="/about/" >About</a>
+      </nav>
+    </header>
+
+    <article>
+  <h1>Recording the uke with a $40 lavalier</h1>
+  <div class="meta">
+    <time datetime="2025-09-18">18 September 2025</time>
+    
+      <span class="tag music">Music</span>
+    
+  </div>
+
+  <p>I spent a long time convincing myself I needed a large-diaphragm condenser, a proper interface, and an acoustically-treated corner. Then I recorded a passable demo with a Rode smartLav+ clipped to the headstock of my soprano and my phone in aeroplane mode on a book.</p>
+<p>Here's what I've learned after twenty or thirty takes that way.</p>
+<h2>Placement</h2>
+<ul>
+<li><strong>Clip the lav to the headstock</strong>, not the body. The headstock is quieter (less boom) and the mic ends up roughly a foot from the soundhole.</li>
+<li><strong>Angle it across the strings</strong>, not towards the soundhole. Pointing straight at the hole exaggerates low-mid honk.</li>
+<li><strong>Slack the cable.</strong> If the cable is taut it transmits finger noise up the fretting hand like a telegraph.</li>
+</ul>
+<h2>The phone</h2>
+<p>An iPhone's voice-memo app records 16-bit / 44.1 kHz mono, which is fine. The bigger wins:</p>
+<ul>
+<li>Turn on <strong>aeroplane mode</strong>. No notifications, no LTE buzz.</li>
+<li>Record a ten-second room-tone clip at the start of every session. It makes noise reduction in post much more forgiving.</li>
+<li><strong>Never let the phone touch the floor</strong> — footsteps will end up in the take.</li>
+</ul>
+<h2>Post</h2>
+<p>I use Audacity. Two moves cover most of it:</p>
+<ol>
+<li><strong>Noise reduction</strong> sampled from that room-tone clip (12 dB, sensitivity 6, frequency smoothing 3).</li>
+<li>A gentle <strong>high-pass at 80 Hz</strong> to get rid of the rumble the lav picks up.</li>
+</ol>
+<p>That's it. No compression, no EQ beyond the high-pass. A recording made this way won't get you on the radio, but it'll happily sit on a blog post next to the chord chart, and that's what I wanted.</p>
+
+</article>
+
+
+    <footer class="site">
+      <span>&copy; 2026 Jason Duffett</span>
+      <span><a href="/feed.xml">RSS</a> · <a href="/about/">About</a></span>
+    </footer>
+
+  </div>
+</body>
+</html>

@@ -213,6 +213,22 @@ article code {
 
 article pre code { background: none; padding: 0; }
 
+/* --- Syntax highlighting (Prism), warm palette -------------------- */
+.token.comment, .token.prolog, .token.doctype, .token.cdata
+  { color: #a49783; font-style: italic; }
+.token.punctuation              { color: #5c574e; }
+.token.keyword, .token.builtin,
+.token.class-name               { color: #7a3d5f; }
+.token.string, .token.char,
+.token.attr-value               { color: #2e5d7e; }
+.token.number, .token.boolean,
+.token.constant                 { color: #8a5a3b; }
+.token.function, .token.tag,
+.token.selector                 { color: #2e5d7e; }
+.token.operator, .token.entity,
+.token.url, .token.variable,
+.token.parameter                { color: #5c574e; }
+
 article hr {
   border: none;
   border-top: 1px solid var(--rule);

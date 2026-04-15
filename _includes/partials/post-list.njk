@@ -1,0 +1,21 @@
+{% set groups = posts | byYear %}
+{% for group in groups %}
+  <div class="year">{{ group.year }}</div>
+  <ul class="posts">
+    {% for post in group.posts %}
+    <li>
+      <time datetime="{{ post.date | htmlDateString }}">{{ post.date | shortDate }}</time>
+      <a class="title" href="{{ post.url }}">{{ post.data.title }}</a>
+      {% if "tech" in post.data.tags %}
+        <span class="tag tech">Tech</span>
+      {% elif "music" in post.data.tags %}
+        <span class="tag music">Music</span>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+{% endfor %}
+
+{% if not posts or posts.length == 0 %}
+<p class="intro"><em>Nothing here yet.</em></p>
+{% endif %}

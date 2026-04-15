@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PowerShell one-liners I keep reaching for — Jason Duffett</title>
+  <meta name="description" content="A small personal cheatsheet — the commands I type two or three times a week." />
+  <link rel="stylesheet" href="/assets/styles.css" />
+  <link rel="alternate" type="application/rss+xml" href="/feed.xml" title="Jason Duffett" />
+  <meta property="og:title" content="PowerShell one-liners I keep reaching for" />
+  <meta property="og:description" content="A small personal cheatsheet — the commands I type two or three times a week." />
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content="https://jasonduffett.net/tech/powershell-one-liners/" />
+</head>
+<body>
+  <div class="wrap">
+
+    <header class="site">
+      <a class="brand" href="/">Jason Duffett <em>— these things I do</em></a>
+      <nav>
+        <a href="/" >Writing</a>
+        <a href="/tech/" class="active">Tech</a>
+        <a href="/music/" >Music</a>
+        <a href="/about/" >About</a>
+      </nav>
+    </header>
+
+    <article>
+  <h1>PowerShell one-liners I keep reaching for</h1>
+  <div class="meta">
+    <time datetime="2025-11-09">9 November 2025</time>
+    
+      <span class="tag tech">Tech</span>
+    
+  </div>
+
+  <p>A small personal cheatsheet — the commands I type two or three times a week and would rather not rediscover every time.</p>
+<h2>Find which process is holding a port</h2>
+<pre class="language-powershell"><code class="language-powershell"><span class="token function">Get-NetTCPConnection</span> <span class="token operator">-</span>LocalPort 443 <span class="token punctuation">|</span>
+  <span class="token function">Select-Object</span> LocalAddress<span class="token punctuation">,</span> State<span class="token punctuation">,</span> OwningProcess<span class="token punctuation">,</span>
+    @<span class="token punctuation">{</span>n=<span class="token string">"Process"</span><span class="token punctuation">;</span>e=<span class="token punctuation">{</span><span class="token punctuation">(</span><span class="token function">Get-Process</span> <span class="token operator">-</span>Id <span class="token variable">$_</span><span class="token punctuation">.</span>OwningProcess<span class="token punctuation">)</span><span class="token punctuation">.</span>Name<span class="token punctuation">}</span><span class="token punctuation">}</span></code></pre>
+<p>Nicer than <code>netstat -ano | findstr</code> because you get the process name in the same line.</p>
+<h2>The last thousand events from one log</h2>
+<pre class="language-powershell"><code class="language-powershell"><span class="token function">Get-WinEvent</span> <span class="token operator">-</span>LogName System <span class="token operator">-</span>MaxEvents 1000 <span class="token punctuation">|</span>
+  <span class="token function">Where-Object</span> <span class="token punctuation">{</span> <span class="token variable">$_</span><span class="token punctuation">.</span>LevelDisplayName <span class="token operator">-in</span> <span class="token string">'Error'</span><span class="token punctuation">,</span><span class="token string">'Warning'</span> <span class="token punctuation">}</span> <span class="token punctuation">|</span>
+  <span class="token function">Format-Table</span> TimeCreated<span class="token punctuation">,</span> Id<span class="token punctuation">,</span> ProviderName<span class="token punctuation">,</span> Message <span class="token operator">-</span>AutoSize</code></pre>
+<p>I tend to paste this into a fresh window when a box starts misbehaving — quick situational awareness before I go digging.</p>
+<h2>Hash a file the same way everywhere</h2>
+<pre class="language-powershell"><code class="language-powershell"><span class="token function">Get-FileHash</span> <span class="token punctuation">.</span>\installer<span class="token punctuation">.</span>msi <span class="token operator">-</span>Algorithm SHA256 <span class="token punctuation">|</span> <span class="token function">Select-Object</span> <span class="token operator">-</span>ExpandProperty Hash</code></pre>
+<p>Pipes nicely into <code>| Set-Clipboard</code> on Windows 11, which is how I paste hashes into change tickets.</p>
+<p>None of these are clever. They're just the ones I've given up trying to remember.</p>
+
+</article>
+
+
+    <footer class="site">
+      <span>&copy; 2026 Jason Duffett</span>
+      <span><a href="/feed.xml">RSS</a> · <a href="/about/">About</a></span>
+    </footer>
+
+  </div>
+</body>
+</html>

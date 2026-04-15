@@ -1,0 +1,16 @@
+{
+  "name": "jasonduffett-net",
+  "version": "0.1.0",
+  "private": true,
+  "description": "jasonduffett.net — a quiet editorial blog, built with Eleventy.",
+  "scripts": {
+    "start": "eleventy --serve --quiet",
+    "build": "eleventy",
+    "clean": "rm -rf _site"
+  },
+  "devDependencies": {
+    "@11ty/eleventy": "^3.0.0",
+    "@11ty/eleventy-plugin-rss": "^2.0.2",
+    "@11ty/eleventy-plugin-syntaxhighlight": "^5.0.0"
+  }
+}
