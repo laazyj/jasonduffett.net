@@ -1,3 +1,5 @@
+const fs = require("node:fs");
+const path = require("node:path");
 const rssPlugin = require("@11ty/eleventy-plugin-rss");
 const syntaxHighlight = require("@11ty/eleventy-plugin-syntaxhighlight");
 
@@ -8,6 +10,13 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy({ "assets": "assets" });
 
   eleventyConfig.addGlobalData("currentYear", () => new Date().getFullYear());
+
+  // Inline a file's contents verbatim. Used to ship the stylesheet inside
+  // each page's <style> — one fewer HTTP request, instant first paint,
+  // and the preview works on any static host without MIME-type quirks.
+  eleventyConfig.addShortcode("inlineFile", (relPath) =>
+    fs.readFileSync(path.join(__dirname, relPath), "utf8")
+  );
 
   // Convert a root-absolute path ("/assets/x.css") into a path relative to
   // the current page. Lets the site render under any URL prefix — including
