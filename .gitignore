@@ -141,3 +141,6 @@ vite.config.ts.timestamp-*
 # Eleventy output
 _site/
 
+# AWS CDK synth output
+cdk.out/
+

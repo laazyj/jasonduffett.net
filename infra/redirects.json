@@ -1,0 +1,4 @@
+{
+  "_comment": "Map of old URL path -> new URL path. Any request matching a key is 301-redirected to the corresponding value. Populate via `npm run redirects` (scrapes the current jasonduffett.net) or by hand.",
+  "redirects": {}
+}
