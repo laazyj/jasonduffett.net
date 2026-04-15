@@ -5,7 +5,7 @@
     {% for post in group.posts %}
     <li>
       <time datetime="{{ post.date | htmlDateString }}">{{ post.date | shortDate }}</time>
-      <a class="title" href="{{ post.url }}">{{ post.data.title }}</a>
+      <a class="title" href="{{ post.url | rel }}">{{ post.data.title }}</a>
       {% if "tech" in post.data.tags %}
         <span class="tag tech">Tech</span>
       {% elif "music" in post.data.tags %}

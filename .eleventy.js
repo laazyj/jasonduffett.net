@@ -9,6 +9,17 @@ module.exports = function (eleventyConfig) {
 
   eleventyConfig.addGlobalData("currentYear", () => new Date().getFullYear());
 
+  // Convert a root-absolute path ("/assets/x.css") into a path relative to
+  // the current page. Lets the site render under any URL prefix — including
+  // raw.githack preview links — without a build-time pathPrefix flag.
+  eleventyConfig.addFilter("rel", function (target) {
+    if (typeof target !== "string" || !target.startsWith("/")) return target;
+    const pageUrl = (this.page && this.page.url) || (this.ctx && this.ctx.page && this.ctx.page.url) || "/";
+    const depth = pageUrl.split("/").filter(Boolean).length;
+    const prefix = depth === 0 ? "./" : "../".repeat(depth);
+    return prefix + target.replace(/^\//, "");
+  });
+
   // --- Filters -----------------------------------------------------------
   eleventyConfig.addFilter("readableDate", (date) => {
     const d = date instanceof Date ? date : new Date(date);
