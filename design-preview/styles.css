@@ -1,0 +1,235 @@
+/* ------------------------------------------------------------------
+   Jason Duffett — "Quiet Editorial" design system
+   Palette:  ink #1a1a1a  •  paper #faf7f2  •  rule #e6dfd2
+             muted #6b6357  •  accent #8a5a3b (warm tan)
+   Type:    "Source Serif 4" for prose, "Inter" for UI/nav
+   ------------------------------------------------------------------ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap');
+
+:root {
+  --ink: #1a1a1a;
+  --paper: #faf7f2;
+  --rule: #e6dfd2;
+  --muted: #6b6357;
+  --accent: #8a5a3b;
+  --measure: 38rem;
+}
+
+* { box-sizing: border-box; }
+
+html { font-size: 18px; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Source Serif 4", Georgia, serif;
+  font-optical-sizing: auto;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ------------------------------ Layout --------------------------- */
+.wrap {
+  max-width: var(--measure);
+  margin: 0 auto;
+  padding: 3rem 1.5rem 6rem;
+}
+
+/* ------------------------------ Header --------------------------- */
+header.site {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 2rem;
+  padding-bottom: 1.25rem;
+  margin-bottom: 3rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+header.site a.brand {
+  font-family: "Source Serif 4", Georgia, serif;
+  font-weight: 600;
+  font-size: 1.05rem;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+header.site a.brand em {
+  font-style: italic;
+  color: var(--muted);
+  font-weight: 400;
+}
+
+header.site nav {
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+header.site nav a {
+  color: var(--muted);
+  text-decoration: none;
+  margin-left: 1.5rem;
+}
+
+header.site nav a:hover,
+header.site nav a.active {
+  color: var(--ink);
+}
+
+/* ------------------------------ Intro ---------------------------- */
+.intro {
+  margin: 0 0 3.5rem;
+  font-size: 1.05rem;
+  color: var(--muted);
+  max-width: 34rem;
+}
+
+.intro strong { color: var(--ink); font-weight: 600; }
+
+/* ------------------------------ Post list ------------------------ */
+.year {
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 2.5rem 0 0.75rem;
+}
+
+ul.posts {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border-top: 1px solid var(--rule);
+}
+
+ul.posts li {
+  border-bottom: 1px solid var(--rule);
+  padding: 1rem 0;
+  display: grid;
+  grid-template-columns: 5.5rem 1fr auto;
+  gap: 1.25rem;
+  align-items: baseline;
+}
+
+ul.posts time {
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 0.82rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+ul.posts a.title {
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 1.05rem;
+  line-height: 1.45;
+}
+
+ul.posts a.title:hover { color: var(--accent); }
+
+.tag {
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 0.15rem 0.55rem;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+}
+
+.tag.tech  { color: #2e5d7e; border-color: #cfdde8; }
+.tag.music { color: #7a3d5f; border-color: #e8cfdd; }
+
+/* ------------------------------ Article -------------------------- */
+article h1 {
+  font-family: "Source Serif 4", Georgia, serif;
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  margin: 0 0 0.5rem;
+}
+
+article .meta {
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin-bottom: 2.5rem;
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+article p { margin: 0 0 1.25rem; }
+
+article h2 {
+  font-family: "Source Serif 4", Georgia, serif;
+  font-weight: 600;
+  font-size: 1.3rem;
+  margin: 2.5rem 0 0.75rem;
+}
+
+article a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+
+article blockquote {
+  margin: 1.5rem 0;
+  padding: 0.25rem 0 0.25rem 1.25rem;
+  border-left: 2px solid var(--accent);
+  color: var(--muted);
+  font-style: italic;
+}
+
+article pre {
+  background: #f2ece0;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 1rem 1.15rem;
+  overflow-x: auto;
+  font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+article code {
+  font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  font-size: 0.88em;
+  background: #f2ece0;
+  padding: 0.08em 0.35em;
+  border-radius: 3px;
+}
+
+article pre code { background: none; padding: 0; }
+
+article hr {
+  border: none;
+  border-top: 1px solid var(--rule);
+  margin: 3rem 0;
+}
+
+/* ------------------------------ Footer --------------------------- */
+footer.site {
+  margin-top: 5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--rule);
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 0.8rem;
+  color: var(--muted);
+  display: flex;
+  justify-content: space-between;
+}
+
+footer.site a { color: var(--muted); text-decoration: none; }
+footer.site a:hover { color: var(--ink); }
