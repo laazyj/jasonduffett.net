@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{% if title %}{{ title }} — {{ site.title }}{% else %}{{ site.title }} — {{ site.tagline }}{% endif %}</title>
   <meta name="description" content="{{ summary or site.description }}" />
-  <style>{% inlineFile "assets/styles.css" %}</style>
+  <link rel="stylesheet" href="{{ '/assets/styles.css' | rel }}" />
   <link rel="alternate" type="application/rss+xml" href="{{ '/feed.xml' | rel }}" title="{{ site.title }}" />
   <meta property="og:title" content="{% if title %}{{ title }}{% else %}{{ site.title }}{% endif %}" />
   <meta property="og:description" content="{{ summary or site.description }}" />
