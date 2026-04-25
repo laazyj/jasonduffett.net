@@ -53,7 +53,7 @@ The `jasonduffett.net` zone is currently hosted at LiveDNS. After the **first** 
 
    ```sh
    aws cloudformation describe-stacks \
-     --stack-name JasonduffettNet \
+     --stack-name JasonDuffettNetDnsStack \
      --query "Stacks[0].Outputs[?OutputKey=='NameServers'].OutputValue" \
      --output text
    ```

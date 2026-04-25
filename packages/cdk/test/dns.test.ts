@@ -1,26 +1,52 @@
-import { describe, it, expect } from "vitest";
+import { App, Stack } from "aws-cdk-lib";
 import { Template } from "aws-cdk-lib/assertions";
-import { createDnsApp } from "../src/dns-app.js";
+import { beforeAll, describe, expect, it } from "vitest";
+import { compose, ref } from "@composurecdk/core";
+import { createHostedZoneBuilder, type HostedZoneBuilderResult } from "@composurecdk/route53";
+import { zoneRecords } from "@composurecdk/route53/zone";
+import { DOMAIN, ZONE_RECORDS } from "../src/zone-records.js";
 
+/**
+ * Synthesises just the DNS portion of the composed system in a throwaway
+ * stack. Isolates zone + records from the full {@link createSystem}, which
+ * also needs a site-content directory and three stacks wired for cross-region
+ * references.
+ */
 function synthTemplate(): Template {
-  const { stack } = createDnsApp();
+  const app = new App();
+  const stack = new Stack(app, "TestDns");
+  compose(
+    {
+      zone: createHostedZoneBuilder().zoneName(DOMAIN),
+      records: zoneRecords(ZONE_RECORDS).zone(
+        ref<HostedZoneBuilderResult>("zone").get("hostedZone"),
+      ),
+    },
+    { zone: [], records: ["zone"] },
+  ).build(stack, "DNS");
   return Template.fromStack(stack);
 }
 
-describe("dns-app", () => {
+describe("dns composition", () => {
+  let template: Template;
+
+  beforeAll(() => {
+    template = synthTemplate();
+  });
+
   describe("resource counts", () => {
     it("creates exactly one hosted zone", () => {
-      synthTemplate().resourceCountIs("AWS::Route53::HostedZone", 1);
+      template.resourceCountIs("AWS::Route53::HostedZone", 1);
     });
 
     it("creates 16 record sets (8 A, 4 CNAME, 3 TXT, 1 MX)", () => {
-      synthTemplate().resourceCountIs("AWS::Route53::RecordSet", 16);
+      template.resourceCountIs("AWS::Route53::RecordSet", 16);
     });
   });
 
   describe("hosted zone", () => {
     it("uses the jasonduffett.net domain", () => {
-      synthTemplate().hasResourceProperties("AWS::Route53::HostedZone", {
+      template.hasResourceProperties("AWS::Route53::HostedZone", {
         Name: "jasonduffett.net.",
       });
     });
@@ -37,7 +63,7 @@ describe("dns-app", () => {
       ["mailserver.jasonduffett.net.", "213.171.216.40"],
       ["mcp.jasonduffett.net.", "213.171.195.10"],
     ])("%s → %s", (name, ip) => {
-      synthTemplate().hasResourceProperties("AWS::Route53::RecordSet", {
+      template.hasResourceProperties("AWS::Route53::RecordSet", {
         Type: "A",
         Name: name,
         ResourceRecords: [ip],
@@ -47,7 +73,7 @@ describe("dns-app", () => {
 
   describe("CNAME records (Livemail DKIM)", () => {
     it.each([1, 2, 3, 4])("livemail%d._domainkey points to its DKIM target", (n) => {
-      synthTemplate().hasResourceProperties("AWS::Route53::RecordSet", {
+      template.hasResourceProperties("AWS::Route53::RecordSet", {
         Type: "CNAME",
         Name: `livemail${String(n)}._domainkey.jasonduffett.net.`,
         ResourceRecords: [`livemail${String(n)}._domainkey.39769.dkim.livemail.co.uk.`],
@@ -57,7 +83,7 @@ describe("dns-app", () => {
 
   describe("TXT records", () => {
     it("apex TXT carries both the MS verification token and SPF policy", () => {
-      synthTemplate().hasResourceProperties("AWS::Route53::RecordSet", {
+      template.hasResourceProperties("AWS::Route53::RecordSet", {
         Type: "TXT",
         Name: "jasonduffett.net.",
         ResourceRecords: ['"MS=ms66482160"', '"v=spf1 mx a include:_spf.livemail.co.uk ~all"'],
@@ -65,7 +91,7 @@ describe("dns-app", () => {
     });
 
     it("_dmarc TXT publishes a monitor-only DMARC policy", () => {
-      synthTemplate().hasResourceProperties("AWS::Route53::RecordSet", {
+      template.hasResourceProperties("AWS::Route53::RecordSet", {
         Type: "TXT",
         Name: "_dmarc.jasonduffett.net.",
         ResourceRecords: ['"v=DMARC1; p=none;"'],
@@ -73,7 +99,7 @@ describe("dns-app", () => {
     });
 
     it("dzc.nuget TXT carries the NuGet domain-association token", () => {
-      synthTemplate().hasResourceProperties("AWS::Route53::RecordSet", {
+      template.hasResourceProperties("AWS::Route53::RecordSet", {
         Type: "TXT",
         Name: "dzc.nuget.jasonduffett.net.",
         ResourceRecords: ['"K2G6Wa8y"'],
@@ -83,7 +109,7 @@ describe("dns-app", () => {
 
   describe("MX record", () => {
     it("apex MX routes mail to mailserver.livemail.co.uk with priority 10", () => {
-      synthTemplate().hasResourceProperties("AWS::Route53::RecordSet", {
+      template.hasResourceProperties("AWS::Route53::RecordSet", {
         Type: "MX",
         Name: "jasonduffett.net.",
         ResourceRecords: ["10 mailserver.livemail.co.uk."],
@@ -91,17 +117,9 @@ describe("dns-app", () => {
     });
   });
 
-  describe("outputs", () => {
-    it("exports the hosted zone NameServers for registrar delegation", () => {
-      synthTemplate().hasOutput("NameServers", {
-        Description: "Set these as the NS records at the domain registrar to delegate the zone.",
-      });
-    });
-  });
-
   describe("template", () => {
     it("matches the expected synthesised template", () => {
-      expect(synthTemplate().toJSON()).toMatchSnapshot();
+      expect(template.toJSON()).toMatchSnapshot();
     });
   });
 });

@@ -1,24 +1,7 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`dns-app > template > matches the expected synthesised template 1`] = `
+exports[`dns composition > template > matches the expected synthesised template 1`] = `
 {
-  "Description": "DNS for jasonduffett.net",
-  "Outputs": {
-    "NameServers": {
-      "Description": "Set these as the NS records at the domain registrar to delegate the zone.",
-      "Value": {
-        "Fn::Join": [
-          ",",
-          {
-            "Fn::GetAtt": [
-              "DNSzone02D37B85",
-              "NameServers",
-            ],
-          },
-        ],
-      },
-    },
-  },
   "Parameters": {
     "BootstrapVersion": {
       "Default": "/cdk-bootstrap/hnb659fds/version",
@@ -27,7 +10,7 @@ exports[`dns-app > template > matches the expected synthesised template 1`] = `
     },
   },
   "Resources": {
-    "DNSrecordsaapex8FF223FF": {
+    "DNSrecordsaApex928EEC3A": {
       "Properties": {
         "HostedZoneId": {
           "Ref": "DNSzone02D37B85",
@@ -41,7 +24,7 @@ exports[`dns-app > template > matches the expected synthesised template 1`] = `
       },
       "Type": "AWS::Route53::RecordSet",
     },
-    "DNSrecordsaexchange687E7020": {
+    "DNSrecordsaexchange4E01C6B9": {
       "Properties": {
         "HostedZoneId": {
           "Ref": "DNSzone02D37B85",
@@ -55,7 +38,7 @@ exports[`dns-app > template > matches the expected synthesised template 1`] = `
       },
       "Type": "AWS::Route53::RecordSet",
     },
-    "DNSrecordsamail1FDC8FBC": {
+    "DNSrecordsamail7C158C4E": {
       "Properties": {
         "HostedZoneId": {
           "Ref": "DNSzone02D37B85",
@@ -69,7 +52,7 @@ exports[`dns-app > template > matches the expected synthesised template 1`] = `
       },
       "Type": "AWS::Route53::RecordSet",
     },
-    "DNSrecordsamailserver75C33A47": {
+    "DNSrecordsamailserver025C0098": {
       "Properties": {
         "HostedZoneId": {
           "Ref": "DNSzone02D37B85",
@@ -83,7 +66,7 @@ exports[`dns-app > template > matches the expected synthesised template 1`] = `
       },
       "Type": "AWS::Route53::RecordSet",
     },
-    "DNSrecordsamcp881F747F": {
+    "DNSrecordsamcp2A398227": {
       "Properties": {
         "HostedZoneId": {
           "Ref": "DNSzone02D37B85",
@@ -97,7 +80,7 @@ exports[`dns-app > template > matches the expected synthesised template 1`] = `
       },
       "Type": "AWS::Route53::RecordSet",
     },
-    "DNSrecordsasmtp0FB5153D": {
+    "DNSrecordsasmtpB9A6BADB": {
       "Properties": {
         "HostedZoneId": {
           "Ref": "DNSzone02D37B85",
@@ -111,7 +94,7 @@ exports[`dns-app > template > matches the expected synthesised template 1`] = `
       },
       "Type": "AWS::Route53::RecordSet",
     },
-    "DNSrecordsawebmailE7D34734": {
+    "DNSrecordsawebmail29D691A4": {
       "Properties": {
         "HostedZoneId": {
           "Ref": "DNSzone02D37B85",
@@ -125,7 +108,7 @@ exports[`dns-app > template > matches the expected synthesised template 1`] = `
       },
       "Type": "AWS::Route53::RecordSet",
     },
-    "DNSrecordsawww630B0F82": {
+    "DNSrecordsawwwA8D40E4E": {
       "Properties": {
         "HostedZoneId": {
           "Ref": "DNSzone02D37B85",
@@ -139,7 +122,7 @@ exports[`dns-app > template > matches the expected synthesised template 1`] = `
       },
       "Type": "AWS::Route53::RecordSet",
     },
-    "DNSrecordscnamelivemail1domainkey767E594B": {
+    "DNSrecordscnamelivemail1domainkey9AB182B2": {
       "Properties": {
         "HostedZoneId": {
           "Ref": "DNSzone02D37B85",
@@ -153,7 +136,7 @@ exports[`dns-app > template > matches the expected synthesised template 1`] = `
       },
       "Type": "AWS::Route53::RecordSet",
     },
-    "DNSrecordscnamelivemail2domainkey73757D99": {
+    "DNSrecordscnamelivemail2domainkeyFB70A300": {
       "Properties": {
         "HostedZoneId": {
           "Ref": "DNSzone02D37B85",
@@ -167,7 +150,7 @@ exports[`dns-app > template > matches the expected synthesised template 1`] = `
       },
       "Type": "AWS::Route53::RecordSet",
     },
-    "DNSrecordscnamelivemail3domainkey00824C9E": {
+    "DNSrecordscnamelivemail3domainkey2C415515": {
       "Properties": {
         "HostedZoneId": {
           "Ref": "DNSzone02D37B85",
@@ -181,7 +164,7 @@ exports[`dns-app > template > matches the expected synthesised template 1`] = `
       },
       "Type": "AWS::Route53::RecordSet",
     },
-    "DNSrecordscnamelivemail4domainkeyEA7BAFB8": {
+    "DNSrecordscnamelivemail4domainkeyB61BFFE9": {
       "Properties": {
         "HostedZoneId": {
           "Ref": "DNSzone02D37B85",
@@ -195,7 +178,7 @@ exports[`dns-app > template > matches the expected synthesised template 1`] = `
       },
       "Type": "AWS::Route53::RecordSet",
     },
-    "DNSrecordsmxapexA289EED1": {
+    "DNSrecordsmxApexB2AF3B6D": {
       "Properties": {
         "HostedZoneId": {
           "Ref": "DNSzone02D37B85",
@@ -209,7 +192,7 @@ exports[`dns-app > template > matches the expected synthesised template 1`] = `
       },
       "Type": "AWS::Route53::RecordSet",
     },
-    "DNSrecordstxtapexA7521EF9": {
+    "DNSrecordstxtApexB3EB8D07": {
       "Properties": {
         "HostedZoneId": {
           "Ref": "DNSzone02D37B85",
@@ -224,7 +207,7 @@ exports[`dns-app > template > matches the expected synthesised template 1`] = `
       },
       "Type": "AWS::Route53::RecordSet",
     },
-    "DNSrecordstxtdmarc78E74FBC": {
+    "DNSrecordstxtdmarc1B80A0DA": {
       "Properties": {
         "HostedZoneId": {
           "Ref": "DNSzone02D37B85",
@@ -238,7 +221,7 @@ exports[`dns-app > template > matches the expected synthesised template 1`] = `
       },
       "Type": "AWS::Route53::RecordSet",
     },
-    "DNSrecordstxtdzcnugetFEE793D8": {
+    "DNSrecordstxtdzcnugetD8BC6A6B": {
       "Properties": {
         "HostedZoneId": {
           "Ref": "DNSzone02D37B85",
