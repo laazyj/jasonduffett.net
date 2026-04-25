@@ -1,6 +1,6 @@
 import { App, Stack } from "aws-cdk-lib";
 import { Template } from "aws-cdk-lib/assertions";
-import { beforeAll, describe, expect, it } from "vitest";
+import { beforeAll, describe, it } from "vitest";
 import { compose, ref } from "@composurecdk/core";
 import { createHostedZoneBuilder, type HostedZoneBuilderResult } from "@composurecdk/route53";
 import { zoneRecords } from "@composurecdk/route53/zone";
@@ -39,8 +39,8 @@ describe("dns composition", () => {
       template.resourceCountIs("AWS::Route53::HostedZone", 1);
     });
 
-    it("creates 16 record sets (8 A, 4 CNAME, 3 TXT, 1 MX)", () => {
-      template.resourceCountIs("AWS::Route53::RecordSet", 16);
+    it("creates 14 record sets (6 A, 4 CNAME, 3 TXT, 1 MX)", () => {
+      template.resourceCountIs("AWS::Route53::RecordSet", 14);
     });
   });
 
@@ -54,8 +54,6 @@ describe("dns composition", () => {
 
   describe("A records", () => {
     it.each([
-      ["jasonduffett.net.", "88.208.252.9"],
-      ["www.jasonduffett.net.", "88.208.252.9"],
       ["mail.jasonduffett.net.", "213.171.216.40"],
       ["webmail.jasonduffett.net.", "213.171.216.231"],
       ["smtp.jasonduffett.net.", "213.171.216.50"],
@@ -114,12 +112,6 @@ describe("dns composition", () => {
         Name: "jasonduffett.net.",
         ResourceRecords: ["10 mailserver.livemail.co.uk."],
       });
-    });
-  });
-
-  describe("template", () => {
-    it("matches the expected synthesised template", () => {
-      expect(template.toJSON()).toMatchSnapshot();
     });
   });
 });

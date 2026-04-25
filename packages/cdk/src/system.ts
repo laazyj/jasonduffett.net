@@ -12,8 +12,12 @@ import { Source } from "aws-cdk-lib/aws-s3-deployment";
 import { compose, ref } from "@composurecdk/core";
 import { createCertificateBuilder, type CertificateBuilderResult } from "@composurecdk/acm";
 import { alarmActionsPolicy } from "@composurecdk/cloudwatch";
-import { createHostedZoneBuilder, type HostedZoneBuilderResult } from "@composurecdk/route53";
-import { zoneRecords } from "@composurecdk/route53/zone";
+import {
+  cloudfrontAliasTarget,
+  createHostedZoneBuilder,
+  type HostedZoneBuilderResult,
+} from "@composurecdk/route53";
+import { ALIAS, type RecordSpec, zoneRecords } from "@composurecdk/route53/zone";
 import {
   createBucketBuilder,
   createBucketDeploymentBuilder,
@@ -67,13 +71,21 @@ export function createSystem(stacks: SystemStacks, siteContentPath: string) {
   const distribution = ref<DistributionBuilderResult>("cdn").get("distribution");
   const certificate = ref<CertificateBuilderResult>("cert").get("certificate");
 
+  const cdnAliasTarget = cloudfrontAliasTarget(distribution);
+  const aliasSpecs: readonly RecordSpec[] = [
+    ALIAS("@", cdnAliasTarget),
+    ALIAS("@", cdnAliasTarget, { ipv6: true }),
+    ALIAS("www", cdnAliasTarget),
+    ALIAS("www", cdnAliasTarget, { ipv6: true }),
+  ];
+
   return compose(
     {
-      // DNS — apex/www A records still resolve to the existing host. The
-      // CloudFront alias records are deliberately not yet created so this
-      // stack can deploy without changing where end users land.
+      // DNS
       zone: createHostedZoneBuilder().zoneName(DOMAIN),
       records: zoneRecords(ZONE_RECORDS).zone(hostedZone),
+      // Routed to siteStack in withStacks() so the stack graph stays acyclic.
+      aliasRecords: zoneRecords(aliasSpecs).zone(hostedZone),
 
       // Cert (depends on zone for DNS validation)
       cert: createCertificateBuilder()
@@ -132,6 +144,7 @@ export function createSystem(stacks: SystemStacks, siteContentPath: string) {
     {
       zone: [],
       records: ["zone"],
+      aliasRecords: ["zone", "cdn"],
       cert: ["zone"],
       usEast1Alerts: [],
       siteAlerts: [],
@@ -144,6 +157,7 @@ export function createSystem(stacks: SystemStacks, siteContentPath: string) {
     .withStacks({
       zone: dnsStack,
       records: dnsStack,
+      aliasRecords: siteStack,
       cert: certStack,
       usEast1Alerts: usEast1AlertsStack,
       siteAlerts: siteStack,

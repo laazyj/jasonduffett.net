@@ -1,165 +1,6 @@
 {
   "Description": "jasonduffett.net — static site on CloudFront + S3.",
   "Resources": {
-    "jasonduffettnetsiteAlerts842D6C29": {
-      "Type": "AWS::SNS::Topic",
-      "Properties": {
-        "DisplayName": "jasonduffett.net site alerts"
-      }
-    },
-    "jasonduffettnetsiteAlertsPolicyA246F478": {
-      "Type": "AWS::SNS::TopicPolicy",
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sns:Publish",
-              "Condition": {
-                "Bool": {
-                  "aws:SecureTransport": "false"
-                }
-              },
-              "Effect": "Deny",
-              "Principal": "*",
-              "Resource": {
-                "Ref": "jasonduffettnetsiteAlerts842D6C29"
-              },
-              "Sid": "AllowPublishThroughSSLOnly"
-            }
-          ],
-          "Version": "2012-10-17"
-        },
-        "Topics": [
-          {
-            "Ref": "jasonduffettnetsiteAlerts842D6C29"
-          }
-        ]
-      }
-    },
-    "jasonduffettnetsiteAlertsNumberOfNotificationsFailedAlarmF37A3C89": {
-      "Type": "AWS::CloudWatch::Alarm",
-      "Properties": {
-        "AlarmActions": [
-          {
-            "Ref": "jasonduffettnetsiteAlerts842D6C29"
-          }
-        ],
-        "AlarmDescription": "SNS topic is failing to deliver notifications. Threshold: > 0 failures in 1 minute.",
-        "ComparisonOperator": "GreaterThanThreshold",
-        "DatapointsToAlarm": 1,
-        "Dimensions": [
-          {
-            "Name": "TopicName",
-            "Value": {
-              "Fn::GetAtt": [
-                "jasonduffettnetsiteAlerts842D6C29",
-                "TopicName"
-              ]
-            }
-          }
-        ],
-        "EvaluationPeriods": 1,
-        "MetricName": "NumberOfNotificationsFailed",
-        "Namespace": "AWS/SNS",
-        "Period": 60,
-        "Statistic": "Sum",
-        "Threshold": 0,
-        "TreatMissingData": "notBreaching"
-      }
-    },
-    "jasonduffettnetsiteAlertsNumberOfNotificationsFilteredOutInvalidAttributesAlarm71404621": {
-      "Type": "AWS::CloudWatch::Alarm",
-      "Properties": {
-        "AlarmActions": [
-          {
-            "Ref": "jasonduffettnetsiteAlerts842D6C29"
-          }
-        ],
-        "AlarmDescription": "SNS topic messages are being filtered out due to invalid subscription filter policy attributes. Threshold: > 0 filtered messages in 1 minute.",
-        "ComparisonOperator": "GreaterThanThreshold",
-        "DatapointsToAlarm": 1,
-        "Dimensions": [
-          {
-            "Name": "TopicName",
-            "Value": {
-              "Fn::GetAtt": [
-                "jasonduffettnetsiteAlerts842D6C29",
-                "TopicName"
-              ]
-            }
-          }
-        ],
-        "EvaluationPeriods": 1,
-        "MetricName": "NumberOfNotificationsFilteredOut-InvalidAttributes",
-        "Namespace": "AWS/SNS",
-        "Period": 60,
-        "Statistic": "Sum",
-        "Threshold": 0,
-        "TreatMissingData": "notBreaching"
-      }
-    },
-    "jasonduffettnetsiteAlertsNumberOfNotificationsRedrivenToDlqAlarmC7FE6DCA": {
-      "Type": "AWS::CloudWatch::Alarm",
-      "Properties": {
-        "AlarmActions": [
-          {
-            "Ref": "jasonduffettnetsiteAlerts842D6C29"
-          }
-        ],
-        "AlarmDescription": "SNS topic is redriving messages to a subscription dead-letter queue, indicating delivery failures. Threshold: > 0 redrives in 1 minute.",
-        "ComparisonOperator": "GreaterThanThreshold",
-        "DatapointsToAlarm": 1,
-        "Dimensions": [
-          {
-            "Name": "TopicName",
-            "Value": {
-              "Fn::GetAtt": [
-                "jasonduffettnetsiteAlerts842D6C29",
-                "TopicName"
-              ]
-            }
-          }
-        ],
-        "EvaluationPeriods": 1,
-        "MetricName": "NumberOfNotificationsRedrivenToDlq",
-        "Namespace": "AWS/SNS",
-        "Period": 60,
-        "Statistic": "Sum",
-        "Threshold": 0,
-        "TreatMissingData": "notBreaching"
-      }
-    },
-    "jasonduffettnetsiteAlertsNumberOfNotificationsFailedToRedriveToDlqAlarm30C7DDC2": {
-      "Type": "AWS::CloudWatch::Alarm",
-      "Properties": {
-        "AlarmActions": [
-          {
-            "Ref": "jasonduffettnetsiteAlerts842D6C29"
-          }
-        ],
-        "AlarmDescription": "SNS topic failed to redrive a message to a subscription dead-letter queue; messages may be lost. Threshold: > 0 failed redrives in 1 minute.",
-        "ComparisonOperator": "GreaterThanThreshold",
-        "DatapointsToAlarm": 1,
-        "Dimensions": [
-          {
-            "Name": "TopicName",
-            "Value": {
-              "Fn::GetAtt": [
-                "jasonduffettnetsiteAlerts842D6C29",
-                "TopicName"
-              ]
-            }
-          }
-        ],
-        "EvaluationPeriods": 1,
-        "MetricName": "NumberOfNotificationsFailedToRedriveToDlq",
-        "Namespace": "AWS/SNS",
-        "Period": 60,
-        "Statistic": "Sum",
-        "Threshold": 0,
-        "TreatMissingData": "notBreaching"
-      }
-    },
     "jasonduffettnetbucketAccessLogsB5DC331A": {
       "Type": "AWS::S3::Bucket",
       "Properties": {
@@ -558,6 +399,273 @@
         "jasonduffettnetcdnAccessLogsPolicy08B03FEB",
         "jasonduffettnetcdnAccessLogsFE92CA24"
       ]
+    },
+    "jasonduffettnetaliasRecordsaApexE1289325": {
+      "Type": "AWS::Route53::RecordSet",
+      "Properties": {
+        "AliasTarget": {
+          "DNSName": {
+            "Fn::GetAtt": [
+              "jasonduffettnetcdn02768B87",
+              "DomainName"
+            ]
+          },
+          "HostedZoneId": {
+            "Fn::FindInMap": [
+              "AWSCloudFrontPartitionHostedZoneIdMap",
+              {
+                "Ref": "AWS::Partition"
+              },
+              "zoneId"
+            ]
+          }
+        },
+        "HostedZoneId": {
+          "Fn::ImportValue": "JasonDuffettNetDnsStack:ExportsOutputRefHostedZoneEE9C6912"
+        },
+        "Name": "jasonduffett.net.",
+        "Type": "A"
+      }
+    },
+    "jasonduffettnetaliasRecordsawww14E93D02": {
+      "Type": "AWS::Route53::RecordSet",
+      "Properties": {
+        "AliasTarget": {
+          "DNSName": {
+            "Fn::GetAtt": [
+              "jasonduffettnetcdn02768B87",
+              "DomainName"
+            ]
+          },
+          "HostedZoneId": {
+            "Fn::FindInMap": [
+              "AWSCloudFrontPartitionHostedZoneIdMap",
+              {
+                "Ref": "AWS::Partition"
+              },
+              "zoneId"
+            ]
+          }
+        },
+        "HostedZoneId": {
+          "Fn::ImportValue": "JasonDuffettNetDnsStack:ExportsOutputRefHostedZoneEE9C6912"
+        },
+        "Name": "www.jasonduffett.net.",
+        "Type": "A"
+      }
+    },
+    "jasonduffettnetaliasRecordsaaaaApexC759E4CF": {
+      "Type": "AWS::Route53::RecordSet",
+      "Properties": {
+        "AliasTarget": {
+          "DNSName": {
+            "Fn::GetAtt": [
+              "jasonduffettnetcdn02768B87",
+              "DomainName"
+            ]
+          },
+          "HostedZoneId": {
+            "Fn::FindInMap": [
+              "AWSCloudFrontPartitionHostedZoneIdMap",
+              {
+                "Ref": "AWS::Partition"
+              },
+              "zoneId"
+            ]
+          }
+        },
+        "HostedZoneId": {
+          "Fn::ImportValue": "JasonDuffettNetDnsStack:ExportsOutputRefHostedZoneEE9C6912"
+        },
+        "Name": "jasonduffett.net.",
+        "Type": "AAAA"
+      }
+    },
+    "jasonduffettnetaliasRecordsaaaawww4B7E6FDE": {
+      "Type": "AWS::Route53::RecordSet",
+      "Properties": {
+        "AliasTarget": {
+          "DNSName": {
+            "Fn::GetAtt": [
+              "jasonduffettnetcdn02768B87",
+              "DomainName"
+            ]
+          },
+          "HostedZoneId": {
+            "Fn::FindInMap": [
+              "AWSCloudFrontPartitionHostedZoneIdMap",
+              {
+                "Ref": "AWS::Partition"
+              },
+              "zoneId"
+            ]
+          }
+        },
+        "HostedZoneId": {
+          "Fn::ImportValue": "JasonDuffettNetDnsStack:ExportsOutputRefHostedZoneEE9C6912"
+        },
+        "Name": "www.jasonduffett.net.",
+        "Type": "AAAA"
+      }
+    },
+    "jasonduffettnetsiteAlerts842D6C29": {
+      "Type": "AWS::SNS::Topic",
+      "Properties": {
+        "DisplayName": "jasonduffett.net site alerts"
+      }
+    },
+    "jasonduffettnetsiteAlertsPolicyA246F478": {
+      "Type": "AWS::SNS::TopicPolicy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sns:Publish",
+              "Condition": {
+                "Bool": {
+                  "aws:SecureTransport": "false"
+                }
+              },
+              "Effect": "Deny",
+              "Principal": "*",
+              "Resource": {
+                "Ref": "jasonduffettnetsiteAlerts842D6C29"
+              },
+              "Sid": "AllowPublishThroughSSLOnly"
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "Topics": [
+          {
+            "Ref": "jasonduffettnetsiteAlerts842D6C29"
+          }
+        ]
+      }
+    },
+    "jasonduffettnetsiteAlertsNumberOfNotificationsFailedAlarmF37A3C89": {
+      "Type": "AWS::CloudWatch::Alarm",
+      "Properties": {
+        "AlarmActions": [
+          {
+            "Ref": "jasonduffettnetsiteAlerts842D6C29"
+          }
+        ],
+        "AlarmDescription": "SNS topic is failing to deliver notifications. Threshold: > 0 failures in 1 minute.",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "DatapointsToAlarm": 1,
+        "Dimensions": [
+          {
+            "Name": "TopicName",
+            "Value": {
+              "Fn::GetAtt": [
+                "jasonduffettnetsiteAlerts842D6C29",
+                "TopicName"
+              ]
+            }
+          }
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "NumberOfNotificationsFailed",
+        "Namespace": "AWS/SNS",
+        "Period": 60,
+        "Statistic": "Sum",
+        "Threshold": 0,
+        "TreatMissingData": "notBreaching"
+      }
+    },
+    "jasonduffettnetsiteAlertsNumberOfNotificationsFilteredOutInvalidAttributesAlarm71404621": {
+      "Type": "AWS::CloudWatch::Alarm",
+      "Properties": {
+        "AlarmActions": [
+          {
+            "Ref": "jasonduffettnetsiteAlerts842D6C29"
+          }
+        ],
+        "AlarmDescription": "SNS topic messages are being filtered out due to invalid subscription filter policy attributes. Threshold: > 0 filtered messages in 1 minute.",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "DatapointsToAlarm": 1,
+        "Dimensions": [
+          {
+            "Name": "TopicName",
+            "Value": {
+              "Fn::GetAtt": [
+                "jasonduffettnetsiteAlerts842D6C29",
+                "TopicName"
+              ]
+            }
+          }
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "NumberOfNotificationsFilteredOut-InvalidAttributes",
+        "Namespace": "AWS/SNS",
+        "Period": 60,
+        "Statistic": "Sum",
+        "Threshold": 0,
+        "TreatMissingData": "notBreaching"
+      }
+    },
+    "jasonduffettnetsiteAlertsNumberOfNotificationsRedrivenToDlqAlarmC7FE6DCA": {
+      "Type": "AWS::CloudWatch::Alarm",
+      "Properties": {
+        "AlarmActions": [
+          {
+            "Ref": "jasonduffettnetsiteAlerts842D6C29"
+          }
+        ],
+        "AlarmDescription": "SNS topic is redriving messages to a subscription dead-letter queue, indicating delivery failures. Threshold: > 0 redrives in 1 minute.",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "DatapointsToAlarm": 1,
+        "Dimensions": [
+          {
+            "Name": "TopicName",
+            "Value": {
+              "Fn::GetAtt": [
+                "jasonduffettnetsiteAlerts842D6C29",
+                "TopicName"
+              ]
+            }
+          }
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "NumberOfNotificationsRedrivenToDlq",
+        "Namespace": "AWS/SNS",
+        "Period": 60,
+        "Statistic": "Sum",
+        "Threshold": 0,
+        "TreatMissingData": "notBreaching"
+      }
+    },
+    "jasonduffettnetsiteAlertsNumberOfNotificationsFailedToRedriveToDlqAlarm30C7DDC2": {
+      "Type": "AWS::CloudWatch::Alarm",
+      "Properties": {
+        "AlarmActions": [
+          {
+            "Ref": "jasonduffettnetsiteAlerts842D6C29"
+          }
+        ],
+        "AlarmDescription": "SNS topic failed to redrive a message to a subscription dead-letter queue; messages may be lost. Threshold: > 0 failed redrives in 1 minute.",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "DatapointsToAlarm": 1,
+        "Dimensions": [
+          {
+            "Name": "TopicName",
+            "Value": {
+              "Fn::GetAtt": [
+                "jasonduffettnetsiteAlerts842D6C29",
+                "TopicName"
+              ]
+            }
+          }
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "NumberOfNotificationsFailedToRedriveToDlq",
+        "Namespace": "AWS/SNS",
+        "Period": 60,
+        "Statistic": "Sum",
+        "Threshold": 0,
+        "TreatMissingData": "notBreaching"
+      }
     },
     "jasonduffettnetdeployLogGroupD9B8C477": {
       "Type": "AWS::Logs::LogGroup",
@@ -964,6 +1072,16 @@
       "DependsOn": [
         "CustomCrossRegionExportWriterCustomResourceProviderRoleC951B1E1"
       ]
+    }
+  },
+  "Mappings": {
+    "AWSCloudFrontPartitionHostedZoneIdMap": {
+      "aws": {
+        "zoneId": "Z2FDTNDATAQYW2"
+      },
+      "aws-cn": {
+        "zoneId": "Z3RFFRIM2A3IF5"
+      }
     }
   },
   "Outputs": {
