@@ -88,7 +88,17 @@ npm run deploy   # apply
 ```
 
 Each of these builds the CDK package first via Nx's task graph (cached when inputs are
-unchanged). A first-time account also needs `npx cdk bootstrap` once per account/region.
+unchanged).
+
+### First-time setup
+
+A new AWS account needs `cdk bootstrap` run once per region the app deploys into. This
+app spans two regions, so bootstrap both:
+
+```sh
+npx cdk bootstrap --region eu-west-2   # DNS + Site stacks
+npx cdk bootstrap --region us-east-1   # Cert stack (CloudFront requirement)
+```
 
 ## Domain delegation
 
