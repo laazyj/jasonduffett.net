@@ -50,6 +50,6 @@ const siteContentPath = resolve(import.meta.dirname, "..", "..", "site", "dist")
 createSystem(
   { dnsStack, usEast1AlertsStack, certStack, siteStack, cdnAlarmsStack },
   siteContentPath,
-).build(app, "App");
+).build(app, "jasonduffett.net");
 
 app.synth();
