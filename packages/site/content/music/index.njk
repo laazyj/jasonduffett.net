@@ -1,0 +1,10 @@
+---
+layout: layouts/base.njk
+title: "Music"
+eleventyExcludeFromCollections: true
+permalink: /music/
+---
+<p class="intro">Ukulele arrangements, covers, and recording notes.</p>
+
+{% set posts = collections.music %}
+{% include "partials/post-list.njk" %}

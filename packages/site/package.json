@@ -2,18 +2,23 @@
   "name": "@jasonduffett-net/site",
   "version": "0.0.0",
   "private": true,
-  "description": "Blog and landing site for jasonduffett.net.",
+  "description": "Blog and landing site for jasonduffett.net (Eleventy).",
   "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
   "scripts": {
     "clean": "rm -rf dist",
-    "build": "tsc -p tsconfig.build.json",
-    "typecheck": "tsc --noEmit",
-    "test": "vitest run --passWithNoTests",
-    "test:watch": "vitest"
+    "build": "eleventy",
+    "start": "eleventy --serve --quiet"
+  },
+  "nx": {
+    "targets": {
+      "start": {
+        "cache": false
+      }
+    }
   },
   "devDependencies": {
-    "vitest": "^4.1.4"
+    "@11ty/eleventy": "^3.0.0",
+    "@11ty/eleventy-plugin-rss": "^2.0.2",
+    "@11ty/eleventy-plugin-syntaxhighlight": "^5.0.0"
   }
 }

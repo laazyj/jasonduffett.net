@@ -13,13 +13,13 @@ export default defineConfig(
     languageOptions: {
       parserOptions: {
         projectService: {
-          allowDefaultProject: ["eslint.config.mjs"],
+          allowDefaultProject: ["eslint.config.mjs", "packages/site/eleventy.config.js"],
         },
       },
     },
   },
   {
-    files: ["eslint.config.mjs"],
+    files: ["eslint.config.mjs", "packages/site/**/*.{js,mjs,cjs}"],
     extends: [tseslint.configs.disableTypeChecked],
   },
   eslintConfigPrettier,

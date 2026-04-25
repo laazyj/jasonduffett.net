@@ -5,7 +5,17 @@ Monorepo for `jasonduffett.net` — infrastructure and blog.
 ## Packages
 
 - `packages/cdk` — AWS CDK app managing the domain, DNS, and hosting infrastructure.
-- `packages/site` — the blog and landing site.
+- `packages/site` — Eleventy-built blog and landing site.
+
+## Site — develop locally
+
+```sh
+npx nx run @jasonduffett-net/site:start     # hot-reload dev server at http://localhost:8080
+npx nx run @jasonduffett-net/site:build     # write ./packages/site/dist
+```
+
+Posts live under `packages/site/content/tech/` or `packages/site/content/music/` as
+Markdown; layout and permalink come from each directory's `*.json` data file.
 
 ## Scripts
 
