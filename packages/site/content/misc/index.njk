@@ -1,0 +1,10 @@
+---
+layout: layouts/base.njk
+title: "Misc"
+eleventyExcludeFromCollections: true
+permalink: /misc/
+---
+<p class="intro">Asides, beer notes, and occasional Tumblr meta — anything that didn't fit under tech or music.</p>
+
+{% set posts = collections.misc %}
+{% include "partials/post-list.njk" %}

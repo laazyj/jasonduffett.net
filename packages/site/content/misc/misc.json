@@ -1,0 +1,5 @@
+{
+  "layout": "layouts/post.njk",
+  "tags": ["misc"],
+  "permalink": "/misc/{{ page.fileSlug }}/"
+}

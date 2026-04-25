@@ -161,6 +161,10 @@ ul.posts a.title:hover {
   color: #7a3d5f;
   border-color: #e8cfdd;
 }
+.tag.misc {
+  color: #5e6b3f;
+  border-color: #d8dcc6;
+}
 
 /* ------------------------------ Article -------------------------- */
 article h1 {

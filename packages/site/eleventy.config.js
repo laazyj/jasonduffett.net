@@ -64,12 +64,15 @@ export default function (eleventyConfig) {
   eleventyConfig.addCollection("music", (api) =>
     api.getFilteredByTag("music").filter((item) => !item.data.eleventyExcludeFromCollections),
   );
+  eleventyConfig.addCollection("misc", (api) =>
+    api.getFilteredByTag("misc").filter((item) => !item.data.eleventyExcludeFromCollections),
+  );
   eleventyConfig.addCollection("posts", (api) =>
     api
       .getAll()
       .filter((item) => {
         const tags = item.data.tags || [];
-        return tags.includes("tech") || tags.includes("music");
+        return tags.includes("tech") || tags.includes("music") || tags.includes("misc");
       })
       .sort((a, b) => a.date - b.date),
   );
