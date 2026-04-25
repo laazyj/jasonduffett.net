@@ -20,6 +20,13 @@ const dnsStack = new Stack(app, "JasonDuffettNetDnsStack", {
   description: "DNS for jasonduffett.net (Route 53 hosted zone + records).",
 });
 
+// Dedicated topic stack so it has no downstream deps and every us-east-1
+// stack (cert, cdnAlarms, future) can target the same topic without cycles.
+const usEast1AlertsStack = new Stack(app, "JasonDuffettNetUsEast1AlertsStack", {
+  ...stackProps(CLOUDFRONT_CERT_REGION),
+  description: "Notification topic for us-east-1 alarms (cert + CloudFront).",
+});
+
 const certStack = new Stack(app, "JasonDuffettNetCertStack", {
   ...stackProps(CLOUDFRONT_CERT_REGION),
   description: "ACM certificate for jasonduffett.net.",
@@ -30,8 +37,19 @@ const siteStack = new Stack(app, "JasonDuffettNetSiteStack", {
   description: "jasonduffett.net — static site on CloudFront + S3.",
 });
 
+// CloudFront metrics emit only in us-east-1; alarms must too. Kept separate
+// from certStack to avoid a cdn↔cert cycle (cdnAlarms reads distribution id
+// from siteStack, which depends on certStack).
+const cdnAlarmsStack = new Stack(app, "JasonDuffettNetCdnAlarmsStack", {
+  ...stackProps(CLOUDFRONT_CERT_REGION),
+  description: "CloudFront CloudWatch alarms (must live in us-east-1).",
+});
+
 const siteContentPath = resolve(import.meta.dirname, "..", "..", "site", "dist");
 
-createSystem({ dnsStack, certStack, siteStack }, siteContentPath).build(app, "App");
+createSystem(
+  { dnsStack, usEast1AlertsStack, certStack, siteStack, cdnAlarmsStack },
+  siteContentPath,
+).build(app, "App");
 
 app.synth();

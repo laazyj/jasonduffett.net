@@ -20,6 +20,7 @@ import {
   type BucketBuilderResult,
 } from "@composurecdk/s3";
 import {
+  createCloudFrontAlarmBuilder,
   createDistributionBuilder,
   type DistributionBuilderResult,
 } from "@composurecdk/cloudfront";
@@ -32,13 +33,17 @@ import { DOMAIN, WWW, ZONE_RECORDS } from "./zone-records.js";
 export interface SystemStacks {
   /** Route 53 hosted zone + records. Region is cosmetic — Route 53 is global. */
   readonly dnsStack: Stack;
+  /** SNS topic shared by every us-east-1 alarm. No downstream deps to avoid cycles. */
+  readonly usEast1AlertsStack: Stack;
   /** ACM certificate. Must be `us-east-1` for CloudFront-attached certificates. */
   readonly certStack: Stack;
-  /** S3 bucket, CloudFront distribution, bucket deployment, alarms. */
+  /** S3 bucket, CloudFront distribution, bucket deployment, site-region alarms. */
   readonly siteStack: Stack;
+  /** CloudFront CloudWatch alarms. Must be `us-east-1` (CloudFront metrics live there). */
+  readonly cdnAlarmsStack: Stack;
 }
 
-const topicArnOutput = (refName: "certAlerts" | "siteAlerts", role: string) => ({
+const topicArnOutput = (refName: "usEast1Alerts" | "siteAlerts", role: string) => ({
   value: ref<TopicBuilderResult>(refName)
     .get("topic")
     .map((t) => t.topicArn),
@@ -46,12 +51,8 @@ const topicArnOutput = (refName: "certAlerts" | "siteAlerts", role: string) => (
   scope: refName,
 });
 
-/**
- * Kept single-level: composureCDK's nested-compose does not propagate context,
- * so sibling refs only work when every component is a sibling here.
- */
 export function createSystem(stacks: SystemStacks, siteContentPath: string) {
-  const { dnsStack, certStack, siteStack } = stacks;
+  const { dnsStack, usEast1AlertsStack, certStack, siteStack, cdnAlarmsStack } = stacks;
 
   const hostedZone = ref<HostedZoneBuilderResult>("zone").get("hostedZone");
   const bucket = ref<BucketBuilderResult>("bucket").get("bucket");
@@ -72,8 +73,8 @@ export function createSystem(stacks: SystemStacks, siteContentPath: string) {
         .subjectAlternativeNames([WWW])
         .validationZone(hostedZone),
 
-      // CloudWatch alarms can only target same-region SNS topics, so one per stack.
-      certAlerts: createTopicBuilder().displayName("jasonduffett.net cert alerts"),
+      // CloudWatch alarms can only target same-region SNS topics, so one topic per region.
+      usEast1Alerts: createTopicBuilder().displayName("jasonduffett.net us-east-1 alerts"),
       siteAlerts: createTopicBuilder().displayName("jasonduffett.net site alerts"),
 
       // Site
@@ -109,7 +110,10 @@ export function createSystem(stacks: SystemStacks, siteContentPath: string) {
             responsePagePath: "/404.html",
             ttl: Duration.seconds(60),
           },
-        ]),
+        ])
+        // CloudFront metrics only emit in us-east-1; alarms must live there too.
+        .recommendedAlarms(false),
+      cdnAlarms: createCloudFrontAlarmBuilder().distribution(ref<DistributionBuilderResult>("cdn")),
       deploy: createBucketDeploymentBuilder()
         .sources([Source.asset(siteContentPath)])
         .destinationBucket(bucket)
@@ -121,10 +125,11 @@ export function createSystem(stacks: SystemStacks, siteContentPath: string) {
       zone: [],
       records: ["zone"],
       cert: ["zone"],
-      certAlerts: [],
+      usEast1Alerts: [],
       siteAlerts: [],
       bucket: [],
       cdn: ["bucket", "cert"],
+      cdnAlarms: ["cdn"],
       deploy: ["bucket", "cdn"],
     },
   )
@@ -132,10 +137,11 @@ export function createSystem(stacks: SystemStacks, siteContentPath: string) {
       zone: dnsStack,
       records: dnsStack,
       cert: certStack,
-      certAlerts: certStack,
+      usEast1Alerts: usEast1AlertsStack,
       siteAlerts: siteStack,
       bucket: siteStack,
       cdn: siteStack,
+      cdnAlarms: cdnAlarmsStack,
       deploy: siteStack,
     })
     .afterBuild(
@@ -155,14 +161,18 @@ export function createSystem(stacks: SystemStacks, siteContentPath: string) {
           description: "S3 bucket backing the distribution.",
           scope: "bucket",
         },
-        CertAlertsTopicArn: topicArnOutput("certAlerts", "cert-stack alarm notifications"),
+        UsEast1AlertsTopicArn: topicArnOutput(
+          "usEast1Alerts",
+          "us-east-1 stack alarm notifications (cert + CloudFront)",
+        ),
         SiteAlertsTopicArn: topicArnOutput("siteAlerts", "site-stack alarm notifications"),
       }),
     )
     .afterBuild((_scope, _id, results) => {
-      alarmActionsPolicy(certStack, {
-        defaults: { alarmActions: [new SnsAction(results.certAlerts.topic)] },
-      });
+      const usEast1Action = new SnsAction(results.usEast1Alerts.topic);
+      alarmActionsPolicy(usEast1AlertsStack, { defaults: { alarmActions: [usEast1Action] } });
+      alarmActionsPolicy(certStack, { defaults: { alarmActions: [usEast1Action] } });
+      alarmActionsPolicy(cdnAlarmsStack, { defaults: { alarmActions: [usEast1Action] } });
       alarmActionsPolicy(siteStack, {
         defaults: { alarmActions: [new SnsAction(results.siteAlerts.topic)] },
       });
