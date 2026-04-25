@@ -5,13 +5,8 @@ layout: layouts/base.njk
   <h1>{{ title }}</h1>
   <div class="meta">
     <time datetime="{{ page.date | htmlDateString }}">{{ page.date | readableDate }}</time>
-    {% if "tech" in tags %}
-      <span class="tag tech">Tech</span>
-    {% elif "music" in tags %}
-      <span class="tag music">Music</span>
-    {% elif "misc" in tags %}
-      <span class="tag misc">Misc</span>
-    {% endif %}
+    {% set cat = tags | category %}
+    {% if cat %}<span class="tag {{ cat }}">{{ cat | capitalize }}</span>{% endif %}
   </div>
 
   {{ content | safe }}

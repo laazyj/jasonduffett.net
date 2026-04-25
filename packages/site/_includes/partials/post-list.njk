@@ -6,13 +6,8 @@
     <li>
       <time datetime="{{ post.date | htmlDateString }}">{{ post.date | shortDate }}</time>
       <a class="title" href="{{ post.url | rel }}">{{ post.data.title }}</a>
-      {% if "tech" in post.data.tags %}
-        <span class="tag tech">Tech</span>
-      {% elif "music" in post.data.tags %}
-        <span class="tag music">Music</span>
-      {% elif "misc" in post.data.tags %}
-        <span class="tag misc">Misc</span>
-      {% endif %}
+      {% set cat = post.data.tags | category %}
+      {% if cat %}<span class="tag {{ cat }}">{{ cat | capitalize }}</span>{% endif %}
     </li>
     {% endfor %}
   </ul>

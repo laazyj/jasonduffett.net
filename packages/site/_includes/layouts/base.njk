@@ -19,9 +19,9 @@
       <a class="brand" href="{{ '/' | rel }}">{{ site.title }} <em>— {{ site.tagline }}</em></a>
       <nav>
         <a href="{{ '/' | rel }}" {% if page.url == "/" %}class="active"{% endif %}>Writing</a>
-        <a href="{{ '/tech/' | rel }}" {% if page.url.startsWith and page.url.startsWith("/tech") %}class="active"{% endif %}>Tech</a>
-        <a href="{{ '/music/' | rel }}" {% if page.url.startsWith and page.url.startsWith("/music") %}class="active"{% endif %}>Music</a>
-        <a href="{{ '/misc/' | rel }}" {% if page.url.startsWith and page.url.startsWith("/misc") %}class="active"{% endif %}>Misc</a>
+        {% for cat in categories %}
+        <a href="{{ ('/' + cat + '/') | rel }}" {% if page.url.startsWith and page.url.startsWith('/' + cat) %}class="active"{% endif %}>{{ cat | capitalize }}</a>
+        {% endfor %}
         <a href="{{ '/about/' | rel }}" {% if page.url == "/about/" %}class="active"{% endif %}>About</a>
       </nav>
     </header>

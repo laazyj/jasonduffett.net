@@ -6,6 +6,8 @@ import syntaxHighlight from "@11ty/eleventy-plugin-syntaxhighlight";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+const CATEGORIES = ["tech", "music", "misc"];
+
 export default function (eleventyConfig) {
   eleventyConfig.addPlugin(rssPlugin);
   eleventyConfig.addPlugin(syntaxHighlight);
@@ -13,6 +15,11 @@ export default function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy({ assets: "assets" });
 
   eleventyConfig.addGlobalData("currentYear", () => new Date().getFullYear());
+  eleventyConfig.addGlobalData("categories", CATEGORIES);
+
+  eleventyConfig.addFilter("category", (tags) =>
+    Array.isArray(tags) ? CATEGORIES.find((c) => tags.includes(c)) : undefined,
+  );
 
   // Inline a file's contents verbatim. Used to ship the stylesheet inside
   // each page's <style> — one fewer HTTP request, instant first paint,
@@ -56,24 +63,17 @@ export default function (eleventyConfig) {
     return [...groups.entries()].map(([year, posts]) => ({ year, posts }));
   });
 
-  // `tech.json` / `music.json` tag their directory's posts; these collections
+  // Each category's `<cat>.json` tags its directory's posts; these collections
   // filter `all` by tag so they're sorted by date automatically.
-  eleventyConfig.addCollection("tech", (api) =>
-    api.getFilteredByTag("tech").filter((item) => !item.data.eleventyExcludeFromCollections),
-  );
-  eleventyConfig.addCollection("music", (api) =>
-    api.getFilteredByTag("music").filter((item) => !item.data.eleventyExcludeFromCollections),
-  );
-  eleventyConfig.addCollection("misc", (api) =>
-    api.getFilteredByTag("misc").filter((item) => !item.data.eleventyExcludeFromCollections),
-  );
+  for (const tag of CATEGORIES) {
+    eleventyConfig.addCollection(tag, (api) =>
+      api.getFilteredByTag(tag).filter((item) => !item.data.eleventyExcludeFromCollections),
+    );
+  }
   eleventyConfig.addCollection("posts", (api) =>
     api
       .getAll()
-      .filter((item) => {
-        const tags = item.data.tags || [];
-        return tags.includes("tech") || tags.includes("music") || tags.includes("misc");
-      })
+      .filter((item) => (item.data.tags || []).some((t) => CATEGORIES.includes(t)))
       .sort((a, b) => a.date - b.date),
   );
 
