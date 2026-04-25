@@ -61,8 +61,12 @@ redirecting end users.
 ### One-off scripts
 
 ```sh
-npx nx run @jasonduffett-net/cdk:redirects  # scrape old site, regenerate redirects.json
+npx nx run @jasonduffett-net/cdk:check:redirects  # validate live 301s match redirects.json
 ```
+
+`redirects.json` is committed and derived from each post's `originalUrl` frontmatter; there
+is no regeneration step. Run `check:redirects` after a deploy (or against any `BASE_URL`)
+to confirm CloudFront returns the expected 301s.
 
 To target a single package or run only affected projects, use Nx directly:
 

@@ -13,14 +13,30 @@ export default defineConfig(
     languageOptions: {
       parserOptions: {
         projectService: {
-          allowDefaultProject: ["eslint.config.mjs", "packages/site/eleventy.config.js"],
+          allowDefaultProject: [
+            "eslint.config.mjs",
+            "packages/site/eleventy.config.js",
+            "packages/cdk/scripts/*.mjs",
+          ],
         },
       },
     },
   },
   {
-    files: ["eslint.config.mjs", "packages/site/**/*.{js,mjs,cjs}"],
+    files: ["eslint.config.mjs", "packages/site/**/*.{js,mjs,cjs}", "packages/cdk/scripts/*.mjs"],
     extends: [tseslint.configs.disableTypeChecked],
+  },
+  {
+    files: ["packages/cdk/scripts/*.mjs"],
+    languageOptions: {
+      globals: {
+        process: "readonly",
+        console: "readonly",
+        fetch: "readonly",
+        URL: "readonly",
+        AbortSignal: "readonly",
+      },
+    },
   },
   eslintConfigPrettier,
 );
