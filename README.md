@@ -93,11 +93,14 @@ unchanged).
 ### First-time setup
 
 A new AWS account needs `cdk bootstrap` run once per region the app deploys into. This
-app spans two regions, so bootstrap both:
+app spans two regions, so bootstrap both. `cdk bootstrap` requires either a `cdk.json` in
+the working directory or an explicit `aws://ACCOUNT/REGION` env URI — the snippet below
+uses the explicit form so it works from the repo root:
 
 ```sh
-npx cdk bootstrap --region eu-west-2   # DNS + Site stacks
-npx cdk bootstrap --region us-east-1   # Cert stack (CloudFront requirement)
+ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
+npx cdk bootstrap aws://$ACCOUNT/eu-west-2   # DNS + Site stacks
+npx cdk bootstrap aws://$ACCOUNT/us-east-1   # Cert stack (CloudFront requirement)
 ```
 
 ## Domain delegation
