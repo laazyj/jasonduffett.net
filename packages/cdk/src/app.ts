@@ -1,37 +1,37 @@
-import { App, Fn, Stack } from "aws-cdk-lib";
+import { App, Stack } from "aws-cdk-lib";
+import { resolve } from "node:path";
 
-import { compose, ref } from "@composurecdk/core";
-import { outputs } from "@composurecdk/cloudformation";
-import { createHostedZoneBuilder, type HostedZoneBuilderResult } from "@composurecdk/route53";
-import { zoneRecords } from "@composurecdk/route53/zone";
+import { createSystem } from "./system.js";
 
-import { DOMAIN, ZONE_RECORDS } from "./zone-records.js";
+const PRIMARY_REGION = "eu-west-2";
+// ACM certificates attached to CloudFront must live in us-east-1.
+const CLOUDFRONT_CERT_REGION = "us-east-1";
 
 const app = new App();
 
+// Both ends of a cross-region ref must opt in, so every stack sets the flag.
+const stackProps = (region: string) => ({
+  env: { account: process.env.CDK_DEFAULT_ACCOUNT, region },
+  crossRegionReferences: true,
+});
+
 const dnsStack = new Stack(app, "JasonDuffettNetDnsStack", {
-  env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: "eu-west-2" },
+  ...stackProps(PRIMARY_REGION),
   description: "DNS for jasonduffett.net (Route 53 hosted zone + records).",
 });
 
-const hostedZone = ref<HostedZoneBuilderResult>("zone").get("hostedZone");
+const certStack = new Stack(app, "JasonDuffettNetCertStack", {
+  ...stackProps(CLOUDFRONT_CERT_REGION),
+  description: "ACM certificate for jasonduffett.net.",
+});
 
-compose(
-  {
-    zone: createHostedZoneBuilder().zoneName(DOMAIN),
-    records: zoneRecords(ZONE_RECORDS).zone(hostedZone),
-  },
-  { zone: [], records: ["zone"] },
-)
-  .afterBuild(
-    outputs({
-      NameServers: {
-        value: hostedZone.map((z) => Fn.join(",", z.hostedZoneNameServers ?? [])),
-        description: "Set these as the NS records at the domain registrar to delegate the zone.",
-        scope: "zone",
-      },
-    }),
-  )
-  .build(dnsStack, "DNS");
+const siteStack = new Stack(app, "JasonDuffettNetSiteStack", {
+  ...stackProps(PRIMARY_REGION),
+  description: "jasonduffett.net — static site on CloudFront + S3.",
+});
+
+const siteContentPath = resolve(import.meta.dirname, "..", "..", "site", "dist");
+
+createSystem({ dnsStack, certStack, siteStack }, siteContentPath).build(app, "App");
 
 app.synth();
