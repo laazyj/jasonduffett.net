@@ -18,6 +18,7 @@ export default function (eleventyConfig) {
   });
 
   eleventyConfig.addPassthroughCopy({ assets: "assets" });
+  eleventyConfig.addPassthroughCopy({ static: "/" });
 
   eleventyConfig.addGlobalData("currentYear", () => new Date().getFullYear());
   eleventyConfig.addGlobalData("categories", CATEGORIES);

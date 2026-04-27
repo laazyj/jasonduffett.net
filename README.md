@@ -59,7 +59,8 @@ The CDK app is a single top-level `compose()` routed across five CloudFormation 
   CloudFront.
 - **`JasonDuffettNetSiteStack`** (`eu-west-2`) — S3 bucket, CloudFront distribution,
   CloudFront Function (`www`→apex + old-URL 301s), bucket deployment of the Eleventy
-  output, and an SNS topic collecting site-region alarm notifications.
+  output, apex/www alias records, and an SNS topic collecting site-region alarm
+  notifications.
 - **`JasonDuffettNetUsEast1AlertsStack`** (`us-east-1`) — SNS topic shared by every
   us-east-1 alarm (cert + CloudFront). Standalone with no downstream deps so any
   us-east-1 stack can target it without creating a cycle.
@@ -72,12 +73,6 @@ Every stack opts in to `crossRegionReferences: true`, which lets CDK auto-genera
 SSM-parameter + custom-resource plumbing for cross-region edges (`zone → cert`,
 `cdn → cdnAlarms`, `*alerts → alarmActions`). Deployment order is inferred automatically
 from these references, so no `addDependency` calls are needed.
-
-**Cutover pending:** the apex and `www` A records in `ZONE_RECORDS` still point at the
-Livemail IP. The CloudFront distribution is provisioned and reachable at its
-`*.cloudfront.net` hostname for verification, but is not yet aliased from the zone — that
-swap lands in a follow-up PR so this stack can be deployed and exercised without
-redirecting end users.
 
 ### One-off scripts
 

@@ -7,34 +7,6 @@
         "Name": "jasonduffett.net."
       }
     },
-    "jasonduffettnetrecordsaApex2157A357": {
-      "Type": "AWS::Route53::RecordSet",
-      "Properties": {
-        "HostedZoneId": {
-          "Ref": "HostedZone"
-        },
-        "Name": "jasonduffett.net.",
-        "ResourceRecords": [
-          "88.208.252.9"
-        ],
-        "TTL": "300",
-        "Type": "A"
-      }
-    },
-    "jasonduffettnetrecordsawww2625E1DA": {
-      "Type": "AWS::Route53::RecordSet",
-      "Properties": {
-        "HostedZoneId": {
-          "Ref": "HostedZone"
-        },
-        "Name": "www.jasonduffett.net.",
-        "ResourceRecords": [
-          "88.208.252.9"
-        ],
-        "TTL": "300",
-        "Type": "A"
-      }
-    },
     "jasonduffettnetrecordsamailFABAA084": {
       "Type": "AWS::Route53::RecordSet",
       "Properties": {
@@ -344,6 +316,14 @@
             ]
           }
         ]
+      }
+    },
+    "ExportsOutputRefHostedZoneEE9C6912": {
+      "Value": {
+        "Ref": "HostedZone"
+      },
+      "Export": {
+        "Name": "JasonDuffettNetDnsStack:ExportsOutputRefHostedZoneEE9C6912"
       }
     }
   },
