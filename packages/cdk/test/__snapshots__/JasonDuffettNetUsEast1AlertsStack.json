@@ -163,7 +163,7 @@
   },
   "Outputs": {
     "UsEast1AlertsTopicArn": {
-      "Description": "Subscribe here to receive us-east-1 stack alarm notifications (cert + CloudFront).",
+      "Description": "Subscribe here to receive us-east-1 stack alarm notifications (cert + CloudFront + Route 53 health check).",
       "Value": {
         "Ref": "jasonduffettnetusEast1AlertsED7A8D43"
       }

@@ -559,6 +559,22 @@
         "jasonduffettnetcdnAccessLogsFE92CA24"
       ]
     },
+    "jasonduffettnethealthCheck0335EDCA": {
+      "Type": "AWS::Route53::HealthCheck",
+      "Properties": {
+        "HealthCheckConfig": {
+          "EnableSNI": true,
+          "FailureThreshold": 3,
+          "FullyQualifiedDomainName": "jasonduffett.net",
+          "Inverted": false,
+          "MeasureLatency": true,
+          "Port": 443,
+          "RequestInterval": 30,
+          "ResourcePath": "",
+          "Type": "HTTPS"
+        }
+      }
+    },
     "jasonduffettnetdeployLogGroupD9B8C477": {
       "Type": "AWS::Logs::LogGroup",
       "Properties": {
@@ -881,6 +897,9 @@
           "exports": {
             "/cdk/exports/JasonDuffettNetCdnAlarmsStack/JasonDuffettNetSiteStackeuwest2Refjasonduffettnetcdn02768B87E79DE679": {
               "Ref": "jasonduffettnetcdn02768B87"
+            },
+            "/cdk/exports/JasonDuffettNetCdnAlarmsStack/JasonDuffettNetSiteStackeuwest2RefjasonduffettnethealthCheck0335EDCA5A7B6B0F": {
+              "Ref": "jasonduffettnethealthCheck0335EDCA"
             }
           }
         }

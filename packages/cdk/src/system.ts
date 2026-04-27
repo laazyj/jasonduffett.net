@@ -7,12 +7,19 @@ import {
 } from "aws-cdk-lib/aws-cloudfront";
 import { S3BucketOrigin } from "aws-cdk-lib/aws-cloudfront-origins";
 import { SnsAction } from "aws-cdk-lib/aws-cloudwatch-actions";
+import { HealthCheckType } from "aws-cdk-lib/aws-route53";
 import { Source } from "aws-cdk-lib/aws-s3-deployment";
 
 import { compose, ref } from "@composurecdk/core";
 import { createCertificateBuilder, type CertificateBuilderResult } from "@composurecdk/acm";
 import { alarmActionsPolicy } from "@composurecdk/cloudwatch";
-import { createHostedZoneBuilder, type HostedZoneBuilderResult } from "@composurecdk/route53";
+import {
+  createHealthCheckAlarmBuilder,
+  createHealthCheckBuilder,
+  createHostedZoneBuilder,
+  type HealthCheckBuilderResult,
+  type HostedZoneBuilderResult,
+} from "@composurecdk/route53";
 import { zoneRecords } from "@composurecdk/route53/zone";
 import {
   createBucketBuilder,
@@ -45,9 +52,12 @@ export interface SystemStacks {
   readonly usEast1AlertsStack: Stack;
   /** ACM certificate. Must be `us-east-1` for CloudFront-attached certificates. */
   readonly certStack: Stack;
-  /** S3 bucket, CloudFront distribution, bucket deployment, site-region alarms. */
+  /** S3 bucket, CloudFront distribution, bucket deployment, Route 53 health check, site-region alarms. */
   readonly siteStack: Stack;
-  /** CloudFront CloudWatch alarms. Must be `us-east-1` (CloudFront metrics live there). */
+  /**
+   * Alarms whose underlying CloudWatch metrics emit only in `us-east-1`:
+   * CloudFront distribution metrics and AWS/Route53 health-check metrics.
+   */
   readonly cdnAlarmsStack: Stack;
 }
 
@@ -122,6 +132,20 @@ export function createSystem(stacks: SystemStacks, siteContentPath: string) {
         // CloudFront metrics only emit in us-east-1; alarms must live there too.
         .recommendedAlarms(false),
       cdnAlarms: createCloudFrontAlarmBuilder().distribution(ref<DistributionBuilderResult>("cdn")),
+
+      // Route 53 health check on the public apex. Health checks are global
+      // resources so the construct can live in any region; we co-locate it
+      // with the site for operational locality. AWS/Route53 metrics emit only
+      // in us-east-1, so the recommended alarm is suppressed here and
+      // re-created in cdnAlarmsStack via the standalone alarm builder.
+      healthCheck: createHealthCheckBuilder()
+        .type(HealthCheckType.HTTPS)
+        .fqdn(DOMAIN)
+        .recommendedAlarms(false),
+      healthCheckAlarms: createHealthCheckAlarmBuilder().healthCheck(
+        ref<HealthCheckBuilderResult>("healthCheck"),
+      ),
+
       deploy: createBucketDeploymentBuilder()
         .sources([Source.asset(siteContentPath)])
         .destinationBucket(bucket)
@@ -138,6 +162,8 @@ export function createSystem(stacks: SystemStacks, siteContentPath: string) {
       bucket: [],
       cdn: ["bucket", "cert"],
       cdnAlarms: ["cdn"],
+      healthCheck: [],
+      healthCheckAlarms: ["healthCheck"],
       deploy: ["bucket", "cdn"],
     },
   )
@@ -150,6 +176,8 @@ export function createSystem(stacks: SystemStacks, siteContentPath: string) {
       bucket: siteStack,
       cdn: siteStack,
       cdnAlarms: cdnAlarmsStack,
+      healthCheck: siteStack,
+      healthCheckAlarms: cdnAlarmsStack,
       deploy: siteStack,
     })
     .afterBuild(
@@ -171,7 +199,7 @@ export function createSystem(stacks: SystemStacks, siteContentPath: string) {
         },
         UsEast1AlertsTopicArn: topicArnOutput(
           "usEast1Alerts",
-          "us-east-1 stack alarm notifications (cert + CloudFront)",
+          "us-east-1 stack alarm notifications (cert + CloudFront + Route 53 health check)",
         ),
         SiteAlertsTopicArn: topicArnOutput("siteAlerts", "site-stack alarm notifications"),
       }),

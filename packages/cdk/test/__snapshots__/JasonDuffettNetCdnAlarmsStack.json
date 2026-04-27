@@ -1,5 +1,5 @@
 {
-  "Description": "CloudFront CloudWatch alarms (must live in us-east-1).",
+  "Description": "CloudWatch alarms for fixed-region site metrics (CloudFront + Route 53 health checks).",
   "Resources": {
     "jasonduffettnetcdnAlarmsErrorRateAlarm69D6C98E": {
       "Type": "AWS::CloudWatch::Alarm",
@@ -161,6 +161,37 @@
         "TreatMissingData": "notBreaching"
       }
     },
+    "jasonduffettnethealthCheckAlarmsHealthCheckStatusAlarmAF2BFD73": {
+      "Type": "AWS::CloudWatch::Alarm",
+      "Properties": {
+        "AlarmActions": [
+          {
+            "Fn::ImportValue": "JasonDuffettNetUsEast1AlertsStack:ExportsOutputRefjasonduffettnetusEast1AlertsED7A8D43F3302E6E"
+          }
+        ],
+        "AlarmDescription": "Route 53 health check is reporting unhealthy. Threshold: HealthCheckStatus < 1 (Minimum, 1 minute).",
+        "ComparisonOperator": "LessThanThreshold",
+        "DatapointsToAlarm": 1,
+        "Dimensions": [
+          {
+            "Name": "HealthCheckId",
+            "Value": {
+              "Fn::GetAtt": [
+                "ExportsReader8B249524",
+                "/cdk/exports/JasonDuffettNetCdnAlarmsStack/JasonDuffettNetSiteStackeuwest2RefjasonduffettnethealthCheck0335EDCA5A7B6B0F"
+              ]
+            }
+          }
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "HealthCheckStatus",
+        "Namespace": "AWS/Route53",
+        "Period": 60,
+        "Statistic": "Minimum",
+        "Threshold": 1,
+        "TreatMissingData": "breaching"
+      }
+    },
     "ExportsReader8B249524": {
       "Type": "Custom::CrossRegionExportReader",
       "Properties": {
@@ -174,7 +205,8 @@
           "region": "us-east-1",
           "prefix": "JasonDuffettNetCdnAlarmsStack",
           "imports": {
-            "/cdk/exports/JasonDuffettNetCdnAlarmsStack/JasonDuffettNetSiteStackeuwest2Refjasonduffettnetcdn02768B87E79DE679": "{{resolve:ssm:/cdk/exports/JasonDuffettNetCdnAlarmsStack/JasonDuffettNetSiteStackeuwest2Refjasonduffettnetcdn02768B87E79DE679}}"
+            "/cdk/exports/JasonDuffettNetCdnAlarmsStack/JasonDuffettNetSiteStackeuwest2Refjasonduffettnetcdn02768B87E79DE679": "{{resolve:ssm:/cdk/exports/JasonDuffettNetCdnAlarmsStack/JasonDuffettNetSiteStackeuwest2Refjasonduffettnetcdn02768B87E79DE679}}",
+            "/cdk/exports/JasonDuffettNetCdnAlarmsStack/JasonDuffettNetSiteStackeuwest2RefjasonduffettnethealthCheck0335EDCA5A7B6B0F": "{{resolve:ssm:/cdk/exports/JasonDuffettNetCdnAlarmsStack/JasonDuffettNetSiteStackeuwest2RefjasonduffettnethealthCheck0335EDCA5A7B6B0F}}"
           }
         }
       },
