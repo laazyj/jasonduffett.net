@@ -199,7 +199,7 @@ export function createSystem(stacks: SystemStacks, siteContentPath: string) {
         },
         UsEast1AlertsTopicArn: topicArnOutput(
           "usEast1Alerts",
-          "us-east-1 stack alarm notifications (cert + CloudFront + Route 53 health check)",
+          "alarm notifications from every us-east-1 stack",
         ),
         SiteAlertsTopicArn: topicArnOutput("siteAlerts", "site-stack alarm notifications"),
       }),

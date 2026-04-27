@@ -1,5 +1,5 @@
 {
-  "Description": "CloudWatch alarms for fixed-region site metrics (CloudFront + Route 53 health checks).",
+  "Description": "CloudWatch alarms for site metrics that AWS only emits in us-east-1.",
   "Resources": {
     "jasonduffettnetcdnAlarmsErrorRateAlarm69D6C98E": {
       "Type": "AWS::CloudWatch::Alarm",
