@@ -48,6 +48,7 @@
           }
         ],
         "AlarmDescription": "ACM certificate is approaching expiry. Threshold: <= 45 days remaining.",
+        "AlarmName": "jason-duffett-net-cert-stack/jasonduffett-net/cert/days-to-expiry",
         "ComparisonOperator": "LessThanOrEqualToThreshold",
         "DatapointsToAlarm": 1,
         "Dimensions": [

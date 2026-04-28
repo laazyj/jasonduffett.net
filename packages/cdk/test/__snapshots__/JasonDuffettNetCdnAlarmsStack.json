@@ -10,6 +10,7 @@
           }
         ],
         "AlarmDescription": "CloudFront distribution 5xx error rate is elevated. Threshold: > 5% in 1 minute.",
+        "AlarmName": "jason-duffett-net-cdn-alarms-stack/jasonduffett-net/cdn-alarms/error-rate",
         "ComparisonOperator": "GreaterThanThreshold",
         "DatapointsToAlarm": 5,
         "Dimensions": [
@@ -45,6 +46,7 @@
           }
         ],
         "AlarmDescription": "CloudFront origin latency is elevated. Threshold: > 5000ms p90 in 1 minute.",
+        "AlarmName": "jason-duffett-net-cdn-alarms-stack/jasonduffett-net/cdn-alarms/origin-latency",
         "ComparisonOperator": "GreaterThanThreshold",
         "DatapointsToAlarm": 5,
         "Dimensions": [
@@ -80,6 +82,7 @@
           }
         ],
         "AlarmDescription": "CloudFront Function on default behavior (viewer-request) is raising execution errors. Threshold: > 0 errors in 1 minute.",
+        "AlarmName": "jason-duffett-net-cdn-alarms-stack/jasonduffett-net/cdn-alarms/default-behavior-viewer-request-execution-errors",
         "ComparisonOperator": "GreaterThanThreshold",
         "DatapointsToAlarm": 1,
         "Dimensions": [
@@ -110,6 +113,7 @@
           }
         ],
         "AlarmDescription": "CloudFront Function on default behavior (viewer-request) is producing validation errors. Threshold: > 0 errors in 1 minute.",
+        "AlarmName": "jason-duffett-net-cdn-alarms-stack/jasonduffett-net/cdn-alarms/default-behavior-viewer-request-validation-errors",
         "ComparisonOperator": "GreaterThanThreshold",
         "DatapointsToAlarm": 1,
         "Dimensions": [
@@ -140,6 +144,7 @@
           }
         ],
         "AlarmDescription": "CloudFront Function on default behavior (viewer-request) is being throttled — likely exceeding its 1ms compute budget. Threshold: > 0 throttles in 1 minute.",
+        "AlarmName": "jason-duffett-net-cdn-alarms-stack/jasonduffett-net/cdn-alarms/default-behavior-viewer-request-throttles",
         "ComparisonOperator": "GreaterThanThreshold",
         "DatapointsToAlarm": 1,
         "Dimensions": [
@@ -170,6 +175,7 @@
           }
         ],
         "AlarmDescription": "Route 53 health check is reporting unhealthy. Threshold: HealthCheckStatus < 1 (Minimum, 1 minute).",
+        "AlarmName": "jason-duffett-net-cdn-alarms-stack/jasonduffett-net/health-check-alarms/health-check-status",
         "ComparisonOperator": "LessThanThreshold",
         "DatapointsToAlarm": 1,
         "Dimensions": [
