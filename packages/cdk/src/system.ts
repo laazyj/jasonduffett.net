@@ -121,7 +121,15 @@ export function createSystem(stacks: SystemStacks, siteContentPath: string, aler
         .recommendedAlarms(false),
 
       // Site
-      bucket: createBucketBuilder().accessLogging(true).removalPolicy(RemovalPolicy.RETAIN),
+      bucket: createBucketBuilder()
+        .accessLogging(true)
+        .removalPolicy(RemovalPolicy.RETAIN)
+        .lifecycleRules([
+          {
+            noncurrentVersionExpiration: Duration.days(30),
+            abortIncompleteMultipartUploadAfter: Duration.days(7),
+          },
+        ]),
       cdn: createDistributionBuilder()
         .comment("jasonduffett.net")
         .domainNames([DOMAIN, WWW])
@@ -235,6 +243,16 @@ export function createSystem(stacks: SystemStacks, siteContentPath: string, aler
     )
     .afterBuild((_scope, _id, { zone }) => {
       (zone.hostedZone.node.defaultChild as CfnResource).overrideLogicalId(HOSTED_ZONE_LOGICAL_ID);
+    })
+    .afterBuild((_scope, _id, results) => {
+      // Auto-created log buckets would otherwise accumulate forever.
+      const logRule = {
+        expiration: Duration.days(90),
+        noncurrentVersionExpiration: Duration.days(30),
+        abortIncompleteMultipartUploadAfter: Duration.days(7),
+      };
+      results.bucket.accessLogsBucket?.addLifecycleRule(logRule);
+      results.cdn.accessLogsBucket?.addLifecycleRule(logRule);
     })
     .afterBuild((_scope, _id, results) => {
       const usEast1Action = new SnsAction(results.usEast1Alerts.topic);
