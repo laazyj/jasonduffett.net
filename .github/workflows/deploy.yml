@@ -36,6 +36,7 @@ jobs:
       - run: npm run verify
 
       - uses: aws-actions/configure-aws-credentials@v4
+        id: aws
         with:
           role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
           aws-region: eu-west-2
@@ -44,6 +45,9 @@ jobs:
       # are declared cache inputs — so the site rebuilds when this commit changes
       # and the build-sha meta tag reflects this exact commit.
       - name: cdk deploy
+        env:
+          CDK_DEFAULT_ACCOUNT: ${{ steps.aws.outputs.aws-account-id }}
+          CDK_DEFAULT_REGION: eu-west-2
         run: npm run cdk:deploy -- --require-approval never
 
       - name: smoke test

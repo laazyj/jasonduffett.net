@@ -52,6 +52,7 @@ jobs:
       - run: npm ci
 
       - uses: aws-actions/configure-aws-credentials@v4
+        id: aws
         with:
           role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
           aws-region: eu-west-2
@@ -59,6 +60,9 @@ jobs:
       - run: npm run site:build
 
       - name: cdk diff
+        env:
+          CDK_DEFAULT_ACCOUNT: ${{ steps.aws.outputs.aws-account-id }}
+          CDK_DEFAULT_REGION: eu-west-2
         run: npm run cdk:diff -- --no-color 2>&1 | tee /tmp/diff.txt
 
       - name: post diff comment
