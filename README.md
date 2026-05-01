@@ -106,8 +106,8 @@ below. The manual flow here is the fallback for emergencies or first-time bootst
 
 The CDK app uses the standard `CDK_DEFAULT_ACCOUNT` / `CDK_DEFAULT_REGION` environment
 variables, plus `ALERT_EMAIL` (the address subscribed to both alarm topics — synth fails
-if it is unset). Authenticate with the target AWS account first (e.g. `aws sso login`),
-then:
+if it is unset). Authenticate with the target AWS account first (`AWS_PROFILE=jasonduffett.net
+aws sso login`, or set whichever profile points at the account), then:
 
 ```sh
 export ALERT_EMAIL=you@example.com
