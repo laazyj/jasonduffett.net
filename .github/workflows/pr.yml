@@ -7,6 +7,9 @@ on:
 permissions:
   contents: read
 
+env:
+  AWS_REGION: eu-west-2
+
 concurrency:
   group: pr-${{ github.ref }}
   cancel-in-progress: true
@@ -55,21 +58,20 @@ jobs:
         id: aws
         with:
           role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
-          aws-region: eu-west-2
+          aws-region: ${{ env.AWS_REGION }}
 
       - run: npm run site:build
 
       - name: cdk diff
         env:
           CDK_DEFAULT_ACCOUNT: ${{ steps.aws.outputs.aws-account-id }}
-          CDK_DEFAULT_REGION: eu-west-2
+          CDK_DEFAULT_REGION: ${{ env.AWS_REGION }}
+        # PIPESTATUS[0] (not pipefail) — pipefail behaviour proved unreliable
+        # for this step; capturing the first command's exit code explicitly
+        # makes the step fail loud whether cdk succeeds, fails, or hangs tee.
         run: |
-          set +e
-          npm run cdk:diff -- --no-color > /tmp/diff.txt 2>&1
-          diff_exit=$?
-          set -e
-          cat /tmp/diff.txt
-          exit "$diff_exit"
+          npm run cdk:diff -- --no-color 2>&1 | tee /tmp/diff.txt
+          exit "${PIPESTATUS[0]}"
 
       - name: post diff comment
         uses: actions/github-script@v7
