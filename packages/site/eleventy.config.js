@@ -26,6 +26,9 @@ export default function (eleventyConfig) {
   eleventyConfig.addGlobalData("analytics", () => ({
     measurementId: process.env.GA_MEASUREMENT_ID || null,
   }));
+  eleventyConfig.addGlobalData("build", () => ({
+    sha: process.env.GITHUB_SHA || "dev",
+  }));
 
   eleventyConfig.addFilter("category", (tags) =>
     Array.isArray(tags) ? CATEGORIES.find((c) => tags.includes(c)) : undefined,

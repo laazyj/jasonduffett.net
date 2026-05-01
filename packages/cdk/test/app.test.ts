@@ -11,6 +11,7 @@ const STACK_NAMES = [
   "JasonDuffettNetCertStack",
   "JasonDuffettNetSiteStack",
   "JasonDuffettNetCdnAlarmsStack",
+  "JasonDuffettNetCiOidcStack",
 ] as const;
 
 describe("app synthesis", () => {

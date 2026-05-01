@@ -14,6 +14,8 @@ import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { CANONICAL_HOST, fetchWithTimeout, pool, resolveBaseUrl } from "./_lib.mjs";
+
 const here = dirname(fileURLToPath(import.meta.url));
 const redirectsPath = resolve(here, "..", "redirects.json");
 
@@ -21,26 +23,16 @@ const redirectsPath = resolve(here, "..", "redirects.json");
 // against the canonical apex, so probing it only makes sense when BASE_URL
 // resolves to that same host (i.e. post-cutover prod). Against the bare
 // distribution URL or a staging clone we auto-skip that one probe.
-const CANONICAL_HOST = "jasonduffett.net";
-
-const BASE_URL = (process.env.BASE_URL ?? `https://${CANONICAL_HOST}`).replace(/\/$/, "");
+const { baseUrl: BASE_URL, apex, wwwHost, isCanonicalApex: checkWww } = resolveBaseUrl();
 const CHECK_TARGET = process.env.CHECK_TARGET === "1";
 const CONCURRENCY = Number(process.env.CONCURRENCY ?? "10");
-
-const apex = new URL(BASE_URL).host;
-const wwwHost = `www.${apex}`;
-const checkWww = apex === CANONICAL_HOST;
 
 /** @type {{ redirects: Record<string, string> }} */
 const { redirects } = JSON.parse(readFileSync(redirectsPath, "utf8"));
 
 /** @param {string} url */
 async function probe(url) {
-  const res = await fetch(url, {
-    method: "HEAD",
-    redirect: "manual",
-    signal: AbortSignal.timeout(10_000),
-  });
+  const res = await fetchWithTimeout(url, { method: "HEAD", redirect: "manual" });
   return { status: res.status, location: res.headers.get("location") };
 }
 
@@ -61,24 +53,6 @@ function locationMatches(actual, expectedPath) {
   } catch {
     return false;
   }
-}
-
-/**
- * @template T
- * @param {T[]} items
- * @param {number} limit
- * @param {(item: T) => Promise<void>} fn
- */
-async function pool(items, limit, fn) {
-  const queue = [...items];
-  const workers = Array.from({ length: Math.min(limit, queue.length) }, async () => {
-    while (queue.length > 0) {
-      const item = queue.shift();
-      if (item === undefined) return;
-      await fn(item);
-    }
-  });
-  await Promise.all(workers);
 }
 
 const failures = [];

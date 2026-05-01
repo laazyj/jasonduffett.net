@@ -11,9 +11,9 @@
 // Failures are logged but the script always exits 0 — IndexNow is a latency
 // optimisation, not the source of truth (Bing falls back to sitemap polling).
 
-const CANONICAL_HOST = "jasonduffett.net";
+import { fetchWithTimeout, resolveBaseUrl } from "./_lib.mjs";
 
-const BASE_URL = (process.env.BASE_URL ?? `https://${CANONICAL_HOST}`).replace(/\/$/, "");
+const { baseUrl: BASE_URL } = resolveBaseUrl();
 const KEY = process.env.INDEXNOW_KEY;
 
 if (!KEY) {
@@ -37,11 +37,10 @@ const body = {
 console.log(`IndexNow: pinging api.indexnow.org for ${host} (sitemap: ${sitemapUrl})`);
 
 try {
-  const res = await fetch("https://api.indexnow.org/indexnow", {
+  const res = await fetchWithTimeout("https://api.indexnow.org/indexnow", {
     method: "POST",
     headers: { "content-type": "application/json; charset=utf-8" },
     body: JSON.stringify(body),
-    signal: AbortSignal.timeout(10_000),
   });
   const text = await res.text();
   if (res.status === 200 || res.status === 202) {

@@ -2,6 +2,7 @@ import { App, Stack } from "aws-cdk-lib";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { addCiOidc } from "./stacks/ci-oidc-stack.js";
 import { createSystem } from "./system.js";
 
 const PRIMARY_REGION = "eu-west-2";
@@ -65,6 +66,15 @@ export function buildApp({ account, siteContentPath, alertEmail }: BuildAppOptio
     siteContentPath,
     alertEmail,
   ).build(app, "jasonduffett.net");
+
+  // Standalone bootstrap stack for the CI deploy role. Has no edges to the
+  // application stacks: deploying the rest of the app should never require
+  // touching the IAM role that powers CI itself.
+  const ciOidcStack = new Stack(app, "JasonDuffettNetCiOidcStack", {
+    ...stackProps(PRIMARY_REGION),
+    description: "GitHub Actions OIDC provider + deploy role for laazyj/jasonduffett.net.",
+  });
+  addCiOidc(ciOidcStack, { githubOwner: "laazyj", githubRepo: "jasonduffett.net" });
 
   return app;
 }

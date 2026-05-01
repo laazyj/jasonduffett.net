@@ -1,6 +1,6 @@
 {
   "name": "@jasonduffett-net/site",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "private": true,
   "description": "Blog and landing site for jasonduffett.net (Eleventy).",
   "type": "module",
@@ -17,6 +17,9 @@
           "^default",
           {
             "env": "GA_MEASUREMENT_ID"
+          },
+          {
+            "env": "GITHUB_SHA"
           }
         ]
       },

@@ -1,6 +1,6 @@
 {
   "name": "@jasonduffett-net/cdk",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "private": true,
   "description": "AWS CDK infrastructure for jasonduffett.net (domain, hosting, DNS).",
   "type": "module",
@@ -16,7 +16,8 @@
     "deploy:stack": "cdk deploy",
     "diff": "cdk diff",
     "check:redirects": "node scripts/check-redirects.mjs",
-    "indexnow:ping": "node scripts/indexnow-ping.mjs"
+    "indexnow:ping": "node scripts/indexnow-ping.mjs",
+    "smoke": "node scripts/smoke-test.mjs"
   },
   "nx": {
     "implicitDependencies": [
@@ -76,6 +77,7 @@
     "@composurecdk/cloudfront": "^0.5.0",
     "@composurecdk/cloudwatch": "^0.5.0",
     "@composurecdk/core": "^0.5.0",
+    "@composurecdk/iam": "^0.5.0",
     "@composurecdk/route53": "^0.5.0",
     "@composurecdk/s3": "^0.5.0",
     "@composurecdk/sns": "^0.5.0",

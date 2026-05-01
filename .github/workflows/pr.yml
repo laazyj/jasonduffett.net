@@ -1,0 +1,104 @@
+name: pr
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run verify
+
+  cdk-diff:
+    name: cdk diff
+    runs-on: ubuntu-latest
+    # Fork PRs run under the fork's OIDC namespace and cannot assume the deploy
+    # role. Skip the AWS-touching job for them — the verify job still runs.
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    needs: verify
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write
+    env:
+      ALERT_EMAIL: ${{ secrets.ALERT_EMAIL }}
+      GA_MEASUREMENT_ID: ${{ vars.GA_MEASUREMENT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: eu-west-2
+
+      - run: npm run site:build
+
+      - name: cdk diff
+        run: npm run cdk:diff -- --no-color 2>&1 | tee /tmp/diff.txt
+
+      - name: post diff comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('node:fs');
+            const marker = '<!-- cdk-diff-bot -->';
+            const raw = fs.readFileSync('/tmp/diff.txt', 'utf8');
+            const max = 60_000;
+            const truncated = raw.length > max
+              ? raw.slice(0, max) + `\n\n… truncated (${raw.length - max} more chars). See the workflow log for full output.`
+              : raw;
+            const body = [
+              marker,
+              `### CDK diff for \`${context.sha.slice(0, 7)}\``,
+              '',
+              '```',
+              truncated || '(no diff captured)',
+              '```',
+            ].join('\n');
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find((c) => c.body && c.body.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
