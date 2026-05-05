@@ -33,9 +33,14 @@ jobs:
   cdk-diff:
     name: cdk diff
     runs-on: ubuntu-latest
-    # Fork PRs run under the fork's OIDC namespace and cannot assume the deploy
-    # role. Skip the AWS-touching job for them — the verify job still runs.
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    # Skip the AWS-touching job for PRs that can't assume the deploy role:
+    #   - Fork PRs run under the fork's OIDC namespace.
+    #   - Dependabot PRs don't receive repo Actions secrets, so the role ARN
+    #     is empty and configure-aws-credentials fails.
+    # The verify job still runs in both cases.
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.user.login != 'dependabot[bot]'
     needs: verify
     permissions:
       contents: read
