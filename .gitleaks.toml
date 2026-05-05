@@ -14,7 +14,7 @@
 [extend]
 useDefault = true
 
-[allowlist]
+[[allowlists]]
 description = "Known-public DNS and ownership tokens"
 paths = [
   '''packages/cdk/src/zone-records\.ts''',
@@ -33,4 +33,20 @@ regexes = [
   '''K2G6Wa8y''',
   # IndexNow domain-ownership key (32 hex chars). Public by design.
   '''d2c21cc5881850564e767c3a53996299''',
+]
+
+[[allowlists]]
+description = """
+CDK asset-bundle SHA-256 hashes (S3Key) inside CloudFormation snapshot tests.
+These are content-addressable identifiers for synthesized custom-resource
+Lambda zips in the CDK bootstrap bucket — not secrets. Scoped to the snapshot
+directory and to the exact 64-hex-char shape so a real secret accidentally
+committed into a snapshot is still detected.
+"""
+condition = "AND"
+paths = [
+  '''packages/cdk/test/__snapshots__/.*\.json''',
+]
+regexes = [
+  '''^[a-f0-9]{64}\.(zip|json|txt)$''',
 ]
