@@ -1,12 +1,14 @@
 import { A, CNAME, MX, type RecordSpec, TXT } from "@composurecdk/route53/zone";
 
-export const DOMAIN = "jasonduffett.net";
-export const WWW = `www.${DOMAIN}`;
-
 /**
- * Canonical record list for the jasonduffett.net zone. Exported so tests can
- * exercise the zone composition without instantiating the full multi-stack
- * system (which requires a site-content directory for the bucket deployment).
+ * Canonical record list for the zone. The records are subdomain prefixes
+ * pointing at external services (mail provider, DKIM, verification tokens),
+ * so none of them reference the apex domain itself — apex/`www` ALIAS
+ * records to the CloudFront distribution are added in `system.ts`.
+ *
+ * Exported so tests can exercise zone composition without instantiating the
+ * full multi-stack system (which requires a site-content directory for the
+ * bucket deployment).
  */
 export const ZONE_RECORDS: readonly RecordSpec[] = [
   // Service A records. Apex + www come from the site stack as ALIAS

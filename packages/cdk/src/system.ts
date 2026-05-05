@@ -38,7 +38,8 @@ import { createTopicBuilder, type TopicBuilderResult } from "@composurecdk/sns";
 import { outputs } from "@composurecdk/cloudformation";
 
 import { buildRedirectFunctionCode } from "./redirect-function.js";
-import { DOMAIN, WWW, ZONE_RECORDS } from "./zone-records.js";
+import { loadRedirects } from "./redirects.js";
+import { ZONE_RECORDS } from "./zone-records.js";
 
 // Pinning the hosted zone's CFN logical ID decouples it from the construct
 // path, so structural refactors (rename build id, regroup components, swap
@@ -77,8 +78,44 @@ const topicArnOutput = (refName: "usEast1Alerts" | "siteAlerts", role: string) =
   scope: refName,
 });
 
-export function createSystem(stacks: SystemStacks, siteContentPath: string, alertEmail: string) {
+export interface SystemOptions {
+  /** Apex domain — e.g. `jasonduffett.net`. `www.{domain}` is computed from it. */
+  readonly domain: string;
+  /** Directory whose contents are uploaded to the site bucket. */
+  readonly siteContentPath: string;
+  /** Email address subscribed to both alarm topics. */
+  readonly alertEmail: string;
+}
+
+/**
+ * Wires the multi-stack system using composureCDK's `compose()` builder.
+ *
+ * The pattern in three parts:
+ *
+ *  1. **Builders block** — first arg of `compose()`. Each key is a builder
+ *     (e.g. `cert`, `cdn`). Use `ref<T>("name")` to refer to another builder's
+ *     result lazily; the value is resolved at build time once that builder has
+ *     run, so cross-references don't need to be ordered manually.
+ *  2. **Dependency block** — second arg of `compose()`. Lists which other
+ *     builders each one depends on. composureCDK uses this to topologically
+ *     order builds and to attach cross-stack references when a dependency
+ *     lives in a different stack.
+ *  3. **`.withStacks()` + `.afterBuild()`** — `withStacks()` routes each
+ *     builder to a specific Stack (used here to keep the cross-region graph
+ *     acyclic). `afterBuild()` runs after every builder has produced its
+ *     result and is the place to register stack outputs, override CFN logical
+ *     IDs, and do cross-cutting wiring like alarm-action policies.
+ *
+ * Cross-region note: alarms can only target same-region SNS topics, and
+ * CloudFront/Route53 metrics only emit in `us-east-1`. The `usEast1Alerts`
+ * topic stack stands alone (no downstream deps) so every us-east-1 stack
+ * can target it without creating a cycle.
+ */
+export function createSystem(stacks: SystemStacks, options: SystemOptions) {
   const { dnsStack, usEast1AlertsStack, certStack, siteStack, cdnAlarmsStack } = stacks;
+  const { domain, siteContentPath, alertEmail } = options;
+  const www = `www.${domain}`;
+  const redirects = loadRedirects();
 
   const hostedZone = ref<HostedZoneBuilderResult>("zone").get("hostedZone");
   const bucket = ref<BucketBuilderResult>("bucket").get("bucket");
@@ -96,31 +133,34 @@ export function createSystem(stacks: SystemStacks, siteContentPath: string, aler
   return compose(
     {
       // DNS
-      zone: createHostedZoneBuilder().zoneName(DOMAIN),
+      zone: createHostedZoneBuilder().zoneName(domain),
       records: zoneRecords(ZONE_RECORDS).zone(hostedZone),
       // Routed to siteStack in withStacks() so the stack graph stays acyclic.
       aliasRecords: zoneRecords(aliasSpecs).zone(hostedZone),
 
       // Cert (depends on zone for DNS validation)
       cert: createCertificateBuilder()
-        .domainName(DOMAIN)
-        .subjectAlternativeNames([WWW])
+        .domainName(domain)
+        .subjectAlternativeNames([www])
         .validationZone(hostedZone),
 
       // CloudWatch alarms can only target same-region SNS topics, so one topic per region.
       usEast1Alerts: createTopicBuilder()
-        .displayName("jasonduffett.net us-east-1 alerts")
+        .displayName(`${domain} us-east-1 alerts`)
         .addSubscription("email", new EmailSubscription(alertEmail)),
       siteAlerts: createTopicBuilder()
-        .displayName("jasonduffett.net site alerts")
+        .displayName(`${domain} site alerts`)
         .addSubscription("email", new EmailSubscription(alertEmail)),
 
       // Notifies usEast1Alerts at AWS-recommended thresholds (80% actual, 100%
       // forecasted). The builder auto-creates the SNS topic policy granting
       // budgets.amazonaws.com:Publish — distinct from the alarmActionsPolicy
       // wired in the afterBuild block below.
+      // 4 USD covers steady-state CloudFront + Route 53 + S3 for a low-traffic
+      // personal blog with healthy headroom; raise it if you add anything
+      // ongoing (Lambda@Edge, larger CloudFront price class, etc.).
       budget: createBudgetBuilder()
-        .budgetName("jasonduffett.net-monthly")
+        .budgetName(`${domain}-monthly`)
         .limit({ amount: 4, unit: "USD" })
         .withRecommendedThresholds(ref<TopicBuilderResult>("usEast1Alerts").get("topic"))
         .recommendedAlarms(false),
@@ -135,8 +175,8 @@ export function createSystem(stacks: SystemStacks, siteContentPath: string, aler
         })
         .lifecycleRules([{ noncurrentVersionExpiration: Duration.days(30) }]),
       cdn: createDistributionBuilder()
-        .comment("jasonduffett.net")
-        .domainNames([DOMAIN, WWW])
+        .comment(domain)
+        .domainNames([domain, www])
         .certificate(certificate)
         .defaultRootObject("index.html")
         .priceClass(PriceClass.PRICE_CLASS_100)
@@ -151,7 +191,7 @@ export function createSystem(stacks: SystemStacks, siteContentPath: string, aler
             {
               eventType: FunctionEventType.VIEWER_REQUEST,
               functionName: `${siteStack.stackName}-redirect`,
-              code: FunctionCode.fromInline(buildRedirectFunctionCode(DOMAIN)),
+              code: FunctionCode.fromInline(buildRedirectFunctionCode(domain, redirects)),
               comment: "www→apex 301 + old-URL redirect map",
             },
           ],
@@ -181,7 +221,7 @@ export function createSystem(stacks: SystemStacks, siteContentPath: string, aler
       // re-created in cdnAlarmsStack via the standalone alarm builder.
       healthCheck: createHealthCheckBuilder()
         .type(HealthCheckType.HTTPS)
-        .fqdn(DOMAIN)
+        .fqdn(domain)
         .recommendedAlarms(false),
       healthCheckAlarms: createHealthCheckAlarmBuilder().healthCheck(
         ref<HealthCheckBuilderResult>("healthCheck"),

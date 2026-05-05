@@ -1,6 +1,22 @@
 # jasonduffett.net
 
-Monorepo for `jasonduffett.net` — infrastructure and blog.
+[![Built with composureCDK](https://img.shields.io/badge/built%20with-composureCDK-6e44ff)](https://github.com/laazyj/composureCDK)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Content: CC BY 4.0](https://img.shields.io/badge/content-CC%20BY%204.0-lightgrey.svg)](LICENSE-content.md)
+
+Monorepo for [jasonduffett.net](https://jasonduffett.net) — the blog itself
+plus the AWS infrastructure that hosts it.
+
+This repo doubles as a **working example of [composureCDK](https://github.com/laazyj/composureCDK)**:
+a multi-region, multi-stack system composed declaratively from
+independent builders. If you're here to see what composureCDK looks like in
+production for a small static site, start at
+[`packages/cdk/README.md`](packages/cdk/README.md) and
+[`packages/cdk/src/system.ts`](packages/cdk/src/system.ts).
+
+This is a personal project and is **not accepting external contributions**. Feel free to
+fork, adapt, or open issues with questions about the composureCDK patterns.
+Security issues: see [`SECURITY.md`](SECURITY.md).
 
 ## Packages
 
@@ -54,6 +70,22 @@ CDK (`cdk:*`) — each runs build + site build first via Nx's task graph:
 
 ### Stacks
 
+```
+  Cross-region edges (auto-wired by `crossRegionReferences: true`):
+
+    DnsStack    (eu-west-2) ── DNS validation ──▶ CertStack       (us-east-1)
+    CertStack   (us-east-1) ── certificate ARN ─▶ SiteStack       (eu-west-2)
+    SiteStack   (eu-west-2) ── distribution id ─▶ CdnAlarmsStack  (us-east-1)
+
+  Same-region edges (us-east-1):
+
+    UsEast1AlertsStack ── alarm actions ──▶ CertStack, CdnAlarmsStack
+
+  Standalone (no edges to the application stacks):
+
+    CiOidcStack
+```
+
 The CDK app is a single top-level `compose()` routed across five CloudFormation stacks:
 
 - **`JasonDuffettNetDnsStack`** (`eu-west-2`) — Route 53 hosted zone + all DNS records
@@ -83,13 +115,30 @@ from these references, so no `addDependency` calls are needed.
 ```sh
 npm run site:smoke              # post-deploy smoke (homepage, feed, sitemap, sample, 404, www→apex)
 npm run site:check-redirects    # validate live 301s match redirects.json
+npm run indexnow:ping           # notify search engines of fresh content
 ```
 
-CI runs both after every deploy. They're exposed as root scripts for ad-hoc runs.
+CI runs all three after every deploy. They're exposed as root scripts for
+ad-hoc runs.
 
-`redirects.json` is committed and derived from each post's `originalUrl` frontmatter; there
-is no regeneration step. Run `check:redirects` after a deploy (or against any `BASE_URL`)
-to confirm CloudFront returns the expected 301s.
+Environment variables (each script reads its own subset; missing values fall
+back to sensible defaults except where noted):
+
+| Variable            | Used by                          | Default                    | Purpose                                                                                       |
+| ------------------- | -------------------------------- | -------------------------- | --------------------------------------------------------------------------------------------- |
+| `BASE_URL`          | smoke, check-redirects, indexnow | `https://jasonduffett.net` | Origin under test.                                                                            |
+| `EXPECTED_SHA`      | smoke                            | _unset_                    | If set, smoke asserts `<meta name="build-sha">` matches; CI sets this to `${{ github.sha }}`. |
+| `SMOKE_RETRIES`     | smoke                            | `6`                        | Per-URL retry count for transient failures.                                                   |
+| `SMOKE_RETRY_MS`    | smoke                            | `5000`                     | Delay between retries in milliseconds.                                                        |
+| `SMOKE_SAMPLE`      | smoke                            | `10`                       | Number of randomly-sampled sitemap URLs to probe (`0` disables).                              |
+| `SMOKE_CONCURRENCY` | smoke                            | `5`                        | Parallel HTTP fetches for the sample.                                                         |
+| `CHECK_TARGET`      | check-redirects                  | _unset_                    | When `1`, also follows the redirect target and asserts it returns `200`.                      |
+| `CONCURRENCY`       | check-redirects                  | `10`                       | Parallel HTTP fetches.                                                                        |
+| `INDEXNOW_KEY`      | indexnow                         | **required**               | Domain-ownership key matching `packages/site/static/<key>.txt`.                               |
+
+`redirects.json` is committed and derived from each post's `originalUrl` frontmatter;
+there is no regeneration step. Run `check:redirects` after a deploy (or against
+any `BASE_URL`) to confirm CloudFront returns the expected 301s.
 
 To target a single package or run only affected projects, use Nx directly:
 
@@ -192,7 +241,8 @@ repository public does not expand who can deploy.
 
 ## Domain delegation
 
-The `jasonduffett.net` is registered with [FastHosts](https://admin.fasthosts.co.uk/DomainNames/3867580/). To update the name servers of the zone:
+To delegate the zone to Route 53, point the domain's NS records at the
+hosted-zone name servers:
 
 1. Read the new name servers from the stack output:
 
@@ -203,11 +253,37 @@ The `jasonduffett.net` is registered with [FastHosts](https://admin.fasthosts.co
      --output text
    ```
 
-2. At the registrar ([FastHosts](https://admin.fasthosts.co.uk/DomainNames/3867580/)), replace the
-   existing NS records with the Route 53 name servers from step 1.
+2. At your domain registrar, replace the existing NS records with the Route 53
+   name servers from step 1.
 
 3. Wait for propagation (a few minutes to a few hours). Verify with:
 
    ```sh
    dig +short NS jasonduffett.net
    ```
+
+## Pre-commit secret scan
+
+A husky-managed pre-commit hook runs [gitleaks](https://github.com/gitleaks/gitleaks)
+against staged changes (config in [`.gitleaks.toml`](.gitleaks.toml); allowlist
+covers DNS verification tokens that are public by design). `npm install` wires
+the hook automatically; you only need gitleaks installed on `PATH`:
+
+```sh
+brew install gitleaks    # macOS
+# or download a release from https://github.com/gitleaks/gitleaks/releases
+```
+
+GitHub's server-side secret scanning + push protection runs as a second layer.
+The pre-commit hook stops accidental leaks before they leave the laptop; GitHub catches
+anything that slips through.
+
+## License
+
+Code (CDK app, Eleventy config, build scripts) is licensed under the
+[MIT licence](LICENSE).
+
+Blog content under `packages/site/content/` is licensed under
+[CC BY 4.0](LICENSE-content.md) — with carve-outs for the hand-drawn profile
+sketch and any embedded musical works. See [`LICENSE-content.md`](LICENSE-content.md)
+for the full breakdown.

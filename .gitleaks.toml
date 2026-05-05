@@ -1,0 +1,36 @@
+# gitleaks config for jasonduffett.net.
+#
+# Extends the upstream default ruleset and allowlists a small set of
+# already-public values that would otherwise trigger generic-secret rules:
+#
+#   - DNS verification tokens (Google, Microsoft, Bluesky, NuGet, IndexNow).
+#     These live in TXT/CNAME records on a public domain — anyone can `dig`
+#     them. They have no use to an attacker.
+#   - The IndexNow domain-ownership file. The file's *name* is the token, by
+#     IndexNow design (it must be served at `https://<host>/<key>.txt`).
+#
+# Anything outside this allowlist is still scanned with the full default ruleset.
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Known-public DNS and ownership tokens"
+paths = [
+  '''packages/cdk/src/zone-records\.ts''',
+  '''packages/cdk/test/__snapshots__/JasonDuffettNetDnsStack\.json''',
+  '''packages/cdk/dist/zone-records\.js''',
+  '''packages/site/static/[a-f0-9]{32}\.txt''',
+]
+regexes = [
+  # Google Search Console verification token (TXT record).
+  '''google-site-verification=[A-Za-z0-9_-]+''',
+  # Microsoft 365 tenant verification.
+  '''MS=ms\d+''',
+  # Bluesky atproto DID (always prefixed `did:plc:`).
+  '''did:plc:[a-z0-9]+''',
+  # NuGet package-source verification.
+  '''K2G6Wa8y''',
+  # IndexNow domain-ownership key (32 hex chars). Public by design.
+  '''d2c21cc5881850564e767c3a53996299''',
+]

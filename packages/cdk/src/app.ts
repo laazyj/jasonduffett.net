@@ -5,9 +5,22 @@ import { fileURLToPath } from "node:url";
 import { addCiOidc } from "./stacks/ci-oidc-stack.js";
 import { createSystem } from "./system.js";
 
-const PRIMARY_REGION = "eu-west-2";
-// ACM certificates attached to CloudFront must live in us-east-1.
-const CLOUDFRONT_CERT_REGION = "us-east-1";
+/**
+ * Edit-points for forking this app to a different domain or repository.
+ * Everything domain- or repo-specific lives here; the rest of the code reads
+ * from the values passed through `createSystem()` and `addCiOidc()`.
+ *
+ * `edgeRegion` is fixed to `us-east-1` because that's where ACM certificates
+ * attached to CloudFront must live and where CloudFront/Route 53 metrics
+ * emit. `primaryRegion` is otherwise free.
+ */
+const CONFIG = {
+  domain: "jasonduffett.net",
+  githubOwner: "laazyj",
+  githubRepo: "jasonduffett.net",
+  primaryRegion: "eu-west-2",
+  edgeRegion: "us-east-1",
+} as const;
 
 export interface BuildAppOptions {
   /** AWS account ID. `undefined` produces an env-agnostic synth (cdk's default). */
@@ -32,49 +45,51 @@ export function buildApp({ account, siteContentPath, alertEmail }: BuildAppOptio
   });
 
   const dnsStack = new Stack(app, "JasonDuffettNetDnsStack", {
-    ...stackProps(PRIMARY_REGION),
-    description: "DNS for jasonduffett.net (Route 53 hosted zone + records).",
+    ...stackProps(CONFIG.primaryRegion),
+    description: `DNS for ${CONFIG.domain} (Route 53 hosted zone + records).`,
   });
 
   // Dedicated topic stack so it has no downstream deps and every us-east-1
   // stack (cert, cdnAlarms, future) can target the same topic without cycles.
   const usEast1AlertsStack = new Stack(app, "JasonDuffettNetUsEast1AlertsStack", {
-    ...stackProps(CLOUDFRONT_CERT_REGION),
+    ...stackProps(CONFIG.edgeRegion),
     description: "Notification topic for us-east-1 alarms (cert + CloudFront).",
   });
 
   const certStack = new Stack(app, "JasonDuffettNetCertStack", {
-    ...stackProps(CLOUDFRONT_CERT_REGION),
-    description: "ACM certificate for jasonduffett.net.",
+    ...stackProps(CONFIG.edgeRegion),
+    description: `ACM certificate for ${CONFIG.domain}.`,
   });
 
   const siteStack = new Stack(app, "JasonDuffettNetSiteStack", {
-    ...stackProps(PRIMARY_REGION),
-    description: "jasonduffett.net — static site on CloudFront + S3.",
+    ...stackProps(CONFIG.primaryRegion),
+    description: `${CONFIG.domain} — static site on CloudFront + S3.`,
   });
 
   // Kept separate from certStack to avoid a cdn↔cert cycle (this stack reads
   // distribution id from siteStack, which depends on certStack). Logical id
   // retains the "CdnAlarms" name so the deployed stack isn't replaced.
   const cdnAlarmsStack = new Stack(app, "JasonDuffettNetCdnAlarmsStack", {
-    ...stackProps(CLOUDFRONT_CERT_REGION),
+    ...stackProps(CONFIG.edgeRegion),
     description: "CloudWatch alarms for site metrics that AWS only emits in us-east-1.",
   });
 
   createSystem(
     { dnsStack, usEast1AlertsStack, certStack, siteStack, cdnAlarmsStack },
-    siteContentPath,
-    alertEmail,
-  ).build(app, "jasonduffett.net");
+    { domain: CONFIG.domain, siteContentPath, alertEmail },
+  ).build(app, CONFIG.domain);
 
   // Standalone bootstrap stack for the CI deploy role. Has no edges to the
   // application stacks: deploying the rest of the app should never require
   // touching the IAM role that powers CI itself.
   const ciOidcStack = new Stack(app, "JasonDuffettNetCiOidcStack", {
-    ...stackProps(PRIMARY_REGION),
-    description: "GitHub Actions OIDC provider + deploy role for laazyj/jasonduffett.net.",
+    ...stackProps(CONFIG.primaryRegion),
+    description: `GitHub Actions OIDC provider + deploy role for ${CONFIG.githubOwner}/${CONFIG.githubRepo}.`,
   });
-  addCiOidc(ciOidcStack, { githubOwner: "laazyj", githubRepo: "jasonduffett.net" });
+  addCiOidc(ciOidcStack, {
+    githubOwner: CONFIG.githubOwner,
+    githubRepo: CONFIG.githubRepo,
+  });
 
   return app;
 }

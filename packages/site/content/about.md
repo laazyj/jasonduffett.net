@@ -28,7 +28,7 @@ If, for some reason, you want to see more Jason Duffett, try these links
 
 ## technical
 
-This blog is written in Markdown, rendered by [Eleventy](https://www.11ty.dev/), with infrastructure composed and managed in AWS using the excellent [composureCDK](https://github.com/laazyj/composureCDK).
+This blog is written in Markdown, rendered by [Eleventy](https://www.11ty.dev/), with infrastructure composed and managed in AWS using the excellent [composureCDK](https://github.com/laazyj/composureCDK). The full source --- site content and CDK app --- lives at [github.com/laazyj/jasonduffett.net](https://github.com/laazyj/jasonduffett.net).
 
 No ads, no third-party tracking. There's optional Google Analytics if you opt in to it --- see the [privacy page]({{ '/privacy/' | rel }}) for what that means. If you want to hear about new posts, the [RSS feed]({{ '/feed.xml' | rel }}) is your friend.
 
