@@ -1,6 +1,6 @@
 # jasonduffett.net
 
-[![Built with composureCDK](https://img.shields.io/badge/built%20with-composureCDK-6e44ff)](https://github.com/laazyj/composureCDK)
+[![Built with ComposureCDK](https://img.shields.io/badge/built%20with-ComposureCDK-0f0d0c?labelColor=b85416)](https://github.com/laazyj/composureCDK)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Content: CC BY 4.0](https://img.shields.io/badge/content-CC%20BY%204.0-lightgrey.svg)](LICENSE-content.md)
 
