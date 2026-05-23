@@ -186,12 +186,15 @@ async function* walkPosts(distRoot, categories) {
 }
 
 function decodeHtmlEntities(s) {
+  // `&amp;` must be unescaped last: the ampersand is the escape character, so
+  // decoding it earlier would let a literal `&amp;lt;` collapse to `<` (double
+  // unescaping). Keep it after every other entity.
   return s
     .replace(/&#39;/g, "'")
     .replace(/&quot;/g, '"')
-    .replace(/&amp;/g, "&")
     .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">");
+    .replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&");
 }
 
 export async function buildOg({ distDir, sitePackageDir, categories = ["tech", "music", "misc"] }) {
