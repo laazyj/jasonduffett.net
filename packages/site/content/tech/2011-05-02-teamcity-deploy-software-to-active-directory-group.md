@@ -1,7 +1,7 @@
 ---
-title: "Using TeamCity to deploy software to an Active Directory group"
+title: "TeamCity: deploy to an Active Directory group"
 date: 2011-05-02
-summary: "One of the goals we’re trying to achieve in our environment is simple, one-touch, deployment of our software to all environments. One of the applications we…"
+summary: "A PowerShell script and TeamCity build for one-touch deployment of a Windows service to every computer in an Active Directory security group."
 originalUrl: "https://jasonduffett.net/post/5127948500/teamcity-deploy-software-to-active-directory-group"
 originalId: "5127948500"
 tags:
