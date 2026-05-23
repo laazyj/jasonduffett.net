@@ -704,6 +704,29 @@ article img {
   padding: 0.5rem;
 }
 
+/* Inline illustration with a caption, dropped between paragraphs. The artwork
+   carries its own cream canvas, so it sits on the dark page unframed — override
+   the paper padding above. */
+article .post-figure {
+  margin: 2.75rem 0;
+}
+
+article .post-figure img {
+  display: block;
+  width: 100%;
+  border-radius: 4px;
+  background: none;
+  padding: 0;
+}
+
+article .post-figure figcaption {
+  margin-top: 0.7rem;
+  text-align: center;
+  font-style: italic;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
 /* ------------------------------ Code ----------------------------- */
 article pre {
   background: var(--code-bg);
