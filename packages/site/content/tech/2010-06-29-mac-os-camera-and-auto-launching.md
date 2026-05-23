@@ -13,6 +13,6 @@ Now every time I plug in either my digital camera or my iPhone an application ca
 
 To fix this problem you should launch the **Image Capture** application (found in Applications), select your iPhone (or other device) and there is a setting for which application, or no application, to launch when the device is connected.
 
-![](/assets/posts/5867318857560650310/0.png)
+![Mac Image Capture window with the connect-device app dropdown highlighted](/assets/posts/5867318857560650310/0.png)
 
 Thanks to [this thread](http://www.dcresource.com/forums/showthread.php?p=413504) for the info on how to fix it.

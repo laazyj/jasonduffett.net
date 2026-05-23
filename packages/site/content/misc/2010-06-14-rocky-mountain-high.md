@@ -14,7 +14,7 @@ tags:
 Things started well enough as we landed in the mile-high city of Denver. The sun was shining and all was well.  
 To really immerse ourselves in the mountain culture we decided we needed a mode of transport that would be familiar to the locals - the biggest pickup truck Denver airport had to offer...
 
-![](/assets/posts/4911063165632067993/0.jpg)
+![Man standing beside a white pickup truck below the Rockies](/assets/posts/4911063165632067993/0.jpg)
 
 Once we'd found a hotel we paid a visit to the [Great Divide](http://www.greatdivide.com/) brewery. As usual great beers, much less hops than we were getting on the west coast.  
 Thanks to Colin for the tour.  
@@ -29,7 +29,7 @@ We headed downtown for lunch at the [Mountain Sun](http://www.mountainsunpub.com
 
 Things were still good. The sun was still shining and the mountains were still calling. So we jumped in the truck and headed up to see what the Rockies had to offer...
 
-![](/assets/posts/4911063165632067993/1.jpg)
+![Mountain road winding through pine forest toward the Rockies](/assets/posts/4911063165632067993/1.jpg)
 
 At first things went well. The scenery was beautiful ([photos available](http://picasaweb.google.com/laazyj/BeerambassadorsUsaJune2010#)), there was a random [Jebus](http://www.jewforjebus.com/wp-content/uploads/2009/03/jebus.jpg) and we were all enjoying ourselves. Then Barney started freakin' out.
 
@@ -46,7 +46,7 @@ For those interested in London, Doug will be showing his beers at the [White Hor
 The next appointment was at [New Belgium](http://www.newbelgium.com/) where Beer Ambassadors had arranged to meet with Chris, an Irish ex-pat who was making it his mission to break the Australians.  
 He was to be bitterly, perhaps irreparably, broken in the process.
 
-![](/assets/posts/4911063165632067993/2.jpg)
+![Four men in costumes piled onto a tandem bike at New Belgium](/assets/posts/4911063165632067993/2.jpg)
 
 _Beer Ambassadors at large appreciate Fat-Tyre._
 

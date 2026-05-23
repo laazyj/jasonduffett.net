@@ -18,7 +18,7 @@ The evening started sedately enough on the balcony of our room with a dozen Samu
 
 It was also great to see Barney ingratiate himself with the staff by picking a fault with my first beer. It tasted fine to me, does that say something about my under-developed beer palette?
 
-![](/assets/posts/1490058972884388038/1.jpg)
+![Two men drinking bottles of Samuel Adams on a hotel balcony](/assets/posts/1490058972884388038/1.jpg)
 
 If you are ever in Santa Monica, and you enjoy a great beer you could certainly do a lot worse than this place. Great atmosphere and friendly staff. Thanks again guys!
 
@@ -40,4 +40,4 @@ Barney has strolled off somewhere to find a hire-car to get us to Escondido wher
 
 Finally I'll leave you with one great piece of americana, the giant donut...
 
-![](/assets/posts/1490058972884388038/2.jpg)
+![Giant rooftop doughnut sign at Randy's Donuts in LA](/assets/posts/1490058972884388038/2.jpg)

@@ -21,7 +21,7 @@ The next day, after the first full-night's sleep in an age, we were ready to get
 
 We also visited two Apple stores in search of an iPad but they couldn't be had for love nor money...
 
-![](/assets/posts/4593956378464589738/0.jpg)
+![Grinning man in a lobster bib with a bowl of cioppino](/assets/posts/4593956378464589738/0.jpg)
 
 _Beer Ambassador Miro enjoys a San Francisco Cioppino..._
 
@@ -45,6 +45,6 @@ _Beer Ambassadors video interview with Terrence, explaining the Sierra Nevada be
 **Eureka, Arcata and back to the coast**  
 The next leg of our journey was a driving paradise. An undulating, windy road over the mountains to get us back to highway 101, via [Lost Coast Brewing](http://www.lostcoast.com/) in Eureka. A few tasters and some oysters with buffalo sauce and we were back on the road to drop in on Terrence from Sierra Nevada's brother Dutch in Arcata. Dutch and Andy showed us around their bar, [Humboldt Brews](http://www.humboldtbrews.com/index.php) (no longer a brew-pub, unfortunately) and we got back on the 101 and said so long, California. Thanks for the beers!
 
-[![](/assets/posts/4593956378464589738/1.jpg)](http://picasaweb.google.com/lh/photo/Sa-r7CJxOiJFIyDwjleIyg?feat=embedwebsite)
+[![Four men raising glasses of beer together in a bar](/assets/posts/4593956378464589738/1.jpg)](http://picasaweb.google.com/lh/photo/Sa-r7CJxOiJFIyDwjleIyg?feat=embedwebsite)
 
 From [beerambassadors-usa (June 2010)](http://picasaweb.google.com/laazyj/BeerambassadorsUsaJune2010?feat=embedwebsite)

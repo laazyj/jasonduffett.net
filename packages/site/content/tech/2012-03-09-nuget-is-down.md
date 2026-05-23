@@ -20,7 +20,7 @@ Open the Package Manager Settings dialogue and add a new source:
 
 > %LocalAppData%\NuGet\Cache
 
-![](http://i44.tinypic.com/j5ksxd.jpg)
+![NuGet Package Manager settings dialog for adding a package source](http://i44.tinypic.com/j5ksxd.jpg)
 
 \***\*Or you can edit your **NuGet.Config\*\* file located under C:\Users\_[username]\_\AppData\Roaming\NuGet as follows:
 

@@ -16,13 +16,13 @@ It's been a whirlwind tour of hops, malt and yeast. There have been many highs a
 The last few days in Portland (formerly Beer-City USA - a title that now belongs to Ashville NC) have been given us a well-earned rest from constant drinking and travelling - we haven't done any travelling.  
 The Portland beer-market is dominated by craft breweries, 1 in every 2 beers sold are craft beers. It shows. The number of brew-pubs, breweries and beer-bars in this town is amazing.
 
-![](/assets/posts/7460032368915027057/0.jpg)
+![Rows of hop bines growing on trellises at an Oregon hop farm](/assets/posts/7460032368915027057/0.jpg)
 
 We started off with a visit to [the Bridgeport brewery](http://www.bridgeportbrew.com/) with Matt Sage who also took us out of town to visit an Oregon hop farm. Thanks to Matt and Gayle Goschie for your time and insights.
 
 The next day we continued paying visits on Portland's finest purveyors of amber liquids, but the highlight must've been the unexpected passing of the annual [Portland World Naked Bike Ride](http://www.shift2bikes.org/wnbr/min.php) - a couple of the Beer Ambassadors also managed to attend the mostly-naked after-party (but they shall remain nameless).
 
-![](/assets/posts/7460032368915027057/1.jpg)
+![Darts stuck in a pub dartboard mounted on the wall](/assets/posts/7460032368915027057/1.jpg)
 
 _I am Laazy J, Prince of Darts..._
 
@@ -33,7 +33,7 @@ The full Beer Ambassadors report on Portland is available at [BeerAmbassadors.co
 
 _Anyone in the London area on the 1st-4th July should make there way to the [White Horse in Parson's Green](http://www.whitehorsesw6.com/news-events.php) where Doug Odell will be attending the Great American Beer Festival._
 
-[![](/assets/posts/7460032368915027057/2.jpg)](http://picasaweb.google.com/lh/photo/is_Nym-8c2lAg6FZrOgCsA?feat=embedwebsite)
+[![Three men toasting glasses of beer in front of brewery tanks](/assets/posts/7460032368915027057/2.jpg)](http://picasaweb.google.com/lh/photo/is_Nym-8c2lAg6FZrOgCsA?feat=embedwebsite)
 
 From [beerambassadors-usa (June 2010)](http://picasaweb.google.com/laazyj/BeerambassadorsUsaJune2010?feat=embedwebsite)
 

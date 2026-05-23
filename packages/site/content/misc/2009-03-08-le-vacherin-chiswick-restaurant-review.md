@@ -9,7 +9,7 @@ tags:
   - restaurants
 ---
 
-![](/assets/posts/2068742053355556723/0.jpg)  
+![Le Vacherin restaurant frontage with black awnings in Chiswick](/assets/posts/2068742053355556723/0.jpg)  
 I was actually going to go to Kew to check out this Bistro that I'd seen when I was there getting guitar strings yesterday, but the weather turned and what I really needed was somewhere close by to eat.
 
 In the interests of full disclosure I have to admit that I used to go to Le Vacherin a lot, usually for big decadent dinners instead of sensible Sunday lunches, but I haven't been in a few years.

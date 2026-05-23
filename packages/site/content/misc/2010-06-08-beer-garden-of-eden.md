@@ -18,7 +18,7 @@ While the rest of us got our bags packed, Barney walked down to the hire car pla
 
 But Barney had other ideas and decided that we needed a bit of style. He returned with a tribute to the american auto-industry's form-over-function attitude - a Dodge Challenger.
 
-![](/assets/posts/6186593108690961558/0.jpg)
+![Black Dodge Challenger parked in a California car park](/assets/posts/6186593108690961558/0.jpg)
 
 Our destination was [Stone Brewery](http://www.stonebrew.com/home.asp) in Escondido, home of [The Arrogant Bastard Ale](http://www.stonebrew.com/arrogantbastard/).
 
@@ -34,6 +34,6 @@ Full set of photos are available at: [http://picasaweb.google.com/laazyj/Beeramb
 
 As usual beer details + videos are available at [BeerAmbassadors.com](http://beerambassadors.blogspot.com/2010/06/stone-brewery-co-escondido.html).
 
-![](/assets/posts/6186593108690961558/1.jpg)
+![Three men posing together in the green Stone Brewery beer garden](/assets/posts/6186593108690961558/1.jpg)
 
 _Mountain Goat Tom, Beer Ambassador Miro & myself_
