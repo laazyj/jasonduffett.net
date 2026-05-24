@@ -13,9 +13,9 @@ tags:
   - object-equality-guide
 ---
 
-In the 3rd part of [this series](http://jasonduffett.net/tagged/Object%20Equality%20Guide) I’ll show the tests I used to define, and confirm, my assumptions on how comparison of the EmailAddress object should work.
+In the 3rd part of [this series]({{ '/tech/guide-to-value-object-equality-part-1/' | rel }}) I’ll show the tests I used to define, and confirm, my assumptions on how comparison of the EmailAddress object should work.
 
-If you didn’t catch the [other instalments in this series](http://jasonduffett.net/tagged/Object%20Equality%20Guide):
+If you didn’t catch the [other instalments in this series]({{ '/tech/guide-to-value-object-equality-part-1/' | rel }}):
 
 - In [part 1](http://jasonduffett.net/post/5220416027/guide-to-value-object-equality-part-1) I explained how comparisons should work for value-type objects and implemented Equals and the ==/!= operators.
 - In part 2 I covered GetHashCode() - why you can’t just use base.GetHashCode().

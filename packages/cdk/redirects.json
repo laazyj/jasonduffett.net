@@ -1,5 +1,5 @@
 {
-  "_comment": "Map of old URL path -> new URL path. Any request matching a key is 301-redirected to the corresponding value. Generated from post frontmatter (originalUrl).",
+  "_comment": "Map of old URL path -> new URL path. Any request matching a key is 301-redirected to the corresponding value. Mostly generated from post frontmatter (originalUrl); legacy Tumblr URLs without a post ID (e.g. /tagged/* tag archives) are added by hand.",
   "redirects": {
     "/post/106911092859/citrix-netscaler-vpx-safari-compatibility": "/tech/citrix-netscaler-vpx-safari-compatibility/",
     "/post/14916704458/sudo-for-powershell": "/tech/sudo-for-powershell/",
@@ -33,6 +33,7 @@
     "/post/6137285032/esxi-active-directory-domain-trust": "/tech/esxi-active-directory-domain-trust/",
     "/post/6385048950/gmail-custom-domain-name-on-behalf-of": "/tech/gmail-custom-domain-name-on-behalf-of/",
     "/post/69833281829/idonethis-alfredapp-daily-standup-nirvana": "/tech/idonethis-alfredapp-daily-standup-nirvana/",
-    "/post/82802432966/recording-deployments-in-new-relic-with-powershells": "/tech/recording-deployments-in-new-relic-with-powershells/"
+    "/post/82802432966/recording-deployments-in-new-relic-with-powershells": "/tech/recording-deployments-in-new-relic-with-powershells/",
+    "/tagged/Object%20Equality%20Guide": "/tech/guide-to-value-object-equality-part-1/"
   }
 }

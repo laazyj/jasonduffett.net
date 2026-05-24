@@ -12,7 +12,7 @@ tags:
   - domain-driven-design
 ---
 
-In the 2nd part of [the series](http://jasonduffett.net/tagged/Object%20Equality%20Guide) I’ll explain the GetHashCode() method and how you should implement this in your value-type classes.
+In the 2nd part of [the series]({{ '/tech/guide-to-value-object-equality-part-1/' | rel }}) I’ll explain the GetHashCode() method and how you should implement this in your value-type classes.
 
 _[Part 1](http://jasonduffett.net/post/5220416027/guide-to-value-object-equality-part-1) of the series shows how to correctly implement Equals, and the ==/!= operators._
 
