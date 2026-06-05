@@ -1,6 +1,7 @@
 ---
 title: "Your infrastructure isn't an app. So why is your CDK?"
 date: 2026-05-23
+ogImage: "/assets/og-what-is-wrong-with-cdk.jpg"
 summary: "The CDK gave us a real programming language for AWS infrastructure, then taught us to write a program that builds it — instead of a value that simply describes it. A look at the one design choice behind CDK's most familiar frustrations."
 tags:
   - aws
