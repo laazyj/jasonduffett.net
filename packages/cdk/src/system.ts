@@ -161,12 +161,12 @@ export function createSystem(stacks: SystemStacks, options: SystemOptions) {
       // forecasted). The builder auto-creates the SNS topic policy granting
       // budgets.amazonaws.com:Publish — distinct from the alarmActionsPolicy
       // wired in the afterBuild block below.
-      // 4 USD covers steady-state CloudFront + Route 53 + S3 for a low-traffic
+      // 6 USD covers steady-state CloudFront + Route 53 + S3 for a low-traffic
       // personal blog with healthy headroom; raise it if you add anything
       // ongoing (Lambda@Edge, larger CloudFront price class, etc.).
       budget: createBudgetBuilder()
         .budgetName(`${domain}-monthly`)
-        .limit({ amount: 4, unit: "USD" })
+        .limit({ amount: 6, unit: "USD" })
         .withRecommendedThresholds({ sns: ref<TopicBuilderResult>("usEast1Alerts").get("topic") })
         .recommendedAlarms(false),
 

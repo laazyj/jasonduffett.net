@@ -179,7 +179,7 @@
       "Properties": {
         "Budget": {
           "BudgetLimit": {
-            "Amount": 4,
+            "Amount": 6,
             "Unit": "USD"
           },
           "BudgetName": "jasonduffett.net-monthly",

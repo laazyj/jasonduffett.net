@@ -84,12 +84,12 @@ describe("app synthesis", () => {
   });
 
   describe("budget", () => {
-    it("limits monthly spend to 4 USD", () => {
+    it("limits monthly spend to 6 USD", () => {
       stackTemplate(app, "JasonDuffettNetUsEast1AlertsStack").hasResourceProperties(
         "AWS::Budgets::Budget",
         {
           Budget: Match.objectLike({
-            BudgetLimit: { Amount: 4, Unit: "USD" },
+            BudgetLimit: { Amount: 6, Unit: "USD" },
             BudgetType: "COST",
             TimeUnit: "MONTHLY",
           }),
