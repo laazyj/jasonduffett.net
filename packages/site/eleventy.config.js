@@ -11,7 +11,43 @@ const CATEGORIES = ["tech", "music", "misc"];
 
 export default function (eleventyConfig) {
   eleventyConfig.addPlugin(rssPlugin);
-  eleventyConfig.addPlugin(syntaxHighlight);
+  eleventyConfig.addPlugin(syntaxHighlight, {
+    // Two song-sheet "languages" so chord names, section markers and fret
+    // numbers become real tokens we can style (see the .language-chords /
+    // .language-tab rules in styles.css). They aren't shipped Prism grammars,
+    // so we register them on the shared Prism instance here.
+    init: ({ Prism }) => {
+      // Shared between both sheet grammars. Token *order* differs per grammar
+      // (chords must try `chord` before `hint`), so these are referenced
+      // by name rather than spread, to keep each grammar's order explicit.
+      const section = /\[[^\]]*\]/; // [Intro], [banjo riff, strumming], …
+      const hint = /\([^)]*\)/; // parenthetical cues: (n/c), (x2), (D7 - bass run)
+      const bar = /\|/;
+      // Chord / lyric sheet: bold chord names, muted section + cue markers.
+      Prism.languages.chords = {
+        section,
+        chord:
+          /\((?:N\.?C\.?|[A-G](?:#|b)?(?:m|maj|min|dim|aug|sus|add)?\d*(?:\/[A-G](?:#|b)?)?)\)/,
+        hint,
+        bar,
+      };
+      // ASCII tablature: dashes form the string line; pick out fret numbers,
+      // techniques (h/p/b, x = muted), barlines and bracketed/parenthetical cues.
+      Prism.languages.tab = {
+        section,
+        hint,
+        // Chord labels above the staves, matched as whole words so their digits
+        // (e.g. the 7 in D7) aren't mistaken for frets. String labels like `E|`
+        // are excluded by the trailing-whitespace lookahead (they precede `|`).
+        chord:
+          /(?<=^|\s)[A-G](?:#|b)?(?:m|maj|min|dim|aug|sus|add)?\d*(?:\/[A-G](?:#|b)?)?(?=\s|$)/m,
+        technique: /[hpb](?=\d)|x/,
+        fret: /\d+/,
+        bar,
+        dash: /-+/,
+      };
+    },
+  });
 
   eleventyConfig.amendLibrary("md", (md) => {
     md.set({ typographer: true });

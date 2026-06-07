@@ -3,7 +3,7 @@
    tech = burnt orange · music = riso blue · misc = riso chartreuse
    ------------------------------------------------------------------ */
 
-@import url("https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Fraunces:ital,opsz,wght@1,9..144,800;1,9..144,900&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Fraunces:ital,opsz,wght@1,9..144,800;1,9..144,900&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap");
 
 :root {
   --ink: #0f0d0c;
@@ -756,6 +756,48 @@ article pre code {
   background: none;
   padding: 0;
   border: 0;
+}
+
+/* --- Song sheets: chord/lyric charts & ASCII tablature --- */
+
+/* Chord / lyric sheet (```chords): chord names pop, cues recede. */
+.language-chords .token.chord {
+  color: var(--accent);
+  font-weight: 700;
+}
+.language-chords .token.bar {
+  color: var(--rule);
+}
+.language-chords .token.section,
+.language-chords .token.hint {
+  color: var(--muted);
+  font-size: 0.82em;
+}
+
+/* Tablature (```tab) — pull the string rows tight so the four strings read as
+   one stave/fretboard, and squeeze the tracking so runs of hyphens close up
+   into a continuous string line. Blank lines still scale with this
+   line-height, so the gaps between systems and section headings stay open. */
+article pre.language-tab {
+  line-height: 1.15;
+  letter-spacing: -0.06em;
+}
+.language-tab .token.fret {
+  color: var(--accent);
+  font-weight: 700;
+}
+.language-tab .token.dash,
+.language-tab .token.technique {
+  color: var(--muted);
+}
+.language-tab .token.bar {
+  color: var(--paper-dim);
+}
+.language-tab .token.section,
+.language-tab .token.hint {
+  color: var(--muted);
+  font-size: 0.8em;
+  letter-spacing: 0;
 }
 
 /* Prism — riso/dark palette */
