@@ -1,0 +1,298 @@
+{
+  "Description": "ACM certificate for jasonduffett.net.",
+  "Parameters": {
+    "BootstrapVersion": {
+      "Default": "/cdk-bootstrap/hnb659fds/version",
+      "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
+  "Resources": {
+    "CustomCrossRegionExportReaderCustomResourceProviderHandler46647B68": {
+      "DependsOn": [
+        "CustomCrossRegionExportReaderCustomResourceProviderRole10531BBD",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": "cdk-hnb659fds-assets-111111111111-us-east-1",
+          "S3Key": "<asset-hash>.zip",
+        },
+        "Handler": "__entrypoint__.handler",
+        "MemorySize": 128,
+        "Role": {
+          "Fn::GetAtt": [
+            "CustomCrossRegionExportReaderCustomResourceProviderRole10531BBD",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs22.x",
+        "Timeout": 900,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "CustomCrossRegionExportReaderCustomResourceProviderRole10531BBD": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+          },
+        ],
+        "Policies": [
+          {
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Action": [
+                    "ssm:AddTagsToResource",
+                    "ssm:RemoveTagsFromResource",
+                    "ssm:GetParameters",
+                  ],
+                  "Effect": "Allow",
+                  "Resource": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:",
+                        {
+                          "Ref": "AWS::Partition",
+                        },
+                        ":ssm:us-east-1:111111111111:parameter/cdk/exports/JasonDuffettNetCertStack/*",
+                      ],
+                    ],
+                  },
+                },
+              ],
+              "Version": "2012-10-17",
+            },
+            "PolicyName": "Inline",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "CustomCrossRegionExportWriterCustomResourceProviderHandlerD8786E8A": {
+      "DependsOn": [
+        "CustomCrossRegionExportWriterCustomResourceProviderRoleC951B1E1",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": "cdk-hnb659fds-assets-111111111111-us-east-1",
+          "S3Key": "<asset-hash>.zip",
+        },
+        "Handler": "__entrypoint__.handler",
+        "MemorySize": 128,
+        "Role": {
+          "Fn::GetAtt": [
+            "CustomCrossRegionExportWriterCustomResourceProviderRoleC951B1E1",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs22.x",
+        "Timeout": 900,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "CustomCrossRegionExportWriterCustomResourceProviderRoleC951B1E1": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+          },
+        ],
+        "Policies": [
+          {
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Action": [
+                    "ssm:DeleteParameters",
+                    "ssm:ListTagsForResource",
+                    "ssm:GetParameters",
+                    "ssm:PutParameter",
+                  ],
+                  "Effect": "Allow",
+                  "Resource": [
+                    {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:",
+                          {
+                            "Ref": "AWS::Partition",
+                          },
+                          ":ssm:eu-west-2:111111111111:parameter/cdk/exports/*",
+                        ],
+                      ],
+                    },
+                  ],
+                },
+              ],
+              "Version": "2012-10-17",
+            },
+            "PolicyName": "Inline",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "ExportsReader8B249524": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "ReaderProps": {
+          "imports": {
+            "/cdk/exports/JasonDuffettNetCertStack/JasonDuffettNetDnsStackeuwest2RefHostedZone0FB03840": "{{resolve:ssm:/cdk/exports/JasonDuffettNetCertStack/JasonDuffettNetDnsStackeuwest2RefHostedZone0FB03840}}",
+          },
+          "prefix": "JasonDuffettNetCertStack",
+          "region": "us-east-1",
+        },
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "CustomCrossRegionExportReaderCustomResourceProviderHandler46647B68",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "Custom::CrossRegionExportReader",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "ExportsWritereuwest25F52B32F9AB3BFFD": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "CustomCrossRegionExportWriterCustomResourceProviderHandlerD8786E8A",
+            "Arn",
+          ],
+        },
+        "WriterProps": {
+          "exports": {
+            "/cdk/exports/JasonDuffettNetSiteStack/JasonDuffettNetCertStackuseast1Refjasonduffettnetcert90DBB196BACA7E84": {
+              "Ref": "jasonduffettnetcert90DBB196",
+            },
+          },
+          "region": "eu-west-2",
+        },
+      },
+      "Type": "Custom::CrossRegionExportWriter",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "jasonduffettnetcert90DBB196": {
+      "Properties": {
+        "CertificateTransparencyLoggingPreference": "ENABLED",
+        "DomainName": "jasonduffett.net",
+        "DomainValidationOptions": [
+          {
+            "DomainName": "jasonduffett.net",
+            "HostedZoneId": {
+              "Fn::GetAtt": [
+                "ExportsReader8B249524",
+                "/cdk/exports/JasonDuffettNetCertStack/JasonDuffettNetDnsStackeuwest2RefHostedZone0FB03840",
+              ],
+            },
+          },
+          {
+            "DomainName": "www.jasonduffett.net",
+            "HostedZoneId": {
+              "Fn::GetAtt": [
+                "ExportsReader8B249524",
+                "/cdk/exports/JasonDuffettNetCertStack/JasonDuffettNetDnsStackeuwest2RefHostedZone0FB03840",
+              ],
+            },
+          },
+        ],
+        "KeyAlgorithm": "RSA_2048",
+        "SubjectAlternativeNames": [
+          "www.jasonduffett.net",
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "JasonDuffettNetCertStack/jasonduffett.net--cert",
+          },
+        ],
+        "ValidationMethod": "DNS",
+      },
+      "Type": "AWS::CertificateManager::Certificate",
+    },
+    "jasonduffettnetcertDaysToExpiryAlarm3C241D8A": {
+      "Properties": {
+        "AlarmActions": [
+          {
+            "Fn::ImportValue": "JasonDuffettNetUsEast1AlertsStack:ExportsOutputRefjasonduffettnetusEast1AlertsED7A8D43F3302E6E",
+          },
+        ],
+        "AlarmDescription": "ACM certificate is approaching expiry. Threshold: <= 45 days remaining.",
+        "AlarmName": "jason-duffett-net-cert-stack/jasonduffett-net/cert/days-to-expiry",
+        "ComparisonOperator": "LessThanOrEqualToThreshold",
+        "DatapointsToAlarm": 1,
+        "Dimensions": [
+          {
+            "Name": "CertificateArn",
+            "Value": {
+              "Ref": "jasonduffettnetcert90DBB196",
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "DaysToExpiry",
+        "Namespace": "AWS/CertificateManager",
+        "Period": 86400,
+        "Statistic": "Minimum",
+        "Threshold": 45,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+  },
+  "Rules": {
+    "CheckBootstrapVersion": {
+      "Assertions": [
+        {
+          "Assert": {
+            "Fn::Not": [
+              {
+                "Fn::Contains": [
+                  [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                  ],
+                  {
+                    "Ref": "BootstrapVersion",
+                  },
+                ],
+              },
+            ],
+          },
+          "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI.",
+        },
+      ],
+    },
+  },
+}
