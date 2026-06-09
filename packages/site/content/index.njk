@@ -21,11 +21,18 @@ eleventyExcludeFromCollections: true
 {% set latest = collections.posts | last %}
 {% if latest %}
 {% set latestCat = latest.data.tags | category %}
-<p class="currently"{% if latestCat %} data-category="{{ latestCat }}"{% endif %}>
-  <span class="currently-label">currently</span>
-  <span class="currently-arrow" aria-hidden="true">&rarr;</span>
-  <a href="{{ latest.url | rel }}">{{ latest.data.title }}</a>
-</p>
+{% set latestImg = latest.data.ogImage %}
+<a class="currently{% if not latestImg %} no-img{% endif %}" href="{{ latest.url | rel }}"{% if latestCat %} data-category="{{ latestCat }}"{% endif %}{% if latestImg %} style="background-image: url('{{ latestImg | rel }}')"{% endif %}>
+  <span class="currently-eyebrow">{% include "partials/ornaments/sparkle.njk" %} currently</span>
+  <span class="currently-title">{{ latest.data.title }}</span>
+  {% if latest.data.summary %}<span class="currently-summary">{{ latest.data.summary }}</span>{% endif %}
+  <span class="currently-meta">
+    <time datetime="{{ latest.date | htmlDateString }}">{{ latest.date | readableDate }}</time>
+    <span class="sep" aria-hidden="true">&middot;</span>
+    <span>{{ latest.templateContent | readingTime }} min read</span>
+    {% if latestCat %}<span class="sep" aria-hidden="true">&middot;</span><span class="tag {{ latestCat }}">{{ latestCat }}</span>{% endif %}
+  </span>
+</a>
 {% endif %}
 
 <div class="section-heading">
