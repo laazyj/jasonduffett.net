@@ -20,9 +20,10 @@ tags:
 
 <!--
 SKELETON — article 2 of the composureCDK series. Body below is beats, not prose.
-Structure (example-first): §1 intro + the app.ts snippet shown cold; §2 names the
-shapes (compose / builder / ref), pointing back at the code; §3 close-reads the
-example; §4 the "an agent writes my CDK" turn; §5 conclusion + teasers; references.
+Structure (example-first): §1 intro + the app.ts snippet shown cold; §2 walkthrough
+close-reads the example, surfacing the shapes as it goes; §3 names the shapes
+(compose / builder / ref); §4 the "an agent writes my CDK" turn; §5 conclusion +
+teasers; references.
 Decisions locked with Jason:
   - Anchor example = a simplified single-stack cut of this site's `system.ts`
     (no withStacks / cross-region; dropped alerts, budget, alarm wiring).
@@ -109,54 +110,162 @@ compose(
 ).build(stack, "Site");
 ```
 
-## 2. The shapes
+## 2. Walkthrough — reading the example
 
-<!-- The reader has now SEEN these in the snippet above — name them, point back
-     to the code. Three shapes, kept to what the reader uses. -->
+The first thing you notice is that this is a clear declaration of the system's
+infrastructure: no misdirection, and no need to trace through levels of constructs
+to grasp the high-level architecture. It declares the DNS zone (`zone`) and records
+(`aliasRecords`), the site's certificate (`cert`), its asset store (`bucket`),
+distribution (`cdn`), deployment (`deploy`), and health checker (`health`) right
+there in front of you. You also see each component's _dependencies_ laid out as a
+second map.
+
+Each of those components is a [_Lifecycle_](#lifecycle): composure's minimal
+contract for something that can be built. [`compose`](#compose) takes the map of
+named Lifecycles, together with the dependency map, and assembles them into a
+single Lifecycle of its own. That's why _Lifecycle_ is the spine of the composure
+architecture — because a composed system is itself a Lifecycle, systems nest as
+components inside larger systems.
+
+The second thing you'll notice (I'm guessing) is the [_Builders_](#builder).
+Composure uses the [Builder Pattern](https://en.wikipedia.org/wiki/Builder_pattern)
+to express the underlying CDK constructs. This has many advantages, but most
+importantly it separates the _declaration_ of a component's configuration from the
+_construction_ of the component itself.
+
+And finally, you'll notice the [`ref`](#ref) that glues components to their
+dependencies.
+
+For this simplified example, I've pushed everything into a single Stack. We'll talk
+more about Stack management in a future article.
+
+Now let's drill down into the four core shapes we've identified.
+
+## 3. The shapes
+
+<!-- The walkthrough surfaced these. Four shapes: Lifecycle (the contract) +
+     compose / builder / ref (how you use it). Beats, not prose — the Lifecycle
+     entry reads fuller because the walkthrough links straight to it. -->
+
+<a id="lifecycle"></a>
+
+### Lifecycle — good posture, by design
+
+**Lifecycle** is the contract every component implements: a single
+`build(scope, id, context)` method that creates its CDK constructs and hands them
+back. It is deliberately minimal — one method, no base class to extend, no
+`super()` to call; a component is anything with a matching `build`.
+
+```typescript
+interface Lifecycle<T, Context> {
+  build(scope: IConstruct, id: string, context?: Context): T;
+}
+```
+
+<a id="compose"></a>
 
 ### compose — a system is a value
 
-- `compose({ components }, { deps })`: a flat map of named components + a second
-  map declaring each one's dependencies as data.
-- No `new`, no `this`, no constructor side-effects. The description IS a value.
-- The deps map is the thing article 1 said CDK never lets you write.
-- Eager validation: cycles throw `CyclicDependencyError` at compose time, not
-  build/synth time. (Plant this — §3 pays it off against article 1's bug.)
+`compose` assembles components (which are _Lifecycles_) into a system - itself also a _Lifecycle_.
+
+When compose is called, it:
+
+1. Builds a directed acyclic graph from the dependency declarations.
+2. Validates that the graph has no cycles. If a cycle is found, a `CyclicDependencyError` is thrown immediately.
+3. Returns a new _Lifecycle_ whose build method topologically sorts the graph and builds each component in dependency order, passing the resolved outputs of its dependencies as context.
+
+The _eager validation_ is a big win for CDK projects. Catching cyclic references in
+this way surfaces errors earlier and with better context for diagnostics compared to
+catching them at synthesis time.
+
+Because the composed system returned by `compose` is also a _Lifecycle_, it can also
+be used as a component in a larger system. Composition is recursive — systems can be
+nested without special handling.
+
+```typescript
+function compose<Components extends Record<string, Lifecycle>>(
+  components: Components,
+  dependencies: { [Property in keyof Components]: Dependency<Components> },
+);
+```
+
+<a id="builder"></a>
 
 ### The fluent builder — intent, not mutation
 
-- `createXBuilder().a().b()`: reads as a declaration; small, discoverable surface;
-  only the values you care about need stating (see the bare `createBucketBuilder()`).
-- The builder fills in sensible config for you — but that's its own pillar; the
-  deep-dive is a later post (keep powder dry).
-- (Builder mechanics — Proxy, IBuilder type, .copy() — NOT for this article.)
+The builder pattern provides a fluent API for configuring components. It is a separate concern from _Lifecycle_ — a component does not need a builder to work, and the builder does not need to know about composition. But it does provide quite a number of benefits to us:
+
+- The API surface is more discoverable than a large tree of nested props: after each `.`, the IDE offers the next valid option with its documentation inline, so you configure a resource by autocompletion instead of having to know the shape of a deeply nested props object up front.
+- It can enforce constraints between props (e.g. mutual exclusivity).
+- It provides the extensibility required to meet another of Composure's core value propositions - secure and operationally sound defaults (more on this in a later article)
+
+To avoid duplicating the entire `aws-cdk-lib` API surface, _Builders_ are declared as proxies
+over their underlying construct's props. This provides a small footprint to adapt the
+out-of-the-box CDK construct that automatically inherits the functionality
+available in whatever peer aws-cdk-lib version your system uses.
+
+```typescript
+// 1. Define the props type (often an alias for the CDK props)
+type FunctionBuilderProps = lambda.FunctionProps;
+
+// 2. Define the build result
+interface FunctionBuilderResult {
+  function: lambda.Function;
+}
+
+// 3. Implement the class with Lifecycle and a props field
+class FunctionBuilder implements Lifecycle<FunctionBuilderResult> {
+  props: Partial<FunctionBuilderProps> = {};
+
+  build(scope: IConstruct, id: string): FunctionBuilderResult {
+    return {
+      function: new lambda.Function(scope, id, this.props as FunctionBuilderProps),
+    };
+  }
+}
+
+// 4. Export a factory function
+function createFunctionBuilder(): IFunctionBuilder {
+  return Builder<FunctionBuilderProps, FunctionBuilder>(FunctionBuilder);
+}
+```
+
+<a id="ref"></a>
 
 ### ref — lazy wiring
 
-- `ref("name", (r) => r.prop)`: a reference to a value a sibling produces at build
-  time, resolved in dependency order — the wiring sits right at the call site (see
-  the snippet's `.origin(...)`, `.certificate(...)`, alias records).
-- This is how cross-component wiring stays declarative instead of post-build glue.
-- (Typed `.get()` / `.map()` forms + the type-safety story — later article.)
+_Lifecycle_, _Builder_, and `compose` each solve a distinct problem. But there is a gap between them: **builders are configured before their dependencies are built**. `Ref<T>` lets us capture a reference at configuration time that resolves at build time and its partner `Resolvable<T>` signposts the sites where
+a lazy reference can be used.
 
-## 3. Walkthrough — reading the example
+You can see this in the code snippet where the ACM `CertificateBuilder` has the member
+`validationZone(Resolvable<acm.IHostedZone>)`. The system's declaration glues this with a
+`ref`. The snippet above uses composure's concise shorthand; annotate the callback parameter
+and the same wiring is fully typed:
 
-<!-- Close-read the app.ts above. The "it's really this site" framing now lives
-     in the §1 intro. -->
+```typescript
+ref("zone", (z: HostedZoneBuilderResult) => z.hostedZone);
+```
 
-- Dependencies are readable at a glance in the deps map — contrast article 1's
-  "spread over 3 files, hunt for method calls."
-- `ref("name", (r) => r.prop)` doing the wiring at the call site — bucket ->
-  origin, cert -> cdn, distribution -> alias records.
-- The bare `createBucketBuilder()` already gives a well-configured bucket —
-  _less code, more architecture_ (the defaults story is its own later post).
-- **Eager cycle detection** — callback to article 1's cyclic-reference bug: the
-  same mistake that died at synth with a cryptic error is now a compose-time
-  `CyclicDependencyError`, before anything builds.
-- OPTIONAL, light: one line that stack-routing exists (`withStacks`) and pays off
-  article 1's stack-splitting fight — deep-dive deferred. Drop if it bloats.
+where:
+
+- `"zone"` is the sibling component, declared as a dependency of `cert` in the dependency map.
+- `z` is the result of building zone's _Lifecycle_ (a `HostedZoneBuilderResult` in this case).
+- `hostedZone` is an `IHostedZone` prop of `HostedZoneBuilderResult`.
+
+With the parameter annotated, TypeScript checks the transform end to end: `z.hostedZone` must
+exist and must satisfy the `Resolvable<acm.IHostedZone>` that `validationZone` expects, so a
+mistyped property or the wrong shape is a compile error.
+The names you wire with are checked too, in two different ways. A dependency in the second
+map is `keyof` the component map, so a typo like `cdn: ["bukcet"]` won't compile. The component
+name inside a `ref` is a plain string, resolved when the system is built — so a typo there
+fails fast with a clear error at build time, rather than passing silently.
+
+This is how cross-component wiring stays declarative instead of post-build glue.
 
 ## 4. "But an agent writes my CDK anyway"
+
+> That's all very nice Jason but why do I care? I'm a 100x vibe coder and agents do
+> all my coding!
 
 <!-- The turn. Counterintuitive hook: if a machine writes it, surely legibility
      matters LESS? Exactly backwards. Three claims, each cited. -->
@@ -181,7 +290,7 @@ compose(
   `ref` ARE the spec; a wrong wire is a compose-time error, not a silent
   deploy-time surprise. Rhymes with the ts-fake "coding agents" note (the type
   signature is the spec, enforced at the call site, agents can't drift).
-  <!-- Reuse the §3 cyclic-error callback as the concrete instance. -->
+  <!-- Reuse the §3 compose cyclic-error callback (article 1's bug) as the concrete instance. -->
 
 - Land it: composure isn't nostalgia for human-readable code — it's what makes
   the codebase agent-tractable. The declarative shape matters MORE in this world.
@@ -196,6 +305,13 @@ compose(
   - Secure-by-default, following AWS Well-Architected — "defaults should be correct."
 
 ## References
+
+If you want to go deeper into any of the above topics, or are curious to know more, I
+recommend the following links:
+
+- [composureCDK/architecture](https://github.com/laazyj/composureCDK/blob/main/docs/architecture.md)
+- [Stuart Sierra's Component framework for Clojure](https://github.com/stuartsierra/component)
+- Others TBD...
 
 <!-- Curated, first-hand-verified per memory rule. WebFetch each + confirm
      on-thesis before it goes in. Offer: run /deep-research to vet this list and
