@@ -1,12 +1,8 @@
 ---
 title: "Lose the constructs. Keep your composure."
 date: 2026-06-11
-ogImage: "/assets/og-keep-your-composure.jpg" # TODO: generate OG image
-# SUMMARY TODO — lead with "CDK" for discoverability; the title carries no
-# subject keyword by design (see title discussion). One sentence on: a flat map
-# of components + fluent builders = infrastructure you describe, not a program
-# you run; why that matters more, not less, when an agent writes the code.
-summary: "TODO"
+ogImage: "/assets/og-keep-your-composure.jpg"
+summary: "An AWS CDK app is a program that builds your infrastructure. composureCDK makes it a flat map of components you can read, diff, and hand off instead: a worked example, the shapes that make it, and why a declarative description matters more, not less, when an agent writes the code."
 tags:
   - aws
   - cdk
@@ -17,27 +13,6 @@ tags:
   - vibe-coding
   - ai-assisted-development
 ---
-
-<!--
-SKELETON — article 2 of the composureCDK series. Body below is beats, not prose.
-Structure (example-first): §1 intro + the app.ts snippet shown cold; §2 walkthrough
-close-reads the example, surfacing the shapes as it goes; §3 names the shapes
-(compose / builder / ref); §4 the "an agent writes my CDK" turn; §5 conclusion +
-teasers; references.
-Decisions locked with Jason:
-  - Anchor example = a simplified single-stack cut of this site's `system.ts`
-    (no withStacks / cross-region; dropped alerts, budget, alarm wiring).
-  - Snippet uses inline transform-shorthand refs with NO type hints — chosen for
-    conciseness to demonstrate the model; compiles under a relaxed tsconfig; the
-    type-safety angle is deferred to a later article.
-  - Defaults are a later article — keep them a forward-reference here, don't sell.
-  - Article-1 teaser shape (config-objects, reads:/consumes:) was DIRECTIONAL;
-    acknowledge lightly, don't dwell — the real API is fluent builders.
-  - Keep composureCDK powder dry: tease, don't dump (extensibility -> issue #49).
-Source refs (../composureCDK):
-  - docs/architecture.md — Lifecycle, Builder, compose, Ref (definitive)
-  - packages/cdk/src/system.ts — the live anchor (this site), trimmed into the snippet
--->
 
 ## 1. A better way, by example
 
@@ -128,7 +103,7 @@ architecture — because a composed system is itself a Lifecycle, systems nest a
 components inside larger systems.
 
 The second thing you'll notice (I'm guessing) is the [_Builders_](#builder).
-Composure uses the [Builder Pattern](https://en.wikipedia.org/wiki/Builder_pattern)
+composureCDK uses the [Builder Pattern](https://en.wikipedia.org/wiki/Builder_pattern)
 to express the underlying CDK constructs. This has many advantages, but most
 importantly it separates the _declaration_ of a component's configuration from the
 _construction_ of the component itself.
@@ -142,10 +117,6 @@ more about Stack management in a future article.
 Now let's drill down into the four core shapes we've identified.
 
 ## 3. The shapes
-
-<!-- The walkthrough surfaced these. Four shapes: Lifecycle (the contract) +
-     compose / builder / ref (how you use it). Beats, not prose — the Lifecycle
-     entry reads fuller because the walkthrough links straight to it. -->
 
 <a id="lifecycle"></a>
 
@@ -166,7 +137,7 @@ interface Lifecycle<T, Context> {
 
 ### compose — a system is a value
 
-`compose` assembles components (which are _Lifecycles_) into a system - itself also a _Lifecycle_.
+`compose` assembles components (which are _Lifecycles_) into a system, itself also a _Lifecycle_.
 
 When compose is called, it:
 
@@ -174,9 +145,8 @@ When compose is called, it:
 2. Validates that the graph has no cycles. If a cycle is found, a `CyclicDependencyError` is thrown immediately.
 3. Returns a new _Lifecycle_ whose build method topologically sorts the graph and builds each component in dependency order, passing the resolved outputs of its dependencies as context.
 
-The _eager validation_ is a big win for CDK projects. Catching cyclic references in
-this way surfaces errors earlier and with better context for diagnostics compared to
-catching them at synthesis time.
+The _eager validation_ is a big win for CDK projects. Catching cyclic references this way
+surfaces errors earlier, and with better diagnostics, than at synthesis time.
 
 Because the composed system returned by `compose` is also a _Lifecycle_, it can also
 be used as a component in a larger system. Composition is recursive — systems can be
@@ -193,42 +163,15 @@ function compose<Components extends Record<string, Lifecycle>>(
 
 ### The fluent builder — intent, not mutation
 
-The builder pattern provides a fluent API for configuring components. It is a separate concern from _Lifecycle_ — a component does not need a builder to work, and the builder does not need to know about composition. But it does provide quite a number of benefits to us:
+composureCDK exposes CDK constructs through fluent builder APIs. The shape buys a few things:
 
 - The API surface is more discoverable than a large tree of nested props: after each `.`, the IDE offers the next valid option with its documentation inline, so you configure a resource by autocompletion instead of having to know the shape of a deeply nested props object up front.
 - It can enforce constraints between props (e.g. mutual exclusivity).
-- It provides the extensibility required to meet another of Composure's core value propositions - secure and operationally sound defaults (more on this in a later article)
+- It provides the extensibility behind another of composureCDK's pillars: secure, operationally sound defaults (more in a later article).
 
-To avoid duplicating the entire `aws-cdk-lib` API surface, _Builders_ are declared as proxies
-over their underlying construct's props. This provides a small footprint to adapt the
-out-of-the-box CDK construct that automatically inherits the functionality
-available in whatever peer aws-cdk-lib version your system uses.
-
-```typescript
-// 1. Define the props type (often an alias for the CDK props)
-type FunctionBuilderProps = lambda.FunctionProps;
-
-// 2. Define the build result
-interface FunctionBuilderResult {
-  function: lambda.Function;
-}
-
-// 3. Implement the class with Lifecycle and a props field
-class FunctionBuilder implements Lifecycle<FunctionBuilderResult> {
-  props: Partial<FunctionBuilderProps> = {};
-
-  build(scope: IConstruct, id: string): FunctionBuilderResult {
-    return {
-      function: new lambda.Function(scope, id, this.props as FunctionBuilderProps),
-    };
-  }
-}
-
-// 4. Export a factory function
-function createFunctionBuilder(): IFunctionBuilder {
-  return Builder<FunctionBuilderProps, FunctionBuilder>(FunctionBuilder);
-}
-```
+To avoid re-declaring the entire `aws-cdk-lib` API surface, builders are proxies over their
+underlying construct's props. The footprint stays small, and each builder automatically inherits
+whatever the peer `aws-cdk-lib` version exposes.
 
 <a id="ref"></a>
 
@@ -270,6 +213,17 @@ This is how cross-component wiring stays declarative instead of post-build glue.
 Fair. So let's assume an agent writes all of it. That makes the case for composure
 _stronger_, not weaker.
 
+<figure class="post-figure">
+  <img
+    src="{{ '/assets/vibe-coding-like-a-boss.webp' | rel }}"
+    alt="Hand-drawn editorial cartoon: a developer reclines in a deck chair with a drink and a closed laptop beside them, while a friendly robot lays bricks labelled S3, Lambda and Queue into a slightly crooked wall — building their cloud infrastructure for them."
+    width="1584"
+    height="672"
+    decoding="async"
+  />
+  <figcaption>The agent lays the bricks. The architecture is still yours.</figcaption>
+</figure>
+
 LLM coding agents like Claude Code are improving at a remarkable pace, but some invariants
 in how they work are already clear. They behave like a capable but pressured engineer: they
 read _just enough_ to start, then follow whatever patterns they find in the slice of the
@@ -301,7 +255,7 @@ boundary it cannot cross. Leave an illegal state merely discouraged and
 [the agent will still write code that reaches it](https://aipatternbook.com/make-illegal-states-unrepresentable);
 make that state unrepresentable and the option is gone.
 
-> Ok, yeah. But how does ComposureCDK help?
+> Ok, yeah. But how does composureCDK help?
 
 **It's declarative, not imperative.** A `compose` system is _declared_: every component, and every
 dependency, laid out as data in one place. The agent gets the high-level architecture
@@ -320,25 +274,15 @@ connect one component to another you declare the dependency and reach it through
 implicit way to couple them, so coupling stays explicit: if two components are connected, the map
 says so.
 
-I'll be honest about the limits. This is a young project, and the long-term claim, that a composure
-codebase stays coherent as it grows, is still to prove. And conciseness on its own is no virtue:
-agents are good at producing code that _looks_ clean while
-[scoring worse on maintainability](https://arxiv.org/abs/2603.13723) (one study saw the
-Maintainability Index fall in 56% of agent-refactored commits), and terse code that hides its intent
-is worse for an agent, not better. So the win I'm claiming isn't fewer _characters_. It's less
-_boilerplate_: stripping out the procedural glue, the constructors and the manual wiring, so a
-component's intent is what's left on the page. Fewer states to represent, fewer relationships left
-implicit, fewer ways for the next session to drift. The mechanism is already measurable; the
-durability is the gamble.
-
 ## 5. Conclusion + what's next
 
-- One-line restatement of the shift: from a program that BUILDS a description to
-  a description you READ, diff, and hand off — and why that holds up under an
-  agent's hands.
-- Teasers (powder dry):
-  - Extensibility / custom builders / AWS CDK Mixins as external validation — issue #49.
-  - Secure-by-default, following AWS Well-Architected — "defaults should be correct."
+I'll be honest about the limits. This is a young project, and the larger claim, that a composure
+codebase stays coherent as it grows, is still to prove. But my experience so far is that the
+paradigm shift, moving from a program that _builds_ a description to a description you can _read_
+and _diff_, is proving to be a satisfying and effective way to describe AWS infrastructure.
+
+In the next article, we'll talk about one of the other pillars of composureCDK: infrastructure that
+is secure and operationally mature — out of the box.
 
 ## References
 
@@ -347,11 +291,8 @@ recommend the following links:
 
 - [composureCDK/architecture](https://github.com/laazyj/composureCDK/blob/main/docs/architecture.md)
 - [Stuart Sierra's Component framework for Clojure](https://github.com/stuartsierra/component)
-- "AI Coding Agents accelerate drift from the intended ... architecture": [Thoughtworks Technology Radar (Apr 2026)](https://www.thoughtworks.com/radar/techniques/architecture-drift-reduction-with-llms)
-- [When Agentic Coding Goes Off the Rails (Planet Argon)](https://blog.planetargon.com/blog/entries/when-agentic-coding-goes-off-the-rails) - first point is good, rest ¯\_(ツ)\_/¯
-- [Code for the AI Reader: Redesigning Architecture for the LLM Era (dasroot)](https://dasroot.net/posts/2026/05/code-for-ai-reader-redesigning-architecture-llm-era/) - the "indirection tax" and the coupling / signal-to-noise framing behind Problem 1
-- [Effective Context Engineering for AI Agents (Anthropic)](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents) - "attention budget" and "context rot"; grounds Problem 1's finite-context claim
-- [AI Coding Agents in 2026: Coherence Through Orchestration, Not Autonomy (Apr 2026)](https://mikemason.ca/writing/ai-coding-agents-jan-2026/) - mostly slop
-- [Asymmetric Goal Drift in Coding Agents Under Value Conflict (Apr 2026)](https://arxiv.org/pdf/2603.03456) - only lightly related to our problem (context size diluting core values)
-- [From Imperative to Declarative: Towards LLM-friendly OS Interfaces for Boosted Computer-Use Agents](https://arxiv.org/abs/2510.04607) - declarative user interfaces
+- [Thoughtworks Technology Radar (Apr 2026)](https://www.thoughtworks.com/radar/techniques/architecture-drift-reduction-with-llms)
+- [Code for the AI Reader: Redesigning Architecture for the LLM Era (dasroot)](https://dasroot.net/posts/2026/05/code-for-ai-reader-redesigning-architecture-llm-era/)
+- [Effective Context Engineering for AI Agents (Anthropic)](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents)
+- [From Imperative to Declarative: Towards LLM-friendly OS Interfaces for Boosted Computer-Use Agents](https://arxiv.org/abs/2510.04607)
 - [Do AI Agents Really Improve Code Readability? (Mar 2026)](https://arxiv.org/pdf/2603.13723)
