@@ -24,7 +24,9 @@ the behaviour. They're symptoms of one cause: a Construct builds itself in its
 constructor, so to _describe_ your infrastructure you have to run a program that
 _constructs_ it. There's no plain value you can read, diff, or hand to a colleague.
 
-This post is about the way out, and it doesn't ask you to leave CDK behind.
+Experienced teams avoid much of this with discipline and convention; my argument is that CDK's
+defaults make the good architecture the harder path, and composure makes it the path of least
+resistance. And it does so without leaving CDK behind:
 **[composureCDK](https://github.com/laazyj/composureCDK)** keeps the language, the
 L2 constructs, and the whole ecosystem. It changes only the part I wanted to change:
 how you describe the system before any of it runs. You get the conciseness of a
