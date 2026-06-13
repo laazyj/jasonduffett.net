@@ -264,36 +264,72 @@ This is how cross-component wiring stays declarative instead of post-build glue.
 
 ## 4. "But an agent writes my CDK anyway"
 
-> That's all very nice Jason but why do I care? I'm a 100x vibe coder and agents do
+> That's all very nice, Jason, but why do I care? I'm a 100x vibe-coder and agents do
 > all my coding!
 
-<!-- The turn. Counterintuitive hook: if a machine writes it, surely legibility
-     matters LESS? Exactly backwards. Three claims, each cited. -->
+Fair. So let's assume an agent writes all of it. That makes the case for composure
+_stronger_, not weaker.
 
-- Hook: the vibe-coding objection, stated fairly, then inverted.
+LLM coding agents like Claude Code are improving at a remarkable pace, but some invariants
+in how they work are already clear. They behave like a capable but pressured engineer: they
+read _just enough_ to start, then follow whatever patterns they find in the slice of the
+codebase they've loaded. It's fast, and in a small field of view it looks good: the local code
+is neat and readable. Zoom out, though, and it is often not architecturally sound. Personal
+experience and a growing body of research agree the costs land on the maintainability and
+coherence of a codebase, for humans and agents alike.
 
-- **Claim 1 — Locality / reduced indirection.** An agent reasons over a bounded
-  context window. Props threaded through five constructors + deps inferred from
-  scattered method calls force it to reassemble the picture from fragments —
-  the exact surface where it drifts. composureCDK keeps the whole description
-  local: one value, one place.
-  <!-- CITE: dasroot, "Code for the AI Reader: Redesigning Architecture for the
-       LLM Era" — https://dasroot.net/posts/2026/05/code-for-ai-reader-redesigning-architecture-llm-era/
-       VERIFY FIRST-HAND before citing (memory: verify-citations-first-hand). -->
+**Problem 1: Limited context.** An agent reasons over a bounded context window and reads only
+_just enough_ to start. Tight coupling, like inheritance, and opaque API surfaces (a CDK Construct
+is a fine example) force it to drag a swathe of the codebase into context just to understand one
+function, diluting the signal it needs with noise. And context is finite: every token spends the
+model's
+[attention budget](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents),
+and recall degrades as the window fills.
 
-- **Claim 2 — Patterns compound.** Agents build on what already exists. An
-  inheritance-tower codebase trains the agent toward more inheritance towers;
-  problems inherent in the model amplify with every generated change. A flat map
-  is a smaller surface to drift on.
+**Problem 2: Patterns compound.** Agents build on what already exists. An
+[inheritance tower](https://wiki.c2.com/?DeepClassHierarchies) begets another level; props get
+threaded through one more constructor; each session adds a little opacity. Thoughtworks names the
+mechanism plainly: drift
+["compounds as agents and humans replicate existing patterns, including degraded ones, creating a feedback loop where poor code begets poorer code"](https://www.thoughtworks.com/radar/techniques/architecture-drift-reduction-with-llms).
+Whatever your codebase rewards, you get more of.
 
-- **Claim 3 — The spec is enforced at the call site.** The deps map + typed
-  `ref` ARE the spec; a wrong wire is a compose-time error, not a silent
-  deploy-time surprise. Rhymes with the ts-fake "coding agents" note (the type
-  signature is the spec, enforced at the call site, agents can't drift).
-  <!-- Reuse the §3 compose cyclic-error callback (article 1's bug) as the concrete instance. -->
+**Problem 3: Conventions aren't constraints.** The usual defence against all this is a convention:
+a comment, a docstring, a line in `CONTRIBUTING.md` that says "register the dependency here." But a
+convention is text, and an agent treats it as text: a suggestion it can quietly ignore while still
+producing code that compiles and runs. Only something the type system or the build _enforces_ is a
+boundary it cannot cross. Leave an illegal state merely discouraged and
+[the agent will still write code that reaches it](https://aipatternbook.com/make-illegal-states-unrepresentable);
+make that state unrepresentable and the option is gone.
 
-- Land it: composure isn't nostalgia for human-readable code — it's what makes
-  the codebase agent-tractable. The declarative shape matters MORE in this world.
+> Ok, yeah. But how does ComposureCDK help?
+
+**It's declarative, not imperative.** A `compose` system is _declared_: every component, and every
+dependency, laid out as data in one place. The agent gets the high-level architecture
+without spelunking through constructors to reconstruct it. Research comparing a declarative
+vs imperative user interface with computer-use agents measured a [67% jump in success rate and a 43.5% drop in error-prone interaction steps](https://arxiv.org/abs/2510.04607). Describe the
+_what_ instead of a program that builds it, and there's far less for the agent to get wrong.
+
+**It's local and loosely coupled.** The whole description lives in one value, so there's less to
+assemble in-context and less to hallucinate when it can't. A component's coupling is spelled out in
+the dependency map, not hidden in a constructor, so its context carries more signal and less noise,
+and re-use beats duplication. One controlled study found agents on cleaner code used
+[7–8% fewer tokens and revisited files 34% less often](https://arxiv.org/abs/2605.20049).
+
+**It enforces, rather than suggests.** A convention can be ignored; the dependency map can't. To
+connect one component to another you declare the dependency and reach it through a `ref`. There's no
+implicit way to couple them, so coupling stays explicit: if two components are connected, the map
+says so.
+
+I'll be honest about the limits. This is a young project, and the long-term claim, that a composure
+codebase stays coherent as it grows, is still to prove. And conciseness on its own is no virtue:
+agents are good at producing code that _looks_ clean while
+[scoring worse on maintainability](https://arxiv.org/abs/2603.13723) (one study saw the
+Maintainability Index fall in 56% of agent-refactored commits), and terse code that hides its intent
+is worse for an agent, not better. So the win I'm claiming isn't fewer _characters_. It's less
+_boilerplate_: stripping out the procedural glue, the constructors and the manual wiring, so a
+component's intent is what's left on the page. Fewer states to represent, fewer relationships left
+implicit, fewer ways for the next session to drift. The mechanism is already measurable; the
+durability is the gamble.
 
 ## 5. Conclusion + what's next
 
@@ -311,13 +347,11 @@ recommend the following links:
 
 - [composureCDK/architecture](https://github.com/laazyj/composureCDK/blob/main/docs/architecture.md)
 - [Stuart Sierra's Component framework for Clojure](https://github.com/stuartsierra/component)
-- Others TBD...
-
-<!-- Curated, first-hand-verified per memory rule. WebFetch each + confirm
-     on-thesis before it goes in. Offer: run /deep-research to vet this list and
-     surface stronger academic anchors on LLM code comprehension / locality. -->
-
-- dasroot — "Code for the AI Reader: Redesigning Architecture for the LLM Era" (TODO verify)
-- AWS — "Announcing AWS CDK Mixins" (validation that the construct model doesn't compose) (TODO verify)
-- Stuart Sierra — Component (Clojure), the lineage for compose (carry-over from article 1)
-- TODO: academic anchors on LLM code comprehension / locality / indirection
+- "AI Coding Agents accelerate drift from the intended ... architecture": [Thoughtworks Technology Radar (Apr 2026)](https://www.thoughtworks.com/radar/techniques/architecture-drift-reduction-with-llms)
+- [When Agentic Coding Goes Off the Rails (Planet Argon)](https://blog.planetargon.com/blog/entries/when-agentic-coding-goes-off-the-rails) - first point is good, rest ¯\_(ツ)\_/¯
+- [Code for the AI Reader: Redesigning Architecture for the LLM Era (dasroot)](https://dasroot.net/posts/2026/05/code-for-ai-reader-redesigning-architecture-llm-era/) - the "indirection tax" and the coupling / signal-to-noise framing behind Problem 1
+- [Effective Context Engineering for AI Agents (Anthropic)](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents) - "attention budget" and "context rot"; grounds Problem 1's finite-context claim
+- [AI Coding Agents in 2026: Coherence Through Orchestration, Not Autonomy (Apr 2026)](https://mikemason.ca/writing/ai-coding-agents-jan-2026/) - mostly slop
+- [Asymmetric Goal Drift in Coding Agents Under Value Conflict (Apr 2026)](https://arxiv.org/pdf/2603.03456) - only lightly related to our problem (context size diluting core values)
+- [From Imperative to Declarative: Towards LLM-friendly OS Interfaces for Boosted Computer-Use Agents](https://arxiv.org/abs/2510.04607) - declarative user interfaces
+- [Do AI Agents Really Improve Code Readability? (Mar 2026)](https://arxiv.org/pdf/2603.13723)
