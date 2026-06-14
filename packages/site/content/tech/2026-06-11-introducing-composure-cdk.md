@@ -25,13 +25,12 @@ constructor, so to _describe_ your infrastructure you have to run a program that
 _constructs_ it. There's no plain value you can read, diff, or hand to a colleague.
 
 Experienced teams avoid much of this with discipline and convention; my argument is that CDK's
-defaults make the good architecture the harder path, and composure makes it the path of least
-resistance. And it does so without leaving CDK behind:
-**[composureCDK](https://github.com/laazyj/composureCDK)** keeps the language, the
-L2 constructs, and the whole ecosystem. It changes only the part I wanted to change:
-how you describe the system before any of it runs. You get the conciseness of a
-declarative structure and the clarity of explicit dependencies, in a project that
-still reads as CDK to anyone who already knows CDK.
+defaults make the good architecture the harder path, and **[composureCDK](https://github.com/laazyj/composureCDK)**
+makes it the path of least resistance. And it does so without leaving CDK behind:
+_composureCDK_ keeps the language, the L2 constructs, and the whole ecosystem.
+It changes only the part I wanted to change: how you describe the system before any of
+it runs. You get the conciseness of a declarative structure and the clarity of explicit
+dependencies, in a project that still reads as CDK to anyone who already knows CDK.
 
 Enough hand-waving. Here's a whole system as a single value. It stands up a small
 website: an S3 bucket behind a CloudFront distribution, an ACM certificate, Route 53
@@ -97,7 +96,7 @@ distribution (`cdn`), deployment (`deploy`), and health checker (`health`) right
 there in front of you. You also see each component's _dependencies_ laid out as a
 second map.
 
-Each of those components is a [_Lifecycle_](#lifecycle): composure's minimal
+Each of those components is a [_Lifecycle_](#lifecycle): _composureCDK_'s minimal
 contract for something that can be built. [`compose`](#compose) takes the map of
 named Lifecycles, together with the dependency map, and assembles them into a
 single Lifecycle of its own. That's why _Lifecycle_ is the spine of the composure
@@ -226,7 +225,7 @@ _stronger_, not weaker.
   <figcaption>The agent lays the bricks. The architecture is still yours.</figcaption>
 </figure>
 
-LLM coding agents like Claude Code are improving at a remarkable pace, but some invariants
+LLM coding agents like Claude Code are improving at a remarkable pace, but some limitations
 in how they work are already clear. They behave like a capable but pressured engineer: they
 read _just enough_ to start, then follow whatever patterns they find in the slice of the
 codebase they've loaded. It's fast, and in a small field of view it looks good: the local code
