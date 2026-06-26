@@ -145,6 +145,8 @@ vite.config.ts.timestamp-*
 # AWS CDK
 cdk.out/
 
-
 # Playwright MCP transient page snapshots
 .playwright-mcp/
+
+# MacOS Finder
+.DS_Store
