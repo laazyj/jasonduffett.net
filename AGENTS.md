@@ -17,9 +17,9 @@ The husky `pre-commit` hook (`.husky/pre-commit`) runs a gitleaks secret scan
 against staged changes. gitleaks is a standalone binary that is deliberately
 **not** an npm dependency, so it is usually absent from agent environments.
 
-When the binary is missing the hook prints `gitleaks not found in PATH` and
-exits non-zero. This is expected, not a failure to investigate. For changes
-that contain no secrets, bypass the hook:
+If gitleaks is on `PATH`, just commit; the scan passes for secret-free changes.
+When the binary is missing the hook prints `gitleaks not found in PATH` and exits
+non-zero, which is expected, not a failure to investigate; then bypass the hook:
 
 ```sh
 git commit --no-verify -m "..."
