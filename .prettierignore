@@ -8,3 +8,7 @@ package-lock.json
 packages/cdk/test/fixtures/
 # Snapshot artifacts — must match test serializer output byte-for-byte.
 packages/cdk/test/__snapshots__/
+# Agent instruction docs — authored and edited by agents, not subject to
+# Prettier's prose formatting.
+AGENTS.md
+CLAUDE.md
