@@ -12,6 +12,26 @@ export default {
   // Mirror ESLint's ignores — only lint source CSS, never build output or deps.
   ignoreFiles: ["**/dist/**", "**/node_modules/**", "**/cdk.out/**"],
 
+  // Teach Stylelint's value-syntax database the one prefixed function we hand-
+  // write. These sites ship CSS verbatim (no Autoprefixer), so the older-Safari
+  // `-webkit-image-set()` fallback is authored by hand — but Stylelint's grammar
+  // only knows the unprefixed `image-set()`, so `declaration-property-value-no-
+  // unknown` rejects it as an unknown value. Rather than silence the rule, we
+  // extend the grammar: define the prefixed function in terms of the existing
+  // `<image-set-option>` type and add it to `background-image`. The rule stays
+  // fully active and still validates the function's arguments (a malformed
+  // `-webkit-image-set(1px 2px)` is caught) — we've only widened what it knows.
+  languageOptions: {
+    syntax: {
+      types: {
+        "-webkit-image-set()": "-webkit-image-set( <image-set-option># )",
+      },
+      properties: {
+        "background-image": "| <-webkit-image-set()>",
+      },
+    },
+  },
+
   rules: {
     // These sites ship CSS verbatim through Eleventy's passthrough copy — there
     // is no Autoprefixer/PostCSS step — so vendor prefixes are written by hand
