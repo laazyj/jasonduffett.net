@@ -34,7 +34,7 @@ No ads, no third-party tracking. There's optional Google Analytics if you opt in
 
 <h2 id="license">copyright</h2>
 
-The profile sketch of me is an original by my young daughter ((c) 2025 Clara Dineen-Duffett). All textual content is by me ((c) Jason Duffett). I make no claims on lyrics or musical scores in the arrangements I post --- these remain the property of the original copyright holders. Everything else is licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Use it responsibly, attribute properly, don't be a dick.
+The profile sketch of me is an original by my young daughter ((c) 2025 [Clara Dineen-Duffett](https://clara.jasonduffett.net)). All textual content is by me ((c) Jason Duffett). I make no claims on lyrics or musical scores in the arrangements I post --- these remain the property of the original copyright holders. Everything else is licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Use it responsibly, attribute properly, don't be a dick.
 
 </div>
 <figure class="hero-sketch about-sketch">

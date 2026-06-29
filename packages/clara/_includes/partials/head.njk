@@ -1,0 +1,16 @@
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{% if title %}{{ title }} — {{ site.title }}{% else %}{{ site.title }} — {{ site.tagline }}{% endif %}</title>
+<meta name="description" content="{{ site.description }}" />
+<meta name="author" content="{{ site.author.name }}" />
+<meta name="theme-color" content="{{ themeColor or '#fef6ef' }}" />
+<meta name="build-sha" content="{{ build.sha }}" />
+<link rel="canonical" href="{{ site.url }}{{ page.url }}" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500&family=Dancing+Script:wght@600;700&family=Fredoka:wght@400;500;600;700&display=swap"
+/>
+<link rel="stylesheet" href="{{ '/assets/styles.css' | rel }}" />
+{% include "partials/analytics.njk" %}

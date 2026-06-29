@@ -23,6 +23,9 @@
     "site:build": "nx run @jasonduffett-net/site:build",
     "site:start": "nx run @jasonduffett-net/site:start",
     "site:clean": "nx run @jasonduffett-net/site:clean",
+    "clara:build": "nx run @jasonduffett-net/clara:build",
+    "clara:start": "nx run @jasonduffett-net/clara:start",
+    "clara:clean": "nx run @jasonduffett-net/clara:clean",
     "verify": "npm run format:check && npm run build && npm run lint && npm run test",
     "prepare": "husky"
   },

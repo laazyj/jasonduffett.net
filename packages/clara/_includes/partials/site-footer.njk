@@ -1,0 +1,7 @@
+<footer class="site{% if footerClass %} {{ footerClass }}{% endif %}">
+  <span>
+    &copy; {{ currentYear }} {{ site.author.name }}
+    · <a href="{{ '/privacy/' | rel }}">privacy</a>
+    {% if analytics.measurementId %}· <a href="#" data-consent-reopen>cookies</a>{% endif %}
+  </span>
+</footer>

@@ -1,0 +1,445 @@
+/* ------------------------------------------------------------------
+   clara.jasonduffett.net — a light, playful corner.
+   Deliberately distinct from the parent site's dark zine palette:
+   warm cream paper, ink plum, with grape + bubblegum accents.
+   The web fonts are loaded via <link> in partials/head.njk so the browser's
+   preload scanner can fetch them in parallel with this stylesheet.
+   ------------------------------------------------------------------ */
+
+:root {
+  --paper: #fef6ef;
+  --paper-2: #fbe9dc;
+  --ink: #3a2b45;
+  --muted: #8b7c8f;
+  --accent: #7c4dff;
+  --accent-2: #ff5da2;
+  --rule: #e7d6e6;
+  --measure: 34rem;
+  --ui: "Fredoka", system-ui, -apple-system, sans-serif;
+  --hand: "Caveat", "Fredoka", cursive;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 18px;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(120% 80% at 50% -10%, var(--paper-2), transparent 60%), var(--paper);
+  color: var(--ink);
+  font-family: var(--ui);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  flex-direction: column;
+}
+
+.wrap {
+  flex: 1 0 auto;
+  width: 100%;
+  max-width: var(--measure);
+  margin: 0 auto;
+  padding: 2rem 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* hero --------------------------------------------------------------- */
+
+.hero {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 3rem 0;
+}
+
+.hero-title {
+  font-size: clamp(3.5rem, 18vw, 7rem);
+  font-weight: 700;
+  line-height: 0.95;
+  margin: 0;
+  letter-spacing: -0.02em;
+  background: linear-gradient(110deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.hero-sub {
+  font-size: 1.15rem;
+  color: var(--ink);
+  margin: 1.25rem 0 0;
+  max-width: 24rem;
+}
+
+.hero-note {
+  font-family: var(--hand);
+  font-weight: 500;
+  font-size: 1.4rem;
+  color: var(--muted);
+  margin: 0.75rem 0 0;
+}
+
+.hero-note a {
+  color: var(--accent);
+}
+
+/* prose (privacy, etc.) ---------------------------------------------- */
+
+.prose {
+  padding: 1rem 0 2rem;
+}
+
+.prose h1 {
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin: 0 0 1rem;
+}
+
+.prose h2 {
+  font-weight: 600;
+  margin: 2rem 0 0.5rem;
+}
+
+.prose a {
+  color: var(--accent);
+  text-decoration-color: var(--accent-2);
+}
+
+.prose code {
+  background: var(--paper-2);
+  border-radius: 0.3rem;
+  padding: 0.05rem 0.35rem;
+  font-size: 0.9em;
+}
+
+/* footer ------------------------------------------------------------- */
+
+footer.site {
+  flex-shrink: 0;
+  border-top: 1px solid var(--rule);
+  padding: 1.25rem 0;
+  margin-top: 2rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+footer.site a {
+  color: var(--muted);
+  text-decoration-color: var(--accent-2);
+}
+
+footer.site a:hover {
+  color: var(--accent);
+}
+
+/* cookie consent banner ---------------------------------------------- */
+
+.consent {
+  position: fixed;
+  left: 50%;
+  bottom: 1rem;
+  transform: translateX(-50%);
+  width: min(32rem, calc(100% - 2rem));
+  background: #fff;
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  border-radius: 1rem;
+  box-shadow: 0 12px 30px rgba(58, 43, 69, 0.18);
+  padding: 1rem 1.1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  z-index: 50;
+}
+
+.consent[hidden] {
+  display: none;
+}
+
+.consent-msg {
+  flex: 1 1 16rem;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.consent-cta {
+  display: block;
+  color: var(--muted);
+}
+
+.consent-msg a {
+  color: var(--accent);
+}
+
+.consent-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.consent-btn {
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border-radius: 999px;
+  padding: 0.45rem 1.1rem;
+  border: 1px solid var(--rule);
+  cursor: pointer;
+}
+
+.consent-btn--ghost {
+  background: transparent;
+  color: var(--muted);
+}
+
+.consent-btn--ghost:hover {
+  color: var(--ink);
+}
+
+.consent-btn--primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.consent-btn--primary:hover {
+  background: var(--accent-2);
+  border-color: var(--accent-2);
+}
+
+/* ------------------------------------------------------------------
+   Story (homepage) — "Amy and the Rain Forest".
+   A full-bleed, hand-drawn forest scene the reader scrolls a story
+   sheet up over. Deliberately a different world from the cream pages
+   above, so every rule is scoped under .story — the privacy/404
+   pages and the cookie banner keep the light plum palette.
+   ------------------------------------------------------------------ */
+
+.story {
+  /* forest palette, local to the story so it can't leak into prose */
+  --ink: #26331f;
+  --moss: #5a8a44;
+  --deep: #23401d;
+  --bark: #6b4426;
+  --red: #c2402f;
+  --gold: #e7b53a;
+  --paper: #f7f1df;
+  --display: "Dancing Script", cursive;
+
+  display: block;
+  background: var(--deep);
+  color: var(--ink);
+  font-family: "Caveat", cursive;
+  font-size: 25px;
+  line-height: 1.7;
+  scroll-behavior: smooth;
+}
+
+/* Fixed full-bleed hand-drawn scene (paths are relative to this file).
+   AVIF with a WebP fallback via image-set(); the plain url() above it
+   covers browsers without image-set support. The full-resolution source
+   PNG lives in ../assets-src/hero.png, alongside the intermediate
+   composition assets, all kept out of the deployed assets. */
+.story .scene {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-color: #e3e9bf;
+  background-image: url("hero.webp");
+  background-image: image-set(
+    url("hero.avif") type("image/avif"),
+    url("hero.webp") type("image/webp")
+  );
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.story .scene::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #1f3a1900 40%, #1f3a19cc 100%);
+}
+
+/* intro viewport */
+.story .hero {
+  position: relative;
+  z-index: 1;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: center;
+  padding: 9vh 0 0;
+}
+
+.story .kicker {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: clamp(26px, 4vw, 38px);
+  color: var(--deep);
+  background: #ffffffbb;
+  padding: 2px 18px;
+  border-radius: 40px;
+  transform: rotate(-2deg);
+  box-shadow: 0 6px 18px -8px #00000055;
+}
+
+.story .hero h1 {
+  font-family: var(--display);
+  font-weight: 700;
+  color: #fff;
+  font-size: clamp(56px, 13vw, 140px);
+  line-height: 1.02;
+  margin: 0.08em 0;
+  text-shadow:
+    0 3px 0 #23401d,
+    4px 8px 18px #00000066;
+}
+
+.story .hero h1 em {
+  font-style: normal;
+  color: var(--gold);
+}
+
+.story .scroll-cue {
+  position: absolute;
+  bottom: 30px;
+  color: #fff;
+  font-size: 24px;
+  opacity: 0.9;
+}
+
+.story .scroll-cue span {
+  display: block;
+  font-size: 30px;
+  animation: bob 1.6s ease-in-out infinite;
+}
+
+@keyframes bob {
+  50% {
+    transform: translateY(8px);
+  }
+}
+
+/* story panel scrolls up over the scene */
+.story .sheet {
+  position: relative;
+  z-index: 1;
+  max-width: 760px;
+  margin: 0 auto;
+  background: var(--paper);
+  background-image: repeating-linear-gradient(transparent 0 39px, #d8cba422 39px 40px);
+  border-radius: 26px 26px 0 0;
+  border-top: 4px solid var(--gold);
+  padding: 64px clamp(24px, 6vw, 72px) 120px;
+  box-shadow: 0 -30px 80px -20px #00000088;
+}
+
+.story .sheet h2 {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 54px;
+  color: var(--deep);
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+.story .rule {
+  display: block;
+  width: 140px;
+  height: 14px;
+  margin: 0 auto 40px;
+  overflow: visible;
+}
+
+.story .sheet p {
+  margin: 0 0 28px;
+}
+
+.story .sheet p:first-of-type::first-letter {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 86px;
+  float: left;
+  line-height: 0.62;
+  padding: 14px 14px 0 0;
+  color: var(--red);
+}
+
+.story em.say {
+  color: var(--bark);
+}
+
+.story mark {
+  background: linear-gradient(180deg, transparent 58%, #7fbf5a66 58%);
+  padding: 0 3px;
+}
+
+.story .end {
+  text-align: center;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 40px;
+  color: var(--moss);
+  margin-top: 30px;
+}
+
+.story .end b {
+  color: var(--red);
+  font-weight: 400;
+}
+
+/* scroll-triggered reveal */
+.story .fade {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.9s ease,
+    transform 0.9s ease;
+}
+
+.story .fade.in {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .story .fade {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* footer sits above the fixed scene and reads on the dark forest */
+.site--story {
+  position: relative;
+  z-index: 1;
+  margin-top: 0;
+  border-top-color: #ffffff26;
+  color: #f7f1dfb3;
+}
+
+.site--story a {
+  color: #f7f1dfcc;
+  text-decoration-color: var(--gold);
+}
+
+.site--story a:hover {
+  color: #fff;
+}

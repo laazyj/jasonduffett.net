@@ -1,0 +1,31 @@
+{% set themeColor = "#23401d" %}{% set footerClass = "site--story" -%}
+<!doctype html>
+<html lang="{{ site.language }}">
+<head>
+  {% include "partials/head.njk" %}
+</head>
+<body class="story">
+  <div class="scene" aria-hidden="true"></div>
+
+  {{ content | safe }}
+
+  {% include "partials/site-footer.njk" %}
+
+  {% include "partials/consent-banner.njk" %}
+
+  <script>
+    // Reveal each .fade element the first time it scrolls into view, then stop
+    // observing it.
+    const io = new IntersectionObserver(
+      (entries) =>
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add("in");
+          io.unobserve(entry.target);
+        }),
+      { threshold: 0.15 },
+    );
+    document.querySelectorAll(".fade").forEach((el) => io.observe(el));
+  </script>
+</body>
+</html>
