@@ -12,6 +12,8 @@ const STACK_NAMES = [
   "JasonDuffettNetSiteStack",
   "JasonDuffettNetCdnAlarmsStack",
   "JasonDuffettNetCiOidcStack",
+  "JasonDuffettNetClaraCertStack",
+  "JasonDuffettNetClaraSiteStack",
 ] as const;
 
 const stackTemplate = (app: App, name: (typeof STACK_NAMES)[number]) =>
@@ -25,6 +27,7 @@ describe("app synthesis", () => {
     app = buildApp({
       account: "111111111111",
       siteContentPath: resolve(import.meta.dirname, "fixtures", "site"),
+      claraContentPath: resolve(import.meta.dirname, "fixtures", "clara"),
       alertEmail: "alerts@example.invalid",
     });
     templates = Object.fromEntries(
@@ -33,7 +36,7 @@ describe("app synthesis", () => {
   });
 
   // One snapshot file per stack — keeps PR diffs scoped to the stacks that
-  // actually changed instead of bundling all five into a single .snap file.
+  // actually changed instead of bundling them all into a single .snap file.
   // The template object is handed to the matcher directly so vitest's snapshot
   // serializer pipeline runs; CDK asset hashes are normalised to a stable
   // placeholder there (see vitest.setup.ts).
@@ -81,6 +84,29 @@ describe("app synthesis", () => {
           SubjectAlternativeNames: ["www.jasonduffett.net"],
         },
       );
+    });
+  });
+
+  describe("Clara subsite", () => {
+    it("issues a dedicated certificate for the subdomain", () => {
+      stackTemplate(app, "JasonDuffettNetClaraCertStack").hasResourceProperties(
+        "AWS::CertificateManager::Certificate",
+        {
+          DomainName: "clara.jasonduffett.net",
+        },
+      );
+    });
+
+    it("delegates the subdomain from the parent zone to the child zone", () => {
+      const dns = stackTemplate(app, "JasonDuffettNetDnsStack");
+      // A second hosted zone (the delegated child) plus an NS record in the
+      // parent zone wiring the delegation. Both must be present for the
+      // subdomain to resolve without a manual name-server handoff.
+      expect(Object.keys(dns.findResources("AWS::Route53::HostedZone")).length).toBe(2);
+      dns.hasResourceProperties("AWS::Route53::RecordSet", {
+        Type: "NS",
+        Name: "clara.jasonduffett.net.",
+      });
     });
   });
 

@@ -9,6 +9,14 @@
         "Ref": "HostedZone",
       },
     },
+    "ExportsOutputRefjasonduffettnetclarazoneE81AE0A01452BF96": {
+      "Export": {
+        "Name": "JasonDuffettNetDnsStack:ExportsOutputRefjasonduffettnetclarazoneE81AE0A01452BF96",
+      },
+      "Value": {
+        "Ref": "jasonduffettnetclarazoneE81AE0A0",
+      },
+    },
     "NameServers": {
       "Description": "Set these as the NS records at the domain registrar to delegate the zone.",
       "Value": {
@@ -123,6 +131,9 @@
             "/cdk/exports/JasonDuffettNetCertStack/JasonDuffettNetDnsStackeuwest2RefHostedZone0FB03840": {
               "Ref": "HostedZone",
             },
+            "/cdk/exports/JasonDuffettNetClaraCertStack/JasonDuffettNetDnsStackeuwest2RefjasonduffettnetclarazoneE81AE0A033C87109": {
+              "Ref": "jasonduffettnetclarazoneE81AE0A0",
+            },
           },
           "region": "us-east-1",
         },
@@ -133,6 +144,29 @@
     "HostedZone": {
       "Properties": {
         "Name": "jasonduffett.net.",
+      },
+      "Type": "AWS::Route53::HostedZone",
+    },
+    "jasonduffettnetclaraDelegationC963CBC9": {
+      "Properties": {
+        "HostedZoneId": {
+          "Ref": "HostedZone",
+        },
+        "Name": "clara.jasonduffett.net.",
+        "ResourceRecords": {
+          "Fn::GetAtt": [
+            "jasonduffettnetclarazoneE81AE0A0",
+            "NameServers",
+          ],
+        },
+        "TTL": "1800",
+        "Type": "NS",
+      },
+      "Type": "AWS::Route53::RecordSet",
+    },
+    "jasonduffettnetclarazoneE81AE0A0": {
+      "Properties": {
+        "Name": "clara.jasonduffett.net.",
       },
       "Type": "AWS::Route53::HostedZone",
     },
