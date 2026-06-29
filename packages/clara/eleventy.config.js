@@ -7,6 +7,9 @@ export default function (eleventyConfig) {
   });
 
   eleventyConfig.addPassthroughCopy({ assets: "assets" });
+  // Serve root-level static files (e.g. the IndexNow domain-ownership key) at
+  // the site root, mirroring the parent site.
+  eleventyConfig.addPassthroughCopy({ static: "/" });
 
   eleventyConfig.addGlobalData("currentYear", () => new Date().getFullYear());
   // Distinct GA4 property from the main site — its own measurement ID, injected
