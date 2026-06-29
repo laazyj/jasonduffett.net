@@ -22,13 +22,15 @@
   },
   "nx": {
     "implicitDependencies": [
-      "@jasonduffett-net/site"
+      "@jasonduffett-net/site",
+      "@jasonduffett-net/clara"
     ],
     "targets": {
       "synth": {
         "dependsOn": [
           "build",
-          "@jasonduffett-net/site:build"
+          "@jasonduffett-net/site:build",
+          "@jasonduffett-net/clara:build"
         ],
         "inputs": [
           "default",
@@ -51,37 +53,40 @@
       "deploy": {
         "dependsOn": [
           "build",
-          "@jasonduffett-net/site:build"
+          "@jasonduffett-net/site:build",
+          "@jasonduffett-net/clara:build"
         ],
         "cache": false
       },
       "deploy:stack": {
         "dependsOn": [
           "build",
-          "@jasonduffett-net/site:build"
+          "@jasonduffett-net/site:build",
+          "@jasonduffett-net/clara:build"
         ],
         "cache": false
       },
       "diff": {
         "dependsOn": [
           "build",
-          "@jasonduffett-net/site:build"
+          "@jasonduffett-net/site:build",
+          "@jasonduffett-net/clara:build"
         ],
         "cache": false
       }
     }
   },
   "dependencies": {
-    "@composurecdk/acm": "^0.8.4",
-    "@composurecdk/budgets": "^0.8.4",
-    "@composurecdk/cloudformation": "^0.8.4",
-    "@composurecdk/cloudfront": "^0.8.4",
-    "@composurecdk/cloudwatch": "^0.8.4",
-    "@composurecdk/core": "^0.8.4",
-    "@composurecdk/iam": "^0.8.4",
-    "@composurecdk/route53": "^0.8.4",
-    "@composurecdk/s3": "^0.8.4",
-    "@composurecdk/sns": "^0.8.4",
+    "@composurecdk/acm": "^0.8.6",
+    "@composurecdk/budgets": "^0.8.6",
+    "@composurecdk/cloudformation": "^0.8.6",
+    "@composurecdk/cloudfront": "^0.8.6",
+    "@composurecdk/cloudwatch": "^0.8.6",
+    "@composurecdk/core": "^0.8.6",
+    "@composurecdk/iam": "^0.8.6",
+    "@composurecdk/route53": "^0.8.6",
+    "@composurecdk/s3": "^0.8.6",
+    "@composurecdk/sns": "^0.8.6",
     "aws-cdk-lib": "^2.260.0",
     "constructs": "^10.6.0"
   },
