@@ -23,6 +23,7 @@ export default defineConfig(
           allowDefaultProject: [
             "eslint.config.mjs",
             "packages/site/eleventy.config.js",
+            "packages/clara/eleventy.config.js",
             "packages/site/scripts/*.mjs",
             "packages/cdk/scripts/*.mjs",
           ],
@@ -31,7 +32,12 @@ export default defineConfig(
     },
   },
   {
-    files: ["eslint.config.mjs", "packages/site/**/*.{js,mjs,cjs}", "packages/cdk/scripts/*.mjs"],
+    files: [
+      "eslint.config.mjs",
+      "packages/site/**/*.{js,mjs,cjs}",
+      "packages/clara/**/*.{js,mjs,cjs}",
+      "packages/cdk/scripts/*.mjs",
+    ],
     extends: [tseslint.configs.disableTypeChecked],
   },
   {
@@ -39,6 +45,7 @@ export default defineConfig(
       "packages/cdk/scripts/*.mjs",
       "packages/site/scripts/*.mjs",
       "packages/site/eleventy.config.js",
+      "packages/clara/eleventy.config.js",
     ],
     languageOptions: {
       globals: {
@@ -72,7 +79,7 @@ export default defineConfig(
   // which does NOT emit the frontmatter title as an <h1>; their single body
   // `# heading` is the real h1. Exclude the title from the h1 count for these.
   {
-    files: ["packages/site/content/*.md"],
+    files: ["packages/site/content/*.md", "packages/clara/content/*.md"],
     rules: {
       "markdown/no-multiple-h1": ["error", { frontmatterTitle: "" }],
     },

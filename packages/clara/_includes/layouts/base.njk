@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="{{ site.language }}">
+<head>
+  {% include "partials/head.njk" %}
+</head>
+<body>
+  <div class="wrap">
+    {{ content | safe }}
+
+    {% include "partials/site-footer.njk" %}
+  </div>
+  {% include "partials/consent-banner.njk" %}
+</body>
+</html>

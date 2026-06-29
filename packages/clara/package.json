@@ -1,0 +1,34 @@
+{
+  "name": "@jasonduffett-net/clara",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Clara's subsite (clara.jasonduffett.net) — Eleventy.",
+  "type": "module",
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build": "eleventy",
+    "start": "eleventy --serve --quiet"
+  },
+  "nx": {
+    "targets": {
+      "build": {
+        "inputs": [
+          "default",
+          "^default",
+          {
+            "env": "CLARA_GA_MEASUREMENT_ID"
+          },
+          {
+            "env": "GITHUB_SHA"
+          }
+        ]
+      },
+      "start": {
+        "cache": false
+      }
+    }
+  },
+  "devDependencies": {
+    "@11ty/eleventy": "^3.1.6"
+  }
+}
