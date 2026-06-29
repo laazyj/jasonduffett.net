@@ -22,10 +22,7 @@ SOFTWARE.
 
 ---
 
-This MIT licence covers the source code in this repository: the CDK
-infrastructure (`packages/cdk/`), the Eleventy configuration and templates
-(`packages/site/` excluding `packages/site/content/`), build tooling, and any
-ancillary scripts.
-
-The blog content under `packages/site/content/` is licensed separately — see
-`LICENSE-content.md`.
+This MIT licence covers all source code in this repository — every package's
+CDK infrastructure, Eleventy configuration and templates, build tooling, and
+ancillary scripts — except for the prose and image assets enumerated in
+`LICENSE-content.md` and `LICENSE-clara.md`, which are licensed separately.

@@ -3,6 +3,7 @@
 [![Built with ComposureCDK](https://img.shields.io/badge/built%20with-ComposureCDK-0f0d0c?labelColor=b85416)](https://github.com/laazyj/composureCDK)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Content: CC BY 4.0](https://img.shields.io/badge/content-CC%20BY%204.0-lightgrey.svg)](LICENSE-content.md)
+[![Clara content: All rights reserved](https://img.shields.io/badge/clara-all%20rights%20reserved-b85416.svg)](LICENSE-clara.md)
 
 [![jasonduffett.net homepage](screenshots/home.png)](https://jasonduffett.net)
 
@@ -287,6 +288,10 @@ Code (CDK app, Eleventy config, build scripts) is licensed under the
 [MIT licence](LICENSE).
 
 Blog content under `packages/site/content/` is licensed under
-[CC BY 4.0](LICENSE-content.md) — with carve-outs for the hand-drawn profile
-sketch and any embedded musical works. See [`LICENSE-content.md`](LICENSE-content.md)
-for the full breakdown.
+[CC BY 4.0](LICENSE-content.md) — with carve-outs for any embedded musical works.
+See [`LICENSE-content.md`](LICENSE-content.md) for the full breakdown.
+
+Everything on the [clara.jasonduffett.net](https://clara.jasonduffett.net) subsite —
+its prose and all images — plus the hand-drawn profile sketch used as the apex
+hero, is © 2025–2026 Clara Dineen-Duffett, all rights reserved. See
+[`LICENSE-clara.md`](LICENSE-clara.md).
