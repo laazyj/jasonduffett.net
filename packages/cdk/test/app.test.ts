@@ -14,6 +14,8 @@ const STACK_NAMES = [
   "JasonDuffettNetCiOidcStack",
   "JasonDuffettNetClaraCertStack",
   "JasonDuffettNetClaraSiteStack",
+  "JasonDuffettNetClaraCdnAlarmsStack",
+  "JasonDuffettNetClaraUsEast1AlertsStack",
 ] as const;
 
 const stackTemplate = (app: App, name: (typeof STACK_NAMES)[number]) =>
@@ -107,6 +109,51 @@ describe("app synthesis", () => {
         Type: "NS",
         Name: "clara.jasonduffett.net.",
       });
+    });
+
+    it("monitors the subdomain with a Route 53 health check", () => {
+      stackTemplate(app, "JasonDuffettNetClaraSiteStack").hasResourceProperties(
+        "AWS::Route53::HealthCheck",
+        {
+          HealthCheckConfig: Match.objectLike({
+            Type: "HTTPS",
+            FullyQualifiedDomainName: "clara.jasonduffett.net",
+          }),
+        },
+      );
+    });
+
+    it("raises the cert, CloudFront and health-check alarms at apex parity", () => {
+      // Cert expiry alarm lives with the cert (us-east-1).
+      stackTemplate(app, "JasonDuffettNetClaraCertStack").hasResourceProperties(
+        "AWS::CloudWatch::Alarm",
+        Match.objectLike({ MetricName: "DaysToExpiry", Namespace: "AWS/CertificateManager" }),
+      );
+
+      // CloudFront + health-check alarms live together in the us-east-1 alarm stack.
+      const alarms = stackTemplate(app, "JasonDuffettNetClaraCdnAlarmsStack");
+      alarms.hasResourceProperties(
+        "AWS::CloudWatch::Alarm",
+        Match.objectLike({ MetricName: "5xxErrorRate", Namespace: "AWS/CloudFront" }),
+      );
+      alarms.hasResourceProperties(
+        "AWS::CloudWatch::Alarm",
+        Match.objectLike({
+          MetricName: "HealthCheckStatus",
+          Namespace: "AWS/Route53",
+          // Wired to the subsite's own alert topic, not left actionless.
+          AlarmActions: Match.anyValue(),
+        }),
+      );
+    });
+
+    it("owns a dedicated alert topic with an email subscription", () => {
+      const alerts = stackTemplate(app, "JasonDuffettNetClaraUsEast1AlertsStack");
+      alerts.resourceCountIs("AWS::SNS::Topic", 1);
+      alerts.hasResourceProperties(
+        "AWS::SNS::Subscription",
+        Match.objectLike({ Protocol: "email", Endpoint: "alerts@example.invalid" }),
+      );
     });
   });
 

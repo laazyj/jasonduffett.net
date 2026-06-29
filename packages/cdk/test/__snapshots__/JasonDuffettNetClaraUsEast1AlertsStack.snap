@@ -1,0 +1,228 @@
+{
+  "Description": "Notification topic for clara.jasonduffett.net us-east-1 alarms (cert + CloudFront + health check).",
+  "Outputs": {
+    "ClaraUsEast1AlertsTopicArn": {
+      "Description": "Subscribe here to receive Clara subsite alarm notifications from us-east-1 (cert + CloudFront + health check).",
+      "Value": {
+        "Ref": "jasonduffettnetclarausEast1Alerts3C7D3D56",
+      },
+    },
+    "ExportsOutputRefjasonduffettnetclarausEast1Alerts3C7D3D5695F3393E": {
+      "Export": {
+        "Name": "JasonDuffettNetClaraUsEast1AlertsStack:ExportsOutputRefjasonduffettnetclarausEast1Alerts3C7D3D5695F3393E",
+      },
+      "Value": {
+        "Ref": "jasonduffettnetclarausEast1Alerts3C7D3D56",
+      },
+    },
+  },
+  "Parameters": {
+    "BootstrapVersion": {
+      "Default": "/cdk-bootstrap/hnb659fds/version",
+      "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
+  "Resources": {
+    "jasonduffettnetclarausEast1Alerts3C7D3D56": {
+      "Properties": {
+        "DisplayName": "clara.jasonduffett.net us-east-1 alerts",
+      },
+      "Type": "AWS::SNS::Topic",
+    },
+    "jasonduffettnetclarausEast1AlertsEmailSubscriptionB2EDA099": {
+      "Properties": {
+        "Endpoint": "alerts@example.invalid",
+        "Protocol": "email",
+        "TopicArn": {
+          "Ref": "jasonduffettnetclarausEast1Alerts3C7D3D56",
+        },
+      },
+      "Type": "AWS::SNS::Subscription",
+    },
+    "jasonduffettnetclarausEast1AlertsNumberOfNotificationsFailedAlarm279A354E": {
+      "Properties": {
+        "AlarmActions": [
+          {
+            "Ref": "jasonduffettnetclarausEast1Alerts3C7D3D56",
+          },
+        ],
+        "AlarmDescription": "SNS topic is failing to deliver notifications. Threshold: > 0 failures in 1 minute.",
+        "AlarmName": "jason-duffett-net-clara-us-east1-alerts-stack/jasonduffett-net/clara/us-east1-alerts/number-of-notifications-failed",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "DatapointsToAlarm": 1,
+        "Dimensions": [
+          {
+            "Name": "TopicName",
+            "Value": {
+              "Fn::GetAtt": [
+                "jasonduffettnetclarausEast1Alerts3C7D3D56",
+                "TopicName",
+              ],
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "NumberOfNotificationsFailed",
+        "Namespace": "AWS/SNS",
+        "Period": 60,
+        "Statistic": "Sum",
+        "Threshold": 0,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "jasonduffettnetclarausEast1AlertsNumberOfNotificationsFailedToRedriveToDlqAlarm3908B1E2": {
+      "Properties": {
+        "AlarmActions": [
+          {
+            "Ref": "jasonduffettnetclarausEast1Alerts3C7D3D56",
+          },
+        ],
+        "AlarmDescription": "SNS topic failed to redrive a message to a subscription dead-letter queue; messages may be lost. Threshold: > 0 failed redrives in 1 minute.",
+        "AlarmName": "jason-duffett-net-clara-us-east1-alerts-stack/jasonduffett-net/clara/us-east1-alerts/number-of-notifications-failed-to-redrive-to-dlq",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "DatapointsToAlarm": 1,
+        "Dimensions": [
+          {
+            "Name": "TopicName",
+            "Value": {
+              "Fn::GetAtt": [
+                "jasonduffettnetclarausEast1Alerts3C7D3D56",
+                "TopicName",
+              ],
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "NumberOfNotificationsFailedToRedriveToDlq",
+        "Namespace": "AWS/SNS",
+        "Period": 60,
+        "Statistic": "Sum",
+        "Threshold": 0,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "jasonduffettnetclarausEast1AlertsNumberOfNotificationsFilteredOutInvalidAttributesAlarm3BC716AD": {
+      "Properties": {
+        "AlarmActions": [
+          {
+            "Ref": "jasonduffettnetclarausEast1Alerts3C7D3D56",
+          },
+        ],
+        "AlarmDescription": "SNS topic messages are being filtered out due to invalid subscription filter policy attributes. Threshold: > 0 filtered messages in 1 minute.",
+        "AlarmName": "jason-duffett-net-clara-us-east1-alerts-stack/jasonduffett-net/clara/us-east1-alerts/number-of-notifications-filtered-out-invalid-attributes",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "DatapointsToAlarm": 1,
+        "Dimensions": [
+          {
+            "Name": "TopicName",
+            "Value": {
+              "Fn::GetAtt": [
+                "jasonduffettnetclarausEast1Alerts3C7D3D56",
+                "TopicName",
+              ],
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "NumberOfNotificationsFilteredOut-InvalidAttributes",
+        "Namespace": "AWS/SNS",
+        "Period": 60,
+        "Statistic": "Sum",
+        "Threshold": 0,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "jasonduffettnetclarausEast1AlertsNumberOfNotificationsRedrivenToDlqAlarm0D25984F": {
+      "Properties": {
+        "AlarmActions": [
+          {
+            "Ref": "jasonduffettnetclarausEast1Alerts3C7D3D56",
+          },
+        ],
+        "AlarmDescription": "SNS topic is redriving messages to a subscription dead-letter queue, indicating delivery failures. Threshold: > 0 redrives in 1 minute.",
+        "AlarmName": "jason-duffett-net-clara-us-east1-alerts-stack/jasonduffett-net/clara/us-east1-alerts/number-of-notifications-redriven-to-dlq",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "DatapointsToAlarm": 1,
+        "Dimensions": [
+          {
+            "Name": "TopicName",
+            "Value": {
+              "Fn::GetAtt": [
+                "jasonduffettnetclarausEast1Alerts3C7D3D56",
+                "TopicName",
+              ],
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "NumberOfNotificationsRedrivenToDlq",
+        "Namespace": "AWS/SNS",
+        "Period": 60,
+        "Statistic": "Sum",
+        "Threshold": 0,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "jasonduffettnetclarausEast1AlertsPolicyA4F48812": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sns:Publish",
+              "Condition": {
+                "Bool": {
+                  "aws:SecureTransport": "false",
+                },
+              },
+              "Effect": "Deny",
+              "Principal": "*",
+              "Resource": {
+                "Ref": "jasonduffettnetclarausEast1Alerts3C7D3D56",
+              },
+              "Sid": "AllowPublishThroughSSLOnly",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Topics": [
+          {
+            "Ref": "jasonduffettnetclarausEast1Alerts3C7D3D56",
+          },
+        ],
+      },
+      "Type": "AWS::SNS::TopicPolicy",
+    },
+  },
+  "Rules": {
+    "CheckBootstrapVersion": {
+      "Assertions": [
+        {
+          "Assert": {
+            "Fn::Not": [
+              {
+                "Fn::Contains": [
+                  [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                  ],
+                  {
+                    "Ref": "BootstrapVersion",
+                  },
+                ],
+              },
+            ],
+          },
+          "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI.",
+        },
+      ],
+    },
+  },
+}

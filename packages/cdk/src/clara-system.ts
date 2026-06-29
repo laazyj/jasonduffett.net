@@ -6,13 +6,20 @@ import {
   ViewerProtocolPolicy,
 } from "aws-cdk-lib/aws-cloudfront";
 import { S3BucketOrigin } from "aws-cdk-lib/aws-cloudfront-origins";
+import { SnsAction } from "aws-cdk-lib/aws-cloudwatch-actions";
+import { HealthCheckType } from "aws-cdk-lib/aws-route53";
 import { Source } from "aws-cdk-lib/aws-s3-deployment";
+import { EmailSubscription } from "aws-cdk-lib/aws-sns-subscriptions";
 
 import { compose, ref } from "@composurecdk/core";
 import { createCertificateBuilder, type CertificateBuilderResult } from "@composurecdk/acm";
+import { alarmActionsPolicy } from "@composurecdk/cloudwatch";
 import {
   cloudfrontAliasTarget,
+  createHealthCheckAlarmBuilder,
+  createHealthCheckBuilder,
   createHostedZoneBuilder,
+  type HealthCheckBuilderResult,
   type HostedZoneBuilderResult,
 } from "@composurecdk/route53";
 import { ALIAS, type RecordSpec, zoneRecords } from "@composurecdk/route53/zone";
@@ -22,9 +29,11 @@ import {
   type BucketBuilderResult,
 } from "@composurecdk/s3";
 import {
+  createCloudFrontAlarmBuilder,
   createDistributionBuilder,
   type DistributionBuilderResult,
 } from "@composurecdk/cloudfront";
+import { createTopicBuilder, type TopicBuilderResult } from "@composurecdk/sns";
 import { outputs } from "@composurecdk/cloudformation";
 
 /**
@@ -50,10 +59,24 @@ function handler(event) {
 export interface ClaraSubsiteStacks {
   /** Parent zone's stack. The delegated child zone + the NS delegation record both live here. */
   readonly dnsStack: Stack;
-  /** ACM certificate. Must be `us-east-1` for CloudFront-attached certificates. */
+  /** ACM certificate + its expiry alarm. Must be `us-east-1` for CloudFront-attached certificates. */
   readonly certStack: Stack;
-  /** S3 bucket, CloudFront distribution, bucket deployment, alias records. */
+  /**
+   * S3 bucket, CloudFront distribution, bucket deployment, alias records, the
+   * Route 53 health check, and the site-region (`siteAlerts`) topic.
+   */
   readonly siteStack: Stack;
+  /**
+   * CloudFront + health-check alarms. Must be `us-east-1` — AWS only emits
+   * CloudFront and Route 53 health-check metrics there.
+   */
+  readonly cdnAlarmsStack: Stack;
+  /**
+   * The `usEast1Alerts` topic. Stands alone (no downstream deps) so the cert
+   * and CloudFront alarm stacks can target it without forming a cycle. Must be
+   * `us-east-1` — alarms only target a same-region topic.
+   */
+  readonly usEast1AlertsStack: Stack;
 }
 
 export interface ClaraSubsiteOptions {
@@ -61,7 +84,17 @@ export interface ClaraSubsiteOptions {
   readonly subdomain: string;
   /** Directory whose contents are uploaded to the subsite bucket. */
   readonly siteContentPath: string;
+  /** Email address subscribed to both of the subsite's alert topics. */
+  readonly alertEmail: string;
 }
+
+const topicArnOutput = (refName: "usEast1Alerts" | "siteAlerts", role: string) => ({
+  value: ref<TopicBuilderResult>(refName)
+    .get("topic")
+    .map((t) => t.topicArn),
+  description: `Subscribe here to receive ${role}.`,
+  scope: refName,
+});
 
 /**
  * Self-contained subsite for `clara.jasonduffett.net`. Mirrors the apex
@@ -69,16 +102,22 @@ export interface ClaraSubsiteOptions {
  * walkthrough) but trimmed to a single static page: own hosted zone, own ACM
  * cert, own bucket + CloudFront distribution.
  *
+ * It also owns its monitoring at full parity with the apex — a Route 53 health
+ * check plus the recommended certificate and CloudFront alarms — all wired to
+ * its own SNS alert topics, so the subsite has the same availability coverage
+ * without reaching into the parent system's alerting. As on the apex, alarms
+ * can only target a same-region topic, so there is a `us-east-1` topic (for the
+ * cert, CloudFront and health-check alarms) and a site-region topic. The
+ * account-wide budget alarm is not duplicated here.
+ *
  * The build result exposes the child `zone`, which the composition root
  * (`app.ts`) uses to delegate the subdomain from the parent zone — keeping the
  * one parent↔child reference at the call site rather than inside this module,
- * so lifting the subsite into its own repo later is a call-site edit. Recommended
- * alarms are suppressed to keep the subsite lean — the account-wide budget alarm
- * already covers its cost.
+ * so lifting the subsite into its own repo later is a call-site edit.
  */
 export function createClaraSubsite(stacks: ClaraSubsiteStacks, options: ClaraSubsiteOptions) {
-  const { dnsStack, certStack, siteStack } = stacks;
-  const { subdomain, siteContentPath } = options;
+  const { dnsStack, certStack, siteStack, cdnAlarmsStack, usEast1AlertsStack } = stacks;
+  const { subdomain, siteContentPath, alertEmail } = options;
 
   const zone = ref<HostedZoneBuilderResult>("zone").get("hostedZone");
   const bucket = ref<BucketBuilderResult>("bucket").get("bucket");
@@ -98,10 +137,18 @@ export function createClaraSubsite(stacks: ClaraSubsiteStacks, options: ClaraSub
       // these depend on both the zone and the distribution.
       aliasRecords: zoneRecords(aliasSpecs).zone(zone),
 
-      cert: createCertificateBuilder()
-        .domainName(subdomain)
-        .validationZone(zone)
-        .recommendedAlarms(false),
+      // Cert (depends on zone for DNS validation). The recommended expiry alarm
+      // lands in certStack (us-east-1) and is wired to usEast1Alerts below.
+      cert: createCertificateBuilder().domainName(subdomain).validationZone(zone),
+
+      // CloudWatch alarms can only target a same-region SNS topic, so one topic
+      // per region — matching the apex split.
+      usEast1Alerts: createTopicBuilder()
+        .displayName(`${subdomain} us-east-1 alerts`)
+        .addSubscription("email", new EmailSubscription(alertEmail)),
+      siteAlerts: createTopicBuilder()
+        .displayName(`${subdomain} site alerts`)
+        .addSubscription("email", new EmailSubscription(alertEmail)),
 
       bucket: createBucketBuilder().lifecycleRules([
         { noncurrentVersionExpiration: Duration.days(30) },
@@ -138,7 +185,20 @@ export function createClaraSubsite(stacks: ClaraSubsiteStacks, options: ClaraSub
             ttl: Duration.seconds(60),
           },
         ])
+        // CloudFront metrics only emit in us-east-1; alarms must live there too.
         .recommendedAlarms(false),
+      cdnAlarms: createCloudFrontAlarmBuilder().distribution(ref<DistributionBuilderResult>("cdn")),
+
+      // Route 53 health check on the public subdomain. AWS/Route53 metrics emit
+      // only in us-east-1, so the recommended alarm is suppressed here and
+      // re-created in cdnAlarmsStack via the standalone alarm builder.
+      healthCheck: createHealthCheckBuilder()
+        .type(HealthCheckType.HTTPS)
+        .fqdn(subdomain)
+        .recommendedAlarms(false),
+      healthCheckAlarms: createHealthCheckAlarmBuilder().healthCheck(
+        ref<HealthCheckBuilderResult>("healthCheck"),
+      ),
 
       deploy: createBucketDeploymentBuilder()
         .sources([Source.asset(siteContentPath)])
@@ -151,8 +211,13 @@ export function createClaraSubsite(stacks: ClaraSubsiteStacks, options: ClaraSub
       zone: [],
       aliasRecords: ["zone", "cdn"],
       cert: ["zone"],
+      usEast1Alerts: [],
+      siteAlerts: [],
       bucket: [],
       cdn: ["bucket", "cert"],
+      cdnAlarms: ["cdn"],
+      healthCheck: [],
+      healthCheckAlarms: ["healthCheck"],
       deploy: ["bucket", "cdn"],
     },
   )
@@ -160,8 +225,13 @@ export function createClaraSubsite(stacks: ClaraSubsiteStacks, options: ClaraSub
       zone: dnsStack,
       aliasRecords: siteStack,
       cert: certStack,
+      usEast1Alerts: usEast1AlertsStack,
+      siteAlerts: siteStack,
       bucket: siteStack,
       cdn: siteStack,
+      cdnAlarms: cdnAlarmsStack,
+      healthCheck: siteStack,
+      healthCheckAlarms: cdnAlarmsStack,
       deploy: siteStack,
     })
     .afterBuild(
@@ -172,6 +242,23 @@ export function createClaraSubsite(stacks: ClaraSubsiteStacks, options: ClaraSub
             "CloudFront distribution domain for the Clara subsite (manual CNAME checks).",
           scope: "cdn",
         },
+        ClaraUsEast1AlertsTopicArn: topicArnOutput(
+          "usEast1Alerts",
+          "Clara subsite alarm notifications from us-east-1 (cert + CloudFront + health check)",
+        ),
+        ClaraSiteAlertsTopicArn: topicArnOutput(
+          "siteAlerts",
+          "Clara subsite site-region alarm notifications",
+        ),
       }),
-    );
+    )
+    .afterBuild((_scope, _id, results) => {
+      const usEast1Action = new SnsAction(results.usEast1Alerts.topic);
+      alarmActionsPolicy(usEast1AlertsStack, { defaults: { alarmActions: [usEast1Action] } });
+      alarmActionsPolicy(certStack, { defaults: { alarmActions: [usEast1Action] } });
+      alarmActionsPolicy(cdnAlarmsStack, { defaults: { alarmActions: [usEast1Action] } });
+      alarmActionsPolicy(siteStack, {
+        defaults: { alarmActions: [new SnsAction(results.siteAlerts.topic)] },
+      });
+    });
 }

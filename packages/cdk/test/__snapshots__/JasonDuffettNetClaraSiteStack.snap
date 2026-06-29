@@ -20,6 +20,12 @@
         ],
       },
     },
+    "ClaraSiteAlertsTopicArn": {
+      "Description": "Subscribe here to receive Clara subsite site-region alarm notifications.",
+      "Value": {
+        "Ref": "jasonduffettnetclarasiteAlerts1D916E4A",
+      },
+    },
   },
   "Parameters": {
     "BootstrapVersion": {
@@ -267,6 +273,83 @@
       },
       "Type": "AWS::IAM::Role",
     },
+    "CustomCrossRegionExportWriterCustomResourceProviderHandlerD8786E8A": {
+      "DependsOn": [
+        "CustomCrossRegionExportWriterCustomResourceProviderRoleC951B1E1",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": "cdk-hnb659fds-assets-111111111111-eu-west-2",
+          "S3Key": "<asset-hash>.zip",
+        },
+        "Handler": "__entrypoint__.handler",
+        "MemorySize": 128,
+        "Role": {
+          "Fn::GetAtt": [
+            "CustomCrossRegionExportWriterCustomResourceProviderRoleC951B1E1",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs24.x",
+        "Timeout": 900,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "CustomCrossRegionExportWriterCustomResourceProviderRoleC951B1E1": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+          },
+        ],
+        "Policies": [
+          {
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Action": [
+                    "ssm:DeleteParameters",
+                    "ssm:ListTagsForResource",
+                    "ssm:GetParameters",
+                    "ssm:PutParameter",
+                  ],
+                  "Effect": "Allow",
+                  "Resource": [
+                    {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:",
+                          {
+                            "Ref": "AWS::Partition",
+                          },
+                          ":ssm:us-east-1:111111111111:parameter/cdk/exports/*",
+                        ],
+                      ],
+                    },
+                  ],
+                },
+              ],
+              "Version": "2012-10-17",
+            },
+            "PolicyName": "Inline",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
     "ExportsReader8B249524": {
       "DeletionPolicy": "Delete",
       "Properties": {
@@ -285,6 +368,30 @@
         },
       },
       "Type": "Custom::CrossRegionExportReader",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "ExportsWriteruseast10F67B507DDE2E818": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "CustomCrossRegionExportWriterCustomResourceProviderHandlerD8786E8A",
+            "Arn",
+          ],
+        },
+        "WriterProps": {
+          "exports": {
+            "/cdk/exports/JasonDuffettNetClaraCdnAlarmsStack/JasonDuffettNetClaraSiteStackeuwest2Refjasonduffettnetclaracdn3132E4542C715D4A": {
+              "Ref": "jasonduffettnetclaracdn3132E454",
+            },
+            "/cdk/exports/JasonDuffettNetClaraCdnAlarmsStack/JasonDuffettNetClaraSiteStackeuwest2RefjasonduffettnetclarahealthCheck8BF439833276B4E2": {
+              "Ref": "jasonduffettnetclarahealthCheck8BF43983",
+            },
+          },
+          "region": "us-east-1",
+        },
+      },
+      "Type": "Custom::CrossRegionExportWriter",
       "UpdateReplacePolicy": "Delete",
     },
     "jasonduffettnetclaraaliasRecordsaApexE8E09C97": {
@@ -840,6 +947,195 @@
       },
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Retain",
+    },
+    "jasonduffettnetclarahealthCheck8BF43983": {
+      "Properties": {
+        "HealthCheckConfig": {
+          "EnableSNI": true,
+          "FailureThreshold": 3,
+          "FullyQualifiedDomainName": "clara.jasonduffett.net",
+          "Inverted": false,
+          "MeasureLatency": true,
+          "Port": 443,
+          "RequestInterval": 30,
+          "ResourcePath": "",
+          "Type": "HTTPS",
+        },
+      },
+      "Type": "AWS::Route53::HealthCheck",
+    },
+    "jasonduffettnetclarasiteAlerts1D916E4A": {
+      "Properties": {
+        "DisplayName": "clara.jasonduffett.net site alerts",
+      },
+      "Type": "AWS::SNS::Topic",
+    },
+    "jasonduffettnetclarasiteAlertsEmailSubscriptionDEA07F57": {
+      "Properties": {
+        "Endpoint": "alerts@example.invalid",
+        "Protocol": "email",
+        "TopicArn": {
+          "Ref": "jasonduffettnetclarasiteAlerts1D916E4A",
+        },
+      },
+      "Type": "AWS::SNS::Subscription",
+    },
+    "jasonduffettnetclarasiteAlertsNumberOfNotificationsFailedAlarm39D0A8CE": {
+      "Properties": {
+        "AlarmActions": [
+          {
+            "Ref": "jasonduffettnetclarasiteAlerts1D916E4A",
+          },
+        ],
+        "AlarmDescription": "SNS topic is failing to deliver notifications. Threshold: > 0 failures in 1 minute.",
+        "AlarmName": "jason-duffett-net-clara-site-stack/jasonduffett-net/clara/site-alerts/number-of-notifications-failed",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "DatapointsToAlarm": 1,
+        "Dimensions": [
+          {
+            "Name": "TopicName",
+            "Value": {
+              "Fn::GetAtt": [
+                "jasonduffettnetclarasiteAlerts1D916E4A",
+                "TopicName",
+              ],
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "NumberOfNotificationsFailed",
+        "Namespace": "AWS/SNS",
+        "Period": 60,
+        "Statistic": "Sum",
+        "Threshold": 0,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "jasonduffettnetclarasiteAlertsNumberOfNotificationsFailedToRedriveToDlqAlarm260CC68F": {
+      "Properties": {
+        "AlarmActions": [
+          {
+            "Ref": "jasonduffettnetclarasiteAlerts1D916E4A",
+          },
+        ],
+        "AlarmDescription": "SNS topic failed to redrive a message to a subscription dead-letter queue; messages may be lost. Threshold: > 0 failed redrives in 1 minute.",
+        "AlarmName": "jason-duffett-net-clara-site-stack/jasonduffett-net/clara/site-alerts/number-of-notifications-failed-to-redrive-to-dlq",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "DatapointsToAlarm": 1,
+        "Dimensions": [
+          {
+            "Name": "TopicName",
+            "Value": {
+              "Fn::GetAtt": [
+                "jasonduffettnetclarasiteAlerts1D916E4A",
+                "TopicName",
+              ],
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "NumberOfNotificationsFailedToRedriveToDlq",
+        "Namespace": "AWS/SNS",
+        "Period": 60,
+        "Statistic": "Sum",
+        "Threshold": 0,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "jasonduffettnetclarasiteAlertsNumberOfNotificationsFilteredOutInvalidAttributesAlarm2E478FC6": {
+      "Properties": {
+        "AlarmActions": [
+          {
+            "Ref": "jasonduffettnetclarasiteAlerts1D916E4A",
+          },
+        ],
+        "AlarmDescription": "SNS topic messages are being filtered out due to invalid subscription filter policy attributes. Threshold: > 0 filtered messages in 1 minute.",
+        "AlarmName": "jason-duffett-net-clara-site-stack/jasonduffett-net/clara/site-alerts/number-of-notifications-filtered-out-invalid-attributes",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "DatapointsToAlarm": 1,
+        "Dimensions": [
+          {
+            "Name": "TopicName",
+            "Value": {
+              "Fn::GetAtt": [
+                "jasonduffettnetclarasiteAlerts1D916E4A",
+                "TopicName",
+              ],
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "NumberOfNotificationsFilteredOut-InvalidAttributes",
+        "Namespace": "AWS/SNS",
+        "Period": 60,
+        "Statistic": "Sum",
+        "Threshold": 0,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "jasonduffettnetclarasiteAlertsNumberOfNotificationsRedrivenToDlqAlarm4F2F251C": {
+      "Properties": {
+        "AlarmActions": [
+          {
+            "Ref": "jasonduffettnetclarasiteAlerts1D916E4A",
+          },
+        ],
+        "AlarmDescription": "SNS topic is redriving messages to a subscription dead-letter queue, indicating delivery failures. Threshold: > 0 redrives in 1 minute.",
+        "AlarmName": "jason-duffett-net-clara-site-stack/jasonduffett-net/clara/site-alerts/number-of-notifications-redriven-to-dlq",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "DatapointsToAlarm": 1,
+        "Dimensions": [
+          {
+            "Name": "TopicName",
+            "Value": {
+              "Fn::GetAtt": [
+                "jasonduffettnetclarasiteAlerts1D916E4A",
+                "TopicName",
+              ],
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "NumberOfNotificationsRedrivenToDlq",
+        "Namespace": "AWS/SNS",
+        "Period": 60,
+        "Statistic": "Sum",
+        "Threshold": 0,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "jasonduffettnetclarasiteAlertsPolicy677C2CB2": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sns:Publish",
+              "Condition": {
+                "Bool": {
+                  "aws:SecureTransport": "false",
+                },
+              },
+              "Effect": "Deny",
+              "Principal": "*",
+              "Resource": {
+                "Ref": "jasonduffettnetclarasiteAlerts1D916E4A",
+              },
+              "Sid": "AllowPublishThroughSSLOnly",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Topics": [
+          {
+            "Ref": "jasonduffettnetclarasiteAlerts1D916E4A",
+          },
+        ],
+      },
+      "Type": "AWS::SNS::TopicPolicy",
     },
   },
   "Rules": {
