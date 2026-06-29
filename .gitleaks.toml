@@ -21,6 +21,7 @@ paths = [
   '''packages/cdk/test/__snapshots__/JasonDuffettNetDnsStack\.json''',
   '''packages/cdk/dist/zone-records\.js''',
   '''packages/site/static/[a-f0-9]{32}\.txt''',
+  '''packages/clara/static/[a-f0-9]{32}\.txt''',
 ]
 regexes = [
   # Google Search Console verification token (TXT record).
