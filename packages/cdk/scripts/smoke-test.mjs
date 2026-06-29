@@ -8,9 +8,13 @@
 //   4. Sample of sitemap URLs all return 200
 //   5. Unknown path returns 404 + custom 404 page body
 //   6. www -> apex 301 canonicalisation
+//   7. Clara subsite homepage 200 + title + matching <meta name="build-sha">
+//   8. Clara subsite unknown path returns 404 + custom 404 page body
 //
 // Env:
 //   BASE_URL          default https://jasonduffett.net
+//   CLARA_BASE_URL    default https://clara.jasonduffett.net when BASE_URL is
+//                     the canonical apex, else unset (skips the subsite probes)
 //   EXPECTED_SHA      git sha to assert against the meta tag (skip when unset)
 //   SMOKE_RETRIES     default 6
 //   SMOKE_RETRY_MS    default 5000
@@ -26,12 +30,22 @@ import { CANONICAL_HOST, fetchWithTimeout, pool, resolveBaseUrl } from "./_lib.m
 const SITE_TITLE = "Jason Duffett";
 const NOT_FOUND_MARKER = "Not found";
 
+const CLARA_TITLE = "Clara";
+const CLARA_NOT_FOUND_MARKER = "there's nothing here";
+
 const { baseUrl: BASE_URL, apex, wwwHost, isCanonicalApex: checkWww } = resolveBaseUrl();
 const EXPECTED_SHA = process.env.EXPECTED_SHA ?? "";
 const SMOKE_RETRIES = Number(process.env.SMOKE_RETRIES ?? "6");
 const SMOKE_RETRY_MS = Number(process.env.SMOKE_RETRY_MS ?? "5000");
 const SAMPLE_COUNT = Number(process.env.SMOKE_SAMPLE ?? "10");
 const CONCURRENCY = Number(process.env.SMOKE_CONCURRENCY ?? "5");
+
+// Probe the Clara subsite only when smoke-testing the canonical apex (a real
+// production run); a custom BASE_URL points at a preview with no matching
+// subsite. Override the host — or force it on — with CLARA_BASE_URL.
+const CLARA_BASE_URL = (
+  process.env.CLARA_BASE_URL ?? (checkWww ? "https://clara.jasonduffett.net" : "")
+).replace(/\/$/, "");
 
 /** @typedef {{ name: string; ok: boolean; detail?: string }} Result */
 
@@ -189,6 +203,42 @@ if (checkWww) {
   });
 } else {
   console.log(`  - www → apex skipped (BASE_URL host ${apex} != ${CANONICAL_HOST})`);
+}
+
+// -------- 7/8. Clara subsite (clara.jasonduffett.net) --------
+if (CLARA_BASE_URL) {
+  await step("clara homepage 200 + title" + (EXPECTED_SHA ? " + build-sha" : ""), async () => {
+    await withRetry("clara homepage", async () => {
+      const res = await request(`${CLARA_BASE_URL}/`, { redirect: "follow" });
+      expect(res.status === 200, `expected 200, got ${res.status}`);
+      const ct = res.headers.get("content-type") ?? "";
+      expect(ct.includes("text/html"), `expected text/html content-type, got "${ct}"`);
+      const body = await res.text();
+      expect(body.includes(CLARA_TITLE), `clara homepage missing site title "${CLARA_TITLE}"`);
+      if (EXPECTED_SHA) {
+        const tag = `<meta name="build-sha" content="${EXPECTED_SHA}"`;
+        expect(
+          body.includes(tag),
+          `clara homepage build-sha mismatch (looking for ${tag}); cache may still be propagating`,
+        );
+      }
+    });
+  });
+
+  await step("clara unknown path → 404 + custom 404 body", async () => {
+    const probePath = `/__smoke-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+    const res = await request(`${CLARA_BASE_URL}${probePath}`, { redirect: "follow" });
+    expect(res.status === 404, `expected 404, got ${res.status}`);
+    const body = await res.text();
+    expect(
+      body.includes(CLARA_NOT_FOUND_MARKER),
+      `clara 404 body missing marker "${CLARA_NOT_FOUND_MARKER}" — wrong page served?`,
+    );
+  });
+} else {
+  console.log(
+    `  - clara subsite skipped (set CLARA_BASE_URL to probe a non-canonical environment)`,
+  );
 }
 
 // -------- summary --------
