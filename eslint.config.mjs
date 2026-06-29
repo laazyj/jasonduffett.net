@@ -22,6 +22,7 @@ export default defineConfig(
         projectService: {
           allowDefaultProject: [
             "eslint.config.mjs",
+            "stylelint.config.mjs",
             "packages/site/eleventy.config.js",
             "packages/clara/eleventy.config.js",
             "packages/site/scripts/*.mjs",
@@ -34,6 +35,7 @@ export default defineConfig(
   {
     files: [
       "eslint.config.mjs",
+      "stylelint.config.mjs",
       "packages/site/**/*.{js,mjs,cjs}",
       "packages/clara/**/*.{js,mjs,cjs}",
       "packages/cdk/scripts/*.mjs",

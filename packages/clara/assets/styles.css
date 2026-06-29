@@ -156,7 +156,7 @@ footer.site a:hover {
   color: var(--ink);
   border: 1px solid var(--rule);
   border-radius: 1rem;
-  box-shadow: 0 12px 30px rgba(58, 43, 69, 0.18);
+  box-shadow: 0 12px 30px rgb(58 43 69 / 18%);
   padding: 1rem 1.1rem;
   display: flex;
   flex-wrap: wrap;
@@ -242,7 +242,7 @@ footer.site a:hover {
   display: block;
   background: var(--deep);
   color: var(--ink);
-  font-family: "Caveat", cursive;
+  font-family: Caveat, cursive;
   font-size: 25px;
   line-height: 1.7;
   scroll-behavior: smooth;
@@ -293,11 +293,11 @@ footer.site a:hover {
   font-weight: 600;
   font-size: clamp(26px, 4vw, 38px);
   color: var(--deep);
-  background: #ffffffbb;
+  background: #fffb;
   padding: 2px 18px;
   border-radius: 40px;
   transform: rotate(-2deg);
-  box-shadow: 0 6px 18px -8px #00000055;
+  box-shadow: 0 6px 18px -8px #0005;
 }
 
 .story .hero h1 {
@@ -309,7 +309,7 @@ footer.site a:hover {
   margin: 0.08em 0;
   text-shadow:
     0 3px 0 #23401d,
-    4px 8px 18px #00000066;
+    4px 8px 18px #0006;
 }
 
 .story .hero h1 em {
@@ -348,7 +348,7 @@ footer.site a:hover {
   border-radius: 26px 26px 0 0;
   border-top: 4px solid var(--gold);
   padding: 64px clamp(24px, 6vw, 72px) 120px;
-  box-shadow: 0 -30px 80px -20px #00000088;
+  box-shadow: 0 -30px 80px -20px #0008;
 }
 
 .story .sheet h2 {

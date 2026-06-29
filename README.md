@@ -51,7 +51,8 @@ Cross-cutting:
 - `npm run typecheck` — typecheck all packages.
 - `npm test` — run tests across all packages.
 - `npm run clean` — remove build outputs across all packages.
-- `npm run lint` / `npm run lint:fix` — ESLint across the repo.
+- `npm run lint` / `npm run lint:fix` — ESLint (JS/TS/Markdown) and Stylelint
+  (CSS) across the repo; `lint:js` / `lint:css` run each on its own.
 - `npm run format` / `npm run format:check` — Prettier across the repo.
 - `npm run verify` — format check, build, lint, and test (CI parity).
 
