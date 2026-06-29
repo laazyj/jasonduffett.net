@@ -249,16 +249,22 @@ footer.site a:hover {
 }
 
 /* Fixed full-bleed hand-drawn scene (paths are relative to this file).
-   AVIF with a WebP fallback via image-set(); the plain url() above it
-   covers browsers without image-set support. The full-resolution source
-   PNG lives in ../assets-src/hero.png, alongside the intermediate
-   composition assets, all kept out of the deployed assets. */
+   AVIF with a WebP fallback via image-set(). Layered for graceful
+   degradation: the plain url() covers engines without any image-set
+   support; -webkit-image-set() covers older Safari/WebKit, which only
+   ships image-set behind the prefix, ignores type(), and can't decode
+   AVIF — so it points straight at the WebP; the unprefixed image-set()
+   (Safari 17+, Chromium, Firefox) serves AVIF with a WebP fallback.
+   The full-resolution source PNG lives in ../assets-src/hero.png,
+   alongside the intermediate composition assets, all kept out of the
+   deployed assets. */
 .story .scene {
   position: fixed;
   inset: 0;
   z-index: 0;
   background-color: #e3e9bf;
   background-image: url("hero.webp");
+  background-image: -webkit-image-set(url("hero.webp") 1x);
   background-image: image-set(
     url("hero.avif") type("image/avif"),
     url("hero.webp") type("image/webp")
