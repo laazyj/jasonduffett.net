@@ -226,6 +226,35 @@
       },
       "Type": "AWS::CertificateManager::Certificate",
     },
+    "jasonduffettnetclaracertDaysToExpiryAlarm4321D870": {
+      "Properties": {
+        "AlarmActions": [
+          {
+            "Fn::ImportValue": "JasonDuffettNetClaraUsEast1AlertsStack:ExportsOutputRefjasonduffettnetclarausEast1Alerts3C7D3D5695F3393E",
+          },
+        ],
+        "AlarmDescription": "ACM certificate is approaching expiry. Threshold: <= 45 days remaining.",
+        "AlarmName": "jason-duffett-net-clara-cert-stack/jasonduffett-net/clara/cert/days-to-expiry",
+        "ComparisonOperator": "LessThanOrEqualToThreshold",
+        "DatapointsToAlarm": 1,
+        "Dimensions": [
+          {
+            "Name": "CertificateArn",
+            "Value": {
+              "Ref": "jasonduffettnetclaracert2FD9C8CA",
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "DaysToExpiry",
+        "Namespace": "AWS/CertificateManager",
+        "Period": 86400,
+        "Statistic": "Minimum",
+        "Threshold": 45,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
   },
   "Rules": {
     "CheckBootstrapVersion": {

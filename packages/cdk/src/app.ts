@@ -111,10 +111,23 @@ export function buildApp({
     description: "CloudWatch alarms for site metrics that AWS only emits in us-east-1.",
   });
 
+  // clara.jasonduffett.net equivalent — kept separate from the apex alarms so
+  // the subsite's monitoring stands alone.
+  const claraCdnAlarmsStack = new Stack(app, "JasonDuffettNetClaraCdnAlarmsStack", {
+    ...stackProps(CONFIG.edgeRegion),
+    description: `CloudWatch alarms for ${claraDomain} metrics that AWS only emits in us-east-1.`,
+  });
+
   // Dedicated topic stack for every us-east-1 has no downstream deps
   const usEast1AlertsStack = new Stack(app, "JasonDuffettNetUsEast1AlertsStack", {
     ...stackProps(CONFIG.edgeRegion),
     description: "Notification topic for us-east-1 alarms (cert + CloudFront).",
+  });
+
+  // clara.jasonduffett.net's own us-east-1 alert topic stack.
+  const claraUsEast1AlertsStack = new Stack(app, "JasonDuffettNetClaraUsEast1AlertsStack", {
+    ...stackProps(CONFIG.edgeRegion),
+    description: `Notification topic for ${claraDomain} us-east-1 alarms (cert + CloudFront + health check).`,
   });
 
   // -- Declare the system -- //
@@ -144,8 +157,14 @@ export function buildApp({
         CONFIG.domain,
       ),
       clara: createClaraSubsite(
-        { dnsStack, certStack: claraCertStack, siteStack: claraSiteStack },
-        { subdomain: claraDomain, siteContentPath: claraContentPath },
+        {
+          dnsStack,
+          certStack: claraCertStack,
+          siteStack: claraSiteStack,
+          cdnAlarmsStack: claraCdnAlarmsStack,
+          usEast1AlertsStack: claraUsEast1AlertsStack,
+        },
+        { subdomain: claraDomain, siteContentPath: claraContentPath, alertEmail },
       ),
       claraDelegation: createNsRecordBuilder()
         .zone(ref<{ zone: HostedZoneBuilderResult }>("jduffett").get("zone").get("hostedZone"))
