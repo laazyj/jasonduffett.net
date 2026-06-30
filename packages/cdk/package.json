@@ -82,7 +82,7 @@
     "@composurecdk/cloudformation": "^0.8.6",
     "@composurecdk/cloudfront": "^0.8.6",
     "@composurecdk/cloudwatch": "^0.8.6",
-    "@composurecdk/core": "^0.8.6",
+    "@composurecdk/core": "^0.8.7",
     "@composurecdk/iam": "^0.8.6",
     "@composurecdk/route53": "^0.8.6",
     "@composurecdk/s3": "^0.8.6",
