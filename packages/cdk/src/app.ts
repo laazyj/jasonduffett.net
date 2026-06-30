@@ -126,14 +126,19 @@ export function buildApp({
   // `compose()` builds each component with the construct id `${id}/${key}`, so
   // naively nesting the apex under the key `jduffett` would shift every apex
   // construct path (and thus every CloudFormation logical id) — replacing the
-  // live apex resources. `at()` pins the apex sub-lifecycle's build id to the
-  // bare domain, so its components keep building at `jasonduffett.net/<key>`
-  // regardless of the outer key. Clara is new, so its ids are free to change
-  // and it nests without pinning.
+  // live apex resources. `at()` pins the apex sub-lifecycle's build id so its
+  // components keep building at `jasonduffett.net/<key>` regardless of the
+  // outer key. Clara is new, so its ids are free to change and it nests
+  // without pinning.
+  //
+  // The pinned id is a hard-coded literal, not `CONFIG.domain`: it records the
+  // path these resources were originally deployed at and must stay fixed even
+  // if the apex is later re-pointed at a different domain — otherwise the pin
+  // would rotate with the config and replace every live resource.
   compose(
     {
       jduffett: at(
-        CONFIG.domain,
+        "jasonduffett.net",
         createSystem(
           { dnsStack, usEast1AlertsStack, certStack, siteStack, cdnAlarmsStack },
           { domain: CONFIG.domain, siteContentPath, alertEmail },
