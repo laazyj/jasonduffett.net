@@ -2,7 +2,7 @@ import { App, Duration, Stack } from "aws-cdk-lib";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { compose, ref, type Lifecycle } from "@composurecdk/core";
+import { at, compose, ref } from "@composurecdk/core";
 import { createNsRecordBuilder, type HostedZoneBuilderResult } from "@composurecdk/route53";
 
 import { addCiOidc } from "./stacks/ci-oidc-stack.js";
@@ -36,23 +36,6 @@ export interface BuildAppOptions {
   /** Email address subscribed to both alarm topics. */
   readonly alertEmail: string;
 }
-
-/**
- * Wraps a {@link Lifecycle} so it ignores the construct id `compose()` assigns
- * it (`${parentId}/${key}`) and always builds under `id` instead.
- *
- * `compose()` derives every nested component's construct path from its key, so
- * lifting an already-deployed system into a parent graph would otherwise rotate
- * all of its CloudFormation logical ids and replace the live resources. Pinning
- * the inner build id keeps those paths — and therefore the logical ids —
- * stable, which is what lets the apex system become a sub-lifecycle without a
- * destructive redeploy.
- *
- * TODO: Replace with solution from https://github.com/laazyj/composureCDK/issues/245
- */
-const withFixedId = <T extends object>(inner: Lifecycle<T>, id: string): Lifecycle<T> => ({
-  build: (scope, _id, context) => inner.build(scope, id, context),
-});
 
 /**
  * Constructs the App + stacks but does not call `synth()`. Tests import this
@@ -143,18 +126,23 @@ export function buildApp({
   // `compose()` builds each component with the construct id `${id}/${key}`, so
   // naively nesting the apex under the key `jduffett` would shift every apex
   // construct path (and thus every CloudFormation logical id) — replacing the
-  // live apex resources. `withFixedId` pins the apex sub-lifecycle's internal
-  // build id to the bare domain, so its components keep building at
-  // `jasonduffett.net/<key>` regardless of the outer key. Clara is new, so its
-  // ids are free to change and it nests without pinning.
+  // live apex resources. `at()` pins the apex sub-lifecycle's build id so its
+  // components keep building at `jasonduffett.net/<key>` regardless of the
+  // outer key. Clara is new, so its ids are free to change and it nests
+  // without pinning.
+  //
+  // The pinned id is a hard-coded literal, not `CONFIG.domain`: it records the
+  // path these resources were originally deployed at and must stay fixed even
+  // if the apex is later re-pointed at a different domain — otherwise the pin
+  // would rotate with the config and replace every live resource.
   compose(
     {
-      jduffett: withFixedId(
+      jduffett: at(
+        "jasonduffett.net",
         createSystem(
           { dnsStack, usEast1AlertsStack, certStack, siteStack, cdnAlarmsStack },
           { domain: CONFIG.domain, siteContentPath, alertEmail },
         ),
-        CONFIG.domain,
       ),
       clara: createClaraSubsite(
         {
