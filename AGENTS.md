@@ -42,3 +42,17 @@ might actually be a secret.
 ## Build system
 
 Use npx nx to run build/test scripts — this is an nx monorepo.
+
+**Install dependencies with npm 11** (`npm install -g npm@11`, or `npx npm@11
+install` for a one-off). The lockfile is generated under npm 11, and npm 10
+rewrites it on `npm install` — silently stripping the `libc` fields npm 11
+wrote and adding ~40 lines of unrelated churn to the diff. That churn is not a
+defect in the lockfile and does not want committing. Node 22 ships npm 10, so a
+default install on it needs the pin, and CI pins it for the same reason (the
+`Pin npm` step in [pr.yml](.github/workflows/pr.yml) and
+[deploy.yml](.github/workflows/deploy.yml)).
+
+`npm ci` is safe under either version — it never writes the lockfile — so
+running the suite against an npm 10 install will not dirty the tree. The pin
+matters the moment you run `npm install`, `npm update`, or anything else that
+resolves a new dependency.

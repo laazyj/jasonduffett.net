@@ -35,6 +35,14 @@ jobs:
           node-version: 22
           cache: npm
 
+      # Keep CI on the npm the lockfile was generated with. Node 22 ships npm
+      # 10, which disagrees with npm 11 on lockfile contents (it strips the
+      # `libc` fields npm 11 writes). `npm ci` never rewrites the lockfile, so
+      # this is belt-and-braces: it keeps a future divergence from surfacing
+      # here as a mystery install failure. See AGENTS.md § Build system.
+      - name: Pin npm
+        run: npm install -g npm@11
+
       - run: npm ci
 
       - run: npm run verify
