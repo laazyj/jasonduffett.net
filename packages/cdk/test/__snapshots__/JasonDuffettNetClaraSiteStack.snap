@@ -1,5 +1,5 @@
 {
-  "Description": "clara.jasonduffett.net — static subsite on CloudFront + S3.",
+  "Description": "clara.jasonduffett.net - static subsite on CloudFront + S3.",
   "Mappings": {
     "AWSCloudFrontPartitionHostedZoneIdMap": {
       "aws": {
@@ -876,7 +876,7 @@
   return req;
 }",
         "FunctionConfig": {
-          "Comment": "pretty-URL → /index.html rewrite",
+          "Comment": "pretty-URL -> /index.html rewrite",
           "Runtime": "cloudfront-js-2.0",
         },
         "Name": "JasonDuffettNetClaraSiteStack-rewrite",

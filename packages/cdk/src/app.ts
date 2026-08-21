@@ -2,6 +2,7 @@ import { App, Duration, Stack } from "aws-cdk-lib";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { templateTextPolicy } from "@composurecdk/cloudformation";
 import { at, compose, ref } from "@composurecdk/core";
 import { createNsRecordBuilder, type HostedZoneBuilderResult } from "@composurecdk/route53";
 
@@ -50,6 +51,24 @@ export function buildApp({
   const app = new App();
   const claraDomain = `clara.${CONFIG.domain}`;
 
+  // CloudFormation stores template text as ASCII and transliterates anything
+  // else to `?` at deploy time, so the deployed template never matches the
+  // synthesised one and `cdk diff` reports a change on every run forever. Fail
+  // synth instead.
+  //
+  // `functionCode` is added to the built-in registry because it is the only
+  // free-text field here fed by external data: `redirects.json` is stringified
+  // into the CloudFront Function body, and `redirects.ts` validates that file's
+  // shape but not its character set. Registering it names the offending
+  // character at synth rather than leaving it to the test sweep.
+  //
+  // The policy only reads top-level L1 properties, so the two nested
+  // `...Config.Comment` fields stay out of reach; the "is pure ASCII" sweep in
+  // `test/app.test.ts` covers those.
+  templateTextPolicy(app, {
+    fields: { "AWS::CloudFront::Function": ["functionCode"] },
+  });
+
   // -- Setup stacks across home region and us-east-1 where required by AWS -- //
 
   // Both ends of a cross-region ref must opt in, so every stack sets the flag.
@@ -79,13 +98,13 @@ export function buildApp({
   // jasonduffett.net CDN
   const siteStack = new Stack(app, "JasonDuffettNetSiteStack", {
     ...stackProps(CONFIG.primaryRegion),
-    description: `${CONFIG.domain} — static site on CloudFront + S3.`,
+    description: `${CONFIG.domain} - static site on CloudFront + S3.`,
   });
 
   // clara.jasonduffett.net CDN
   const claraSiteStack = new Stack(app, "JasonDuffettNetClaraSiteStack", {
     ...stackProps(CONFIG.primaryRegion),
-    description: `${claraDomain} — static subsite on CloudFront + S3.`,
+    description: `${claraDomain} - static subsite on CloudFront + S3.`,
   });
 
   // Separate CDN alarms from cert stacks to avoid cycles

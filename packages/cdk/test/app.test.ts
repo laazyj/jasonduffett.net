@@ -3,6 +3,8 @@ import { Match, Template } from "aws-cdk-lib/assertions";
 import { resolve } from "node:path";
 import { beforeAll, describe, expect, it } from "vitest";
 
+import { constraints } from "@composurecdk/cloudformation";
+
 import { buildApp } from "../src/app.js";
 
 const STACK_NAMES = [
@@ -44,6 +46,19 @@ describe("app synthesis", () => {
   // placeholder there (see vitest.setup.ts).
   it.each(STACK_NAMES)("%s matches snapshot", async (name) => {
     await expect(templates[name]).toMatchFileSnapshot(`./__snapshots__/${name}.snap`);
+  });
+
+  // Belt to `templateTextPolicy`'s braces (see `app.ts`): the Aspect only reads
+  // top-level L1 properties, so sweep the whole rendered template for
+  // characters CloudFormation would transliterate — that is what reaches the
+  // nested `DistributionConfig.Comment` / `FunctionConfig.Comment` fields. Same
+  // validator the Aspect applies, so the two cannot disagree about the allowed
+  // set.
+  it.each(STACK_NAMES)("%s is pure ASCII", (name) => {
+    const rendered = JSON.stringify(templates[name]);
+    expect(() => {
+      constraints.validate.templateText(rendered, `${name} template`);
+    }).not.toThrow();
   });
 
   // Functional assertions sit alongside the snapshots for two reasons. (1) A
