@@ -77,6 +77,26 @@ To fork:
 The budget alarm threshold (4 USD/month) is set in
 [`src/system.ts`](./src/system.ts); raise or lower it for your traffic shape.
 
+## Template text is ASCII-only
+
+CloudFormation stores template text as ASCII and silently transliterates
+anything else — an em dash, a curly quote — to `?` at deploy time. The
+deployed template then never matches the synthesised one, so `cdk diff`
+reports a change on every run forever, on a stack nobody touched.
+
+[`src/app.ts`](./src/app.ts) installs composureCDK's `templateTextPolicy` to
+fail synth on that instead, so a stray character gets fixed at the source. It
+registers the CloudFront Function's `functionCode` on top of the built-in
+field list, because that body carries whatever
+[`redirects.json`](./redirects.json) contains.
+
+The policy only reads top-level L1 properties, so the nested CloudFront
+`DistributionConfig.Comment` and `FunctionConfig.Comment` fields stay out of
+its reach. The whole-template sweep in `test/app.test.ts` pins those.
+
+Prose — this README, article content, source comments that don't ship in a
+template — is unaffected.
+
 ## Tests
 
 ```sh
@@ -88,7 +108,7 @@ Two test files:
 - [`test/app.test.ts`](./test/app.test.ts) — synthesises every stack, snapshots
   the CloudFormation, and adds functional assertions for invariants that
   must hold regardless of refactors (OIDC trust policy, certificate SANs,
-  budget limit, alarm coverage).
+  budget limit, alarm coverage, ASCII-only template text).
 - [`test/redirects.test.ts`](./test/redirects.test.ts) — validates the shape
   of [`redirects.json`](./redirects.json) at build time, so bad data fails
   the test rather than reaching the deployed CloudFront Function (which

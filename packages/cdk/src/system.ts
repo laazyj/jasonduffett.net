@@ -197,7 +197,7 @@ export function createSystem(stacks: SystemStacks, options: SystemOptions) {
               eventType: FunctionEventType.VIEWER_REQUEST,
               functionName: `${siteStack.stackName}-redirect`,
               code: FunctionCode.fromInline(buildRedirectFunctionCode(domain, redirects)),
-              comment: "www→apex 301 + old-URL redirect map",
+              comment: "www->apex 301 + old-URL redirect map",
             },
           ],
         })

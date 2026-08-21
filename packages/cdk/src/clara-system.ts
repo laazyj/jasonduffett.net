@@ -167,7 +167,7 @@ export function createClaraSubsite(stacks: ClaraSubsiteStacks, options: ClaraSub
               eventType: FunctionEventType.VIEWER_REQUEST,
               functionName: `${siteStack.stackName}-rewrite`,
               code: FunctionCode.fromInline(PRETTY_URL_FUNCTION_CODE),
-              comment: "pretty-URL → /index.html rewrite",
+              comment: "pretty-URL -> /index.html rewrite",
             },
           ],
         })
