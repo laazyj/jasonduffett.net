@@ -1,6 +1,8 @@
 ---
 title: "Lose the constructs. Keep your composure."
 date: 2026-06-11
+series: composure-cdk
+seriesPart: 2
 ogImage: "/assets/og-keep-your-composure.jpg"
 summary: "An AWS CDK app is a program that builds your infrastructure. composureCDK makes it a flat map of components you can read, diff, and hand off instead: a worked example, the shapes that make it, and why a declarative description matters more, not less, when an agent writes the code."
 tags:

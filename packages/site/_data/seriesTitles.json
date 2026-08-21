@@ -1,4 +1,5 @@
 {
+  "composure-cdk": "composureCDK: a declarative CDK",
   "value-object-equality": "Value-object equality, in .NET",
   "iscsi-vmware": "iSCSI on VMware ESXi",
   "beer-ambassadors-usa": "Beer Ambassadors USA"
