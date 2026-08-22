@@ -42,8 +42,8 @@
     "@eslint/js": "^10.0.1",
     "@eslint/markdown": "^8.0.3",
     "@nx/js": "23.1.1",
-    "@types/node": "^26.1.2",
-    "eslint": "^10.8.0",
+    "@types/node": "^26.2.0",
+    "eslint": "^10.8.1",
     "eslint-config-prettier": "^10.1.8",
     "husky": "^9.1.7",
     "nx": "23.1.1",
@@ -51,6 +51,6 @@
     "stylelint": "^17.14.1",
     "stylelint-config-standard": "^40.0.0",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.66.0"
+    "typescript-eslint": "^8.67.0"
   }
 }
