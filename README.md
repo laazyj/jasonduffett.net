@@ -25,6 +25,10 @@ Security issues: see [`SECURITY.md`](SECURITY.md).
 
 - `packages/cdk` — AWS CDK app managing the domain, DNS, and site hosting (CloudFront + S3).
 - `packages/site` — Eleventy-built blog and landing site.
+- `packages/clara` — Eleventy subsite at [clara.jasonduffett.net](https://clara.jasonduffett.net).
+- `packages/naomi` — Eleventy subsite at [naomi.jasonduffett.net](https://naomi.jasonduffett.net),
+  the Native AI Operational Maturity Index. See
+  [`packages/naomi/README.md`](packages/naomi/README.md).
 
 ## Site — develop locally
 
@@ -57,9 +61,11 @@ Cross-cutting:
 - `npm run format` / `npm run format:check` — Prettier across the repo.
 - `npm run verify` — format check, build, lint, and test (CI parity).
 
-Site (`site:*`):
+Site (`site:*`) and the subsites (`clara:*`, `naomi:*`):
 
 - `npm run site:start` / `npm run site:build` / `npm run site:clean`.
+- `npm run clara:start` / `npm run clara:build` / `npm run clara:clean`.
+- `npm run naomi:start` / `npm run naomi:build` / `npm run naomi:clean`.
 
 CDK (`cdk:*`) — each runs build + site build first via Nx's task graph:
 
@@ -109,6 +115,23 @@ The CDK app is a single top-level `compose()` routed across five CloudFormation 
   Kept separate from the cert stack to avoid a `cdn ↔ cert` cycle (alarms read the
   distribution id from the site stack, which depends on the cert stack).
 
+Each subsite adds four more stacks of its own, built from the shared
+[`createSubsite()`](packages/cdk/src/subsite.ts) graph and named
+`JasonDuffettNet<Name>{Cert,Site,CdnAlarms,UsEast1Alerts}Stack` — currently
+`…Clara…` and `…Naomi…`. A subsite owns its hosted zone, certificate, bucket,
+distribution, Route 53 health check and alert topics, so one subsite's deploy
+can't disturb the apex or another subsite. The only shared stack is
+`JasonDuffettNetDnsStack`, which holds each child zone plus the NS record
+delegating the subdomain to it.
+
+Everything about a subsite is derived from one key: `naomi` gives the domain
+`naomi.jasonduffett.net`, the content at `packages/naomi/dist`, the
+`JasonDuffettNetNaomi…` stack names and the `Naomi…` stack outputs. Adding one
+is a new `packages/<key>` Eleventy package plus its key in `SUBSITE_KEYS` —
+in [`app.ts`](packages/cdk/src/app.ts) for the infrastructure, and in
+[`scripts/_lib.mjs`](packages/cdk/scripts/_lib.mjs) so the post-deploy smoke
+test and IndexNow ping pick it up.
+
 Every stack opts in to `crossRegionReferences: true`, which lets CDK auto-generate the
 SSM-parameter + custom-resource plumbing for cross-region edges (`zone → cert`,
 `cdn → cdnAlarms`, `*alerts → alarmActions`). Deployment order is inferred automatically
@@ -139,6 +162,8 @@ back to sensible defaults except where noted):
 | `CHECK_TARGET`      | check-redirects                  | _unset_                    | When `1`, also follows the redirect target and asserts it returns `200`.                      |
 | `CONCURRENCY`       | check-redirects                  | `10`                       | Parallel HTTP fetches.                                                                        |
 | `INDEXNOW_KEY`      | indexnow                         | **required**               | Domain-ownership key matching `packages/site/static/<key>.txt`.                               |
+| `CLARA_BASE_URL`    | smoke                            | subsite origin on the apex | Clara subsite origin to probe; empty skips it.                                                |
+| `NAOMI_BASE_URL`    | smoke                            | subsite origin on the apex | NAOMI subsite origin to probe; empty skips it.                                                |
 
 `redirects.json` is committed and derived from each post's `originalUrl` frontmatter;
 there is no regeneration step. Run `check:redirects` after a deploy (or against
@@ -236,6 +261,8 @@ The stack outputs `GitHubActionsDeployRoleArn`. Configure GitHub:
   - `INDEXNOW_KEY` — the IndexNow key (matches `packages/site/static/<key>.txt`).
 - **Repository variables** (same page → Variables tab):
   - `GA_MEASUREMENT_ID` — `G-XXXXXXXXXX` (public; not a secret).
+  - `CLARA_GA_MEASUREMENT_ID` / `NAOMI_GA_MEASUREMENT_ID` — the subsites' own GA4
+    properties. Leave either unset to ship that subsite without analytics.
 - **Branch protection on `main`** (Settings → Branches): require a pull request before
   merging and require the `verify` status check to pass.
 

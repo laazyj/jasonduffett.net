@@ -23,14 +23,14 @@
   "nx": {
     "implicitDependencies": [
       "@jasonduffett-net/site",
-      "@jasonduffett-net/clara"
+      "@jasonduffett-net/clara",
+      "@jasonduffett-net/naomi"
     ],
     "targets": {
       "synth": {
         "dependsOn": [
           "build",
-          "@jasonduffett-net/site:build",
-          "@jasonduffett-net/clara:build"
+          "^build"
         ],
         "inputs": [
           "default",
@@ -53,24 +53,21 @@
       "deploy": {
         "dependsOn": [
           "build",
-          "@jasonduffett-net/site:build",
-          "@jasonduffett-net/clara:build"
+          "^build"
         ],
         "cache": false
       },
       "deploy:stack": {
         "dependsOn": [
           "build",
-          "@jasonduffett-net/site:build",
-          "@jasonduffett-net/clara:build"
+          "^build"
         ],
         "cache": false
       },
       "diff": {
         "dependsOn": [
           "build",
-          "@jasonduffett-net/site:build",
-          "@jasonduffett-net/clara:build"
+          "^build"
         ],
         "cache": false
       }

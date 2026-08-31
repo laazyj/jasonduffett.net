@@ -32,8 +32,9 @@ The composition lives in [`src/system.ts`](./src/system.ts) under the single
 
 | File                                                           | Role                                                                                                                                                              |
 | -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`src/app.ts`](./src/app.ts)                                   | Entry point. Builds the `App`, the five stacks, and the CI OIDC stack. Top-of-file `CONFIG` is the only place to edit when forking.                               |
+| [`src/app.ts`](./src/app.ts)                                   | Entry point. Builds the `App`, the apex stacks, each subsite's stacks, and the CI OIDC stack. Top-of-file `CONFIG` is the only place to edit when forking.        |
 | [`src/system.ts`](./src/system.ts)                             | The composition root — the `compose(...)` call that wires every builder.                                                                                          |
+| [`src/subsite.ts`](./src/subsite.ts)                           | One reusable `compose(...)` graph per subsite (`clara.`, `naomi.`): own zone, cert, bucket, distribution, health check and alert topics.                          |
 | [`src/stacks/ci-oidc-stack.ts`](./src/stacks/ci-oidc-stack.ts) | Standalone OIDC provider + GitHub Actions deploy role.                                                                                                            |
 | [`src/redirect-function.ts`](./src/redirect-function.ts)       | The CloudFront viewer-request function source itself: `www`→apex, old-URL 301s, directory→index rewrite. Only the string between the backticks ships to the edge. |
 | [`src/redirects.ts`](./src/redirects.ts)                       | Synth-time loader and validator for `redirects.json`. Not deployed to CloudFront.                                                                                 |

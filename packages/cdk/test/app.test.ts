@@ -5,7 +5,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 
 import { constraints } from "@composurecdk/cloudformation";
 
-import { buildApp } from "../src/app.js";
+import { buildApp, type SubsiteKey } from "../src/app.js";
 
 const STACK_NAMES = [
   "JasonDuffettNetDnsStack",
@@ -18,7 +18,19 @@ const STACK_NAMES = [
   "JasonDuffettNetClaraSiteStack",
   "JasonDuffettNetClaraCdnAlarmsStack",
   "JasonDuffettNetClaraUsEast1AlertsStack",
+  "JasonDuffettNetNaomiCertStack",
+  "JasonDuffettNetNaomiSiteStack",
+  "JasonDuffettNetNaomiCdnAlarmsStack",
+  "JasonDuffettNetNaomiUsEast1AlertsStack",
 ] as const;
+
+// Every subsite is built from the same `createSubsite()` graph, so the
+// structural guarantees below hold for all of them — new subsites join the
+// table rather than growing a parallel describe block.
+const SUBSITES = [
+  { key: "clara", name: "Clara", subdomain: "clara.jasonduffett.net" },
+  { key: "naomi", name: "Naomi", subdomain: "naomi.jasonduffett.net" },
+] as const satisfies readonly { key: SubsiteKey; name: string; subdomain: string }[];
 
 const stackTemplate = (app: App, name: (typeof STACK_NAMES)[number]) =>
   Template.fromStack(app.node.findChild(name) as Stack);
@@ -31,7 +43,9 @@ describe("app synthesis", () => {
     app = buildApp({
       account: "111111111111",
       siteContentPath: resolve(import.meta.dirname, "fixtures", "site"),
-      claraContentPath: resolve(import.meta.dirname, "fixtures", "clara"),
+      subsiteContentPaths: Object.fromEntries(
+        SUBSITES.map(({ key }) => [key, resolve(import.meta.dirname, "fixtures", key)]),
+      ) as Record<SubsiteKey, string>,
       alertEmail: "alerts@example.invalid",
     });
     templates = Object.fromEntries(
@@ -104,35 +118,45 @@ describe("app synthesis", () => {
     });
   });
 
-  describe("Clara subsite", () => {
+  describe("subsite delegation", () => {
+    it("gives every subsite a delegated child zone under the parent", () => {
+      const dns = stackTemplate(app, "JasonDuffettNetDnsStack");
+      // The parent zone plus one delegated child per subsite. Both the child
+      // zone and its NS record in the parent must be present for the subdomain
+      // to resolve without a manual name-server handoff.
+      expect(Object.keys(dns.findResources("AWS::Route53::HostedZone")).length).toBe(
+        1 + SUBSITES.length,
+      );
+    });
+  });
+
+  describe.each(SUBSITES)("$subdomain subsite", ({ name, subdomain }) => {
     it("issues a dedicated certificate for the subdomain", () => {
-      stackTemplate(app, "JasonDuffettNetClaraCertStack").hasResourceProperties(
+      stackTemplate(app, `JasonDuffettNet${name}CertStack`).hasResourceProperties(
         "AWS::CertificateManager::Certificate",
         {
-          DomainName: "clara.jasonduffett.net",
+          DomainName: subdomain,
         },
       );
     });
 
     it("delegates the subdomain from the parent zone to the child zone", () => {
-      const dns = stackTemplate(app, "JasonDuffettNetDnsStack");
-      // A second hosted zone (the delegated child) plus an NS record in the
-      // parent zone wiring the delegation. Both must be present for the
-      // subdomain to resolve without a manual name-server handoff.
-      expect(Object.keys(dns.findResources("AWS::Route53::HostedZone")).length).toBe(2);
-      dns.hasResourceProperties("AWS::Route53::RecordSet", {
-        Type: "NS",
-        Name: "clara.jasonduffett.net.",
-      });
+      stackTemplate(app, "JasonDuffettNetDnsStack").hasResourceProperties(
+        "AWS::Route53::RecordSet",
+        {
+          Type: "NS",
+          Name: `${subdomain}.`,
+        },
+      );
     });
 
     it("monitors the subdomain with a Route 53 health check", () => {
-      stackTemplate(app, "JasonDuffettNetClaraSiteStack").hasResourceProperties(
+      stackTemplate(app, `JasonDuffettNet${name}SiteStack`).hasResourceProperties(
         "AWS::Route53::HealthCheck",
         {
           HealthCheckConfig: Match.objectLike({
             Type: "HTTPS",
-            FullyQualifiedDomainName: "clara.jasonduffett.net",
+            FullyQualifiedDomainName: subdomain,
           }),
         },
       );
@@ -140,13 +164,13 @@ describe("app synthesis", () => {
 
     it("raises the cert, CloudFront and health-check alarms at apex parity", () => {
       // Cert expiry alarm lives with the cert (us-east-1).
-      stackTemplate(app, "JasonDuffettNetClaraCertStack").hasResourceProperties(
+      stackTemplate(app, `JasonDuffettNet${name}CertStack`).hasResourceProperties(
         "AWS::CloudWatch::Alarm",
         Match.objectLike({ MetricName: "DaysToExpiry", Namespace: "AWS/CertificateManager" }),
       );
 
       // CloudFront + health-check alarms live together in the us-east-1 alarm stack.
-      const alarms = stackTemplate(app, "JasonDuffettNetClaraCdnAlarmsStack");
+      const alarms = stackTemplate(app, `JasonDuffettNet${name}CdnAlarmsStack`);
       alarms.hasResourceProperties(
         "AWS::CloudWatch::Alarm",
         Match.objectLike({ MetricName: "5xxErrorRate", Namespace: "AWS/CloudFront" }),
@@ -163,11 +187,23 @@ describe("app synthesis", () => {
     });
 
     it("owns a dedicated alert topic with an email subscription", () => {
-      const alerts = stackTemplate(app, "JasonDuffettNetClaraUsEast1AlertsStack");
+      const alerts = stackTemplate(app, `JasonDuffettNet${name}UsEast1AlertsStack`);
       alerts.resourceCountIs("AWS::SNS::Topic", 1);
       alerts.hasResourceProperties(
         "AWS::SNS::Subscription",
         Match.objectLike({ Protocol: "email", Endpoint: "alerts@example.invalid" }),
+      );
+    });
+
+    it("serves its own content from a distribution aliased to the subdomain", () => {
+      stackTemplate(app, `JasonDuffettNet${name}SiteStack`).hasResourceProperties(
+        "AWS::CloudFront::Distribution",
+        {
+          DistributionConfig: Match.objectLike({
+            Aliases: [subdomain],
+            DefaultRootObject: "index.html",
+          }),
+        },
       );
     });
   });
