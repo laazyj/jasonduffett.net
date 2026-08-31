@@ -8,13 +8,15 @@
 //   4. Sample of sitemap URLs all return 200
 //   5. Unknown path returns 404 + custom 404 page body
 //   6. www -> apex 301 canonicalisation
-//   7. Clara subsite homepage 200 + title + matching <meta name="build-sha">
-//   8. Clara subsite unknown path returns 404 + custom 404 page body
+//   7. Each subsite's homepage 200 + title + matching <meta name="build-sha">
+//   8. Each subsite's unknown path returns 404 + custom 404 page body
 //
 // Env:
 //   BASE_URL          default https://jasonduffett.net
-//   CLARA_BASE_URL    default https://clara.jasonduffett.net when BASE_URL is
-//                     the canonical apex, else unset (skips the subsite probes)
+//   <KEY>_BASE_URL    one per subsite (CLARA_BASE_URL, NAOMI_BASE_URL); each
+//                     defaults to https://<key>.jasonduffett.net when BASE_URL
+//                     is the canonical apex, else unset (skipping that
+//                     subsite's probes)
 //   EXPECTED_SHA      git sha to assert against the meta tag (skip when unset)
 //   SMOKE_RETRIES     default 6
 //   SMOKE_RETRY_MS    default 5000
@@ -25,13 +27,27 @@
 
 import { setTimeout as sleep } from "node:timers/promises";
 
-import { CANONICAL_HOST, fetchWithTimeout, pool, resolveBaseUrl } from "./_lib.mjs";
+import {
+  CANONICAL_HOST,
+  fetchWithTimeout,
+  pool,
+  resolveBaseUrl,
+  subsiteOrigin,
+  SUBSITE_KEYS,
+} from "./_lib.mjs";
 
 const SITE_TITLE = "Jason Duffett";
 const NOT_FOUND_MARKER = "Not found";
 
-const CLARA_TITLE = "Clara";
-const CLARA_NOT_FOUND_MARKER = "there's nothing here";
+// Every subsite gets the same two probes. Only the page strings vary: `title`
+// and `notFoundMarker` must appear in that subsite's homepage and 404 body
+// respectively, and nowhere else, so a distribution wired to the wrong bucket
+// fails loudly rather than passing on a sibling site's page. The origin and the
+// env var that overrides it are derived from the key.
+const SUBSITE_MARKERS = {
+  clara: { title: "Clara", notFoundMarker: "there's nothing here" },
+  naomi: { title: "NAOMI", notFoundMarker: "NAOMI is a single page" },
+};
 
 const { baseUrl: BASE_URL, apex, wwwHost, isCanonicalApex: checkWww } = resolveBaseUrl();
 const EXPECTED_SHA = process.env.EXPECTED_SHA ?? "";
@@ -40,27 +56,42 @@ const SMOKE_RETRY_MS = Number(process.env.SMOKE_RETRY_MS ?? "5000");
 const SAMPLE_COUNT = Number(process.env.SMOKE_SAMPLE ?? "10");
 const CONCURRENCY = Number(process.env.SMOKE_CONCURRENCY ?? "5");
 
-// Probe the Clara subsite only when smoke-testing the canonical apex (a real
+// Probe the subsites only when smoke-testing the canonical apex (a real
 // production run); a custom BASE_URL points at a preview with no matching
-// subsite. Override the host — or force it on — with CLARA_BASE_URL.
-const CLARA_BASE_URL = (
-  process.env.CLARA_BASE_URL ?? (checkWww ? "https://clara.jasonduffett.net" : "")
-).replace(/\/$/, "");
+// subsites. Override a host — or force it on — with its own <KEY>_BASE_URL.
+const subsiteTargets = SUBSITE_KEYS.map((key) => {
+  const env = `${key.toUpperCase()}_BASE_URL`;
+  return {
+    key,
+    env,
+    ...SUBSITE_MARKERS[key],
+    baseUrl: (process.env[env] ?? (checkWww ? subsiteOrigin(key) : "")).replace(/\/$/, ""),
+  };
+});
 
 /** @typedef {{ name: string; ok: boolean; detail?: string }} Result */
 
 const results = [];
 
-/** @param {string} name @param {() => Promise<void>} fn */
-async function step(name, fn) {
+/**
+ * Run one probe, recording pass/fail and never throwing. `log` collects the
+ * output line: probes that run concurrently pass an array so their lines can be
+ * flushed together afterwards instead of interleaving.
+ *
+ * @param {string} name
+ * @param {() => Promise<void>} fn
+ * @param {string[]} [log]
+ */
+async function step(name, fn, log) {
+  const emit = (line) => (log ? log.push(line) : console.log(line));
   try {
     await fn();
     results.push({ name, ok: true });
-    console.log(`  ✓ ${name}`);
+    emit(`  ✓ ${name}`);
   } catch (err) {
     const detail = err instanceof Error ? err.message : String(err);
     results.push({ name, ok: false, detail });
-    console.log(`  ✗ ${name}\n      ${detail}`);
+    emit(`  ✗ ${name}\n      ${detail}`);
   }
 }
 
@@ -205,40 +236,64 @@ if (checkWww) {
   console.log(`  - www → apex skipped (BASE_URL host ${apex} != ${CANONICAL_HOST})`);
 }
 
-// -------- 7/8. Clara subsite (clara.jasonduffett.net) --------
-if (CLARA_BASE_URL) {
-  await step("clara homepage 200 + title" + (EXPECTED_SHA ? " + build-sha" : ""), async () => {
-    await withRetry("clara homepage", async () => {
-      const res = await request(`${CLARA_BASE_URL}/`, { redirect: "follow" });
-      expect(res.status === 200, `expected 200, got ${res.status}`);
-      const ct = res.headers.get("content-type") ?? "";
-      expect(ct.includes("text/html"), `expected text/html content-type, got "${ct}"`);
-      const body = await res.text();
-      expect(body.includes(CLARA_TITLE), `clara homepage missing site title "${CLARA_TITLE}"`);
-      if (EXPECTED_SHA) {
-        const tag = `<meta name="build-sha" content="${EXPECTED_SHA}"`;
-        expect(
-          body.includes(tag),
-          `clara homepage build-sha mismatch (looking for ${tag}); cache may still be propagating`,
-        );
-      }
-    });
-  });
+// -------- 7/8. Subsites (clara., naomi.) --------
+// One subsite's probes are independent of another's — different origins,
+// different distributions — and each homepage probe can spend up to
+// SMOKE_RETRIES × SMOKE_RETRY_MS waiting out an invalidation. Run the subsites
+// concurrently so that wait is paid once, not once per subsite, and buffer each
+// one's output so the lines stay grouped.
+const probeSubsite = async ({ key, baseUrl, title, notFoundMarker }) => {
+  /** @type {string[]} */
+  const log = [];
 
-  await step("clara unknown path → 404 + custom 404 body", async () => {
-    const probePath = `/__smoke-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
-    const res = await request(`${CLARA_BASE_URL}${probePath}`, { redirect: "follow" });
-    expect(res.status === 404, `expected 404, got ${res.status}`);
-    const body = await res.text();
-    expect(
-      body.includes(CLARA_NOT_FOUND_MARKER),
-      `clara 404 body missing marker "${CLARA_NOT_FOUND_MARKER}" — wrong page served?`,
-    );
-  });
-} else {
-  console.log(
-    `  - clara subsite skipped (set CLARA_BASE_URL to probe a non-canonical environment)`,
+  await step(
+    `${key} homepage 200 + title` + (EXPECTED_SHA ? " + build-sha" : ""),
+    async () => {
+      await withRetry(`${key} homepage`, async () => {
+        const res = await request(`${baseUrl}/`, { redirect: "follow" });
+        expect(res.status === 200, `expected 200, got ${res.status}`);
+        const ct = res.headers.get("content-type") ?? "";
+        expect(ct.includes("text/html"), `expected text/html content-type, got "${ct}"`);
+        const body = await res.text();
+        expect(body.includes(title), `${key} homepage missing site title "${title}"`);
+        if (EXPECTED_SHA) {
+          const tag = `<meta name="build-sha" content="${EXPECTED_SHA}"`;
+          expect(
+            body.includes(tag),
+            `${key} homepage build-sha mismatch (looking for ${tag}); cache may still be propagating`,
+          );
+        }
+      });
+    },
+    log,
   );
+
+  await step(
+    `${key} unknown path → 404 + custom 404 body`,
+    async () => {
+      const probePath = `/__smoke-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+      const res = await request(`${baseUrl}${probePath}`, { redirect: "follow" });
+      expect(res.status === 404, `expected 404, got ${res.status}`);
+      const body = await res.text();
+      expect(
+        body.includes(notFoundMarker),
+        `${key} 404 body missing marker "${notFoundMarker}" — wrong page served?`,
+      );
+    },
+    log,
+  );
+
+  return log;
+};
+
+for (const { key, env, baseUrl } of subsiteTargets) {
+  if (baseUrl) continue;
+  console.log(`  - ${key} subsite skipped (set ${env} to probe a non-canonical environment)`);
+}
+
+const subsiteLogs = await Promise.all(subsiteTargets.filter((t) => t.baseUrl).map(probeSubsite));
+for (const log of subsiteLogs) {
+  console.log(log.join("\n"));
 }
 
 // -------- summary --------

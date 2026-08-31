@@ -37,9 +37,9 @@ import { createTopicBuilder, type TopicBuilderResult } from "@composurecdk/sns";
 import { outputs } from "@composurecdk/cloudformation";
 
 /**
- * Viewer-request CloudFront Function for the Clara subsite. Unlike the apex
+ * Viewer-request CloudFront Function shared by every subsite. Unlike the apex
  * site there is no `www`→apex canonicalisation and no legacy redirect map —
- * the subdomain is brand new — so this only does the pretty-URL rewrite that
+ * each subdomain is brand new — so this only does the pretty-URL rewrite that
  * Eleventy's directory-style output needs (`/privacy/` → `/privacy/index.html`).
  * `defaultRootObject` already covers the bare `/`.
  */
@@ -56,7 +56,7 @@ function handler(event) {
 }
 `.trim();
 
-export interface ClaraSubsiteStacks {
+export interface SubsiteStacks {
   /** Parent zone's stack. The delegated child zone + the NS delegation record both live here. */
   readonly dnsStack: Stack;
   /** ACM certificate + its expiry alarm. Must be `us-east-1` for CloudFront-attached certificates. */
@@ -79,9 +79,15 @@ export interface ClaraSubsiteStacks {
   readonly usEast1AlertsStack: Stack;
 }
 
-export interface ClaraSubsiteOptions {
+export interface SubsiteOptions {
   /** Fully-qualified subdomain — e.g. `clara.jasonduffett.net`. */
   readonly subdomain: string;
+  /**
+   * PascalCase name for the subsite, used to prefix its CloudFormation outputs
+   * (`ClaraDistributionDomainName`) and to label them in prose. Must be unique
+   * across subsites — outputs share the app, not the stack.
+   */
+  readonly name: string;
   /** Directory whose contents are uploaded to the subsite bucket. */
   readonly siteContentPath: string;
   /** Email address subscribed to both of the subsite's alert topics. */
@@ -97,10 +103,11 @@ const topicArnOutput = (refName: "usEast1Alerts" | "siteAlerts", role: string) =
 });
 
 /**
- * Self-contained subsite for `clara.jasonduffett.net`. Mirrors the apex
- * `createSystem()` wiring (see `system.ts` for the full `compose()` pattern
- * walkthrough) but trimmed to a single static page: own hosted zone, own ACM
- * cert, own bucket + CloudFront distribution.
+ * Self-contained subsite for one subdomain of the apex — `clara.` and `naomi.`
+ * are both built from here. Mirrors the apex `createSystem()` wiring (see
+ * `system.ts` for the full `compose()` pattern walkthrough) but trimmed to a
+ * single static page: own hosted zone, own ACM cert, own bucket + CloudFront
+ * distribution.
  *
  * It also owns its monitoring at full parity with the apex — a Route 53 health
  * check plus the recommended certificate and CloudFront alarms — all wired to
@@ -110,14 +117,18 @@ const topicArnOutput = (refName: "usEast1Alerts" | "siteAlerts", role: string) =
  * cert, CloudFront and health-check alarms) and a site-region topic. The
  * account-wide budget alarm is not duplicated here.
  *
+ * Every subsite gets its own four stacks (cert, site, cdn alarms, alerts) so
+ * one subsite's deploy can never disturb another's; only the parent `dnsStack`
+ * is shared, because that is where the child zone and its NS delegation live.
+ *
  * The build result exposes the child `zone`, which the composition root
  * (`app.ts`) uses to delegate the subdomain from the parent zone — keeping the
  * one parent↔child reference at the call site rather than inside this module,
- * so lifting the subsite into its own repo later is a call-site edit.
+ * so lifting a subsite into its own repo later is a call-site edit.
  */
-export function createClaraSubsite(stacks: ClaraSubsiteStacks, options: ClaraSubsiteOptions) {
+export function createSubsite(stacks: SubsiteStacks, options: SubsiteOptions) {
   const { dnsStack, certStack, siteStack, cdnAlarmsStack, usEast1AlertsStack } = stacks;
-  const { subdomain, siteContentPath, alertEmail } = options;
+  const { subdomain, name, siteContentPath, alertEmail } = options;
 
   const zone = ref<HostedZoneBuilderResult>("zone").get("hostedZone");
   const bucket = ref<BucketBuilderResult>("bucket").get("bucket");
@@ -236,19 +247,18 @@ export function createClaraSubsite(stacks: ClaraSubsiteStacks, options: ClaraSub
     })
     .afterBuild(
       outputs({
-        ClaraDistributionDomainName: {
+        [`${name}DistributionDomainName`]: {
           value: distribution.map((d) => d.distributionDomainName),
-          description:
-            "CloudFront distribution domain for the Clara subsite (manual CNAME checks).",
+          description: `CloudFront distribution domain for the ${name} subsite (manual CNAME checks).`,
           scope: "cdn",
         },
-        ClaraUsEast1AlertsTopicArn: topicArnOutput(
+        [`${name}UsEast1AlertsTopicArn`]: topicArnOutput(
           "usEast1Alerts",
-          "Clara subsite alarm notifications from us-east-1 (cert + CloudFront + health check)",
+          `${name} subsite alarm notifications from us-east-1 (cert + CloudFront + health check)`,
         ),
-        ClaraSiteAlertsTopicArn: topicArnOutput(
+        [`${name}SiteAlertsTopicArn`]: topicArnOutput(
           "siteAlerts",
-          "Clara subsite site-region alarm notifications",
+          `${name} subsite site-region alarm notifications`,
         ),
       }),
     )

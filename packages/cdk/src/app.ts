@@ -7,7 +7,7 @@ import { at, compose, ref } from "@composurecdk/core";
 import { createNsRecordBuilder, type HostedZoneBuilderResult } from "@composurecdk/route53";
 
 import { addCiOidc } from "./stacks/ci-oidc-stack.js";
-import { createClaraSubsite } from "./clara-system.js";
+import { createSubsite, type SubsiteStacks } from "./subsite.js";
 import { createSystem } from "./system.js";
 
 /**
@@ -27,13 +27,27 @@ const CONFIG = {
   edgeRegion: "us-east-1",
 } as const;
 
+/**
+ * Every subsite is one key. `clara` means the domain `clara.jasonduffett.net`,
+ * the content at `packages/clara/dist`, the `JasonDuffettNetClara…` stacks, the
+ * `Clara…` CloudFormation outputs, and the `clara`/`claraDelegation` components
+ * below — all derived, so they cannot drift apart. Adding a subsite is this row
+ * plus its `packages/<key>` Eleventy package.
+ */
+const SUBSITE_KEYS = ["clara", "naomi"] as const;
+
+export type SubsiteKey = (typeof SUBSITE_KEYS)[number];
+
+/** `clara` -> `Clara`: the PascalCase form used in stack names and output keys. */
+const pascal = (key: string) => key[0].toUpperCase() + key.slice(1);
+
 export interface BuildAppOptions {
   /** AWS account ID. `undefined` produces an env-agnostic synth (cdk's default). */
   readonly account: string | undefined;
   /** Directory whose contents are uploaded to the site bucket. */
   readonly siteContentPath: string;
-  /** Directory whose contents are uploaded to the Clara subsite bucket. */
-  readonly claraContentPath: string;
+  /** Directory whose contents are uploaded to each subsite's bucket, by subsite key. */
+  readonly subsiteContentPaths: Record<SubsiteKey, string>;
   /** Email address subscribed to both alarm topics. */
   readonly alertEmail: string;
 }
@@ -45,11 +59,10 @@ export interface BuildAppOptions {
 export function buildApp({
   account,
   siteContentPath,
-  claraContentPath,
+  subsiteContentPaths,
   alertEmail,
 }: BuildAppOptions): App {
   const app = new App();
-  const claraDomain = `clara.${CONFIG.domain}`;
 
   // CloudFormation stores template text as ASCII and transliterates anything
   // else to `?` at deploy time, so the deployed template never matches the
@@ -89,22 +102,10 @@ export function buildApp({
     description: `ACM certificate for ${CONFIG.domain}.`,
   });
 
-  // clara.jasonduffett.net cloudFront certificate in us-east-1
-  const claraCertStack = new Stack(app, "JasonDuffettNetClaraCertStack", {
-    ...stackProps(CONFIG.edgeRegion),
-    description: `ACM certificate for ${claraDomain}.`,
-  });
-
   // jasonduffett.net CDN
   const siteStack = new Stack(app, "JasonDuffettNetSiteStack", {
     ...stackProps(CONFIG.primaryRegion),
     description: `${CONFIG.domain} - static site on CloudFront + S3.`,
-  });
-
-  // clara.jasonduffett.net CDN
-  const claraSiteStack = new Stack(app, "JasonDuffettNetClaraSiteStack", {
-    ...stackProps(CONFIG.primaryRegion),
-    description: `${claraDomain} - static subsite on CloudFront + S3.`,
   });
 
   // Separate CDN alarms from cert stacks to avoid cycles
@@ -113,47 +114,83 @@ export function buildApp({
     description: "CloudWatch alarms for site metrics that AWS only emits in us-east-1.",
   });
 
-  // clara.jasonduffett.net equivalent — kept separate from the apex alarms so
-  // the subsite's monitoring stands alone.
-  const claraCdnAlarmsStack = new Stack(app, "JasonDuffettNetClaraCdnAlarmsStack", {
-    ...stackProps(CONFIG.edgeRegion),
-    description: `CloudWatch alarms for ${claraDomain} metrics that AWS only emits in us-east-1.`,
-  });
-
   // Dedicated topic stack for every us-east-1 has no downstream deps
   const usEast1AlertsStack = new Stack(app, "JasonDuffettNetUsEast1AlertsStack", {
     ...stackProps(CONFIG.edgeRegion),
     description: "Notification topic for us-east-1 alarms (cert + CloudFront).",
   });
 
-  // clara.jasonduffett.net's own us-east-1 alert topic stack.
-  const claraUsEast1AlertsStack = new Stack(app, "JasonDuffettNetClaraUsEast1AlertsStack", {
-    ...stackProps(CONFIG.edgeRegion),
-    description: `Notification topic for ${claraDomain} us-east-1 alarms (cert + CloudFront + health check).`,
-  });
+  // Each subsite gets the same four stacks as the apex, named
+  // `JasonDuffettNet<Name>…` and kept separate from the apex's (and from every
+  // other subsite's) so one subsite's deploy can't disturb another's. Only the
+  // parent `dnsStack` is shared — that is where the child zone and its NS
+  // delegation record live.
+  const subsiteStacks = (key: SubsiteKey): SubsiteStacks => {
+    const name = pascal(key);
+    const subdomain = `${key}.${CONFIG.domain}`;
+    return {
+      dnsStack,
+      certStack: new Stack(app, `JasonDuffettNet${name}CertStack`, {
+        ...stackProps(CONFIG.edgeRegion),
+        description: `ACM certificate for ${subdomain}.`,
+      }),
+      siteStack: new Stack(app, `JasonDuffettNet${name}SiteStack`, {
+        ...stackProps(CONFIG.primaryRegion),
+        description: `${subdomain} - static subsite on CloudFront + S3.`,
+      }),
+      cdnAlarmsStack: new Stack(app, `JasonDuffettNet${name}CdnAlarmsStack`, {
+        ...stackProps(CONFIG.edgeRegion),
+        description: `CloudWatch alarms for ${subdomain} metrics that AWS only emits in us-east-1.`,
+      }),
+      usEast1AlertsStack: new Stack(app, `JasonDuffettNet${name}UsEast1AlertsStack`, {
+        ...stackProps(CONFIG.edgeRegion),
+        description: `Notification topic for ${subdomain} us-east-1 alarms (cert + CloudFront + health check).`,
+      }),
+    };
+  };
 
   // -- Declare the system -- //
 
-  // The apex site and Clara's subsite are each a self-contained `compose()`
-  // graph (own bucket, CloudFront distribution, ACM cert, hosted zone). Rather
-  // than build them independently and bridge them with a raw construct, they
-  // are nested as sub-lifecycles of one outer `compose()` — `ComposedSystem`
-  // is itself a `Lifecycle`, so composition is recursive. The outer graph adds
-  // a single `claraDelegation` component that delegates clara.{domain} from the
-  // parent zone to Clara's child zone.
+  // The apex site and each subsite are a self-contained `compose()` graph (own
+  // bucket, CloudFront distribution, ACM cert, hosted zone). Rather than build
+  // them independently and bridge them with a raw construct, they are nested as
+  // sub-lifecycles of one outer `compose()` — `ComposedSystem` is itself a
+  // `Lifecycle`, so composition is recursive. The outer graph adds one
+  // `<name>Delegation` component per subsite, delegating <name>.{domain} from
+  // the parent zone to that subsite's child zone.
   //
   // `compose()` builds each component with the construct id `${id}/${key}`, so
   // naively nesting the apex under the key `jduffett` would shift every apex
   // construct path (and thus every CloudFormation logical id) — replacing the
   // live apex resources. `at()` pins the apex sub-lifecycle's build id so its
   // components keep building at `jasonduffett.net/<key>` regardless of the
-  // outer key. Clara is new, so its ids are free to change and it nests
-  // without pinning.
+  // outer key. The subsites nest without pinning: they were deployed under
+  // these keys from the start.
   //
   // The pinned id is a hard-coded literal, not `CONFIG.domain`: it records the
   // path these resources were originally deployed at and must stay fixed even
   // if the apex is later re-pointed at a different domain — otherwise the pin
   // would rotate with the config and replace every live resource.
+  const delegation = (key: SubsiteKey) =>
+    createNsRecordBuilder()
+      .zone(ref<{ zone: HostedZoneBuilderResult }>("jduffett").get("zone").get("hostedZone"))
+      .recordName(`${key}.${CONFIG.domain}`)
+      .values(
+        ref<{ zone: HostedZoneBuilderResult }>(key)
+          .get("zone")
+          .get("hostedZone")
+          .map((z) => z.hostedZoneNameServers ?? []),
+      )
+      .ttl(Duration.minutes(30));
+
+  // `perSubsite("Delegation", f)` -> `{ claraDelegation: f("clara"), … }`. Each
+  // subsite contributes two components — itself, keyed `<key>`, and the NS
+  // record delegating its subdomain, keyed `<key>Delegation` — so the component
+  // map, the dependency map and the stack routing below are each spelled once
+  // and stay in step by construction.
+  const perSubsite = <T>(suffix: string, build: (key: SubsiteKey) => T): Record<string, T> =>
+    Object.fromEntries(SUBSITE_KEYS.map((key) => [`${key}${suffix}`, build(key)]));
+
   compose(
     {
       jduffett: at(
@@ -163,34 +200,23 @@ export function buildApp({
           { domain: CONFIG.domain, siteContentPath, alertEmail },
         ),
       ),
-      clara: createClaraSubsite(
-        {
-          dnsStack,
-          certStack: claraCertStack,
-          siteStack: claraSiteStack,
-          cdnAlarmsStack: claraCdnAlarmsStack,
-          usEast1AlertsStack: claraUsEast1AlertsStack,
-        },
-        { subdomain: claraDomain, siteContentPath: claraContentPath, alertEmail },
+      ...perSubsite("", (key) =>
+        createSubsite(subsiteStacks(key), {
+          subdomain: `${key}.${CONFIG.domain}`,
+          name: pascal(key),
+          siteContentPath: subsiteContentPaths[key],
+          alertEmail,
+        }),
       ),
-      claraDelegation: createNsRecordBuilder()
-        .zone(ref<{ zone: HostedZoneBuilderResult }>("jduffett").get("zone").get("hostedZone"))
-        .recordName(claraDomain)
-        .values(
-          ref<{ zone: HostedZoneBuilderResult }>("clara")
-            .get("zone")
-            .get("hostedZone")
-            .map((z) => z.hostedZoneNameServers ?? []),
-        )
-        .ttl(Duration.minutes(30)),
+      ...perSubsite("Delegation", delegation),
     },
     {
       jduffett: [],
-      clara: [],
-      claraDelegation: ["jduffett", "clara"],
+      ...perSubsite("", () => []),
+      ...perSubsite("Delegation", (key) => ["jduffett", key]),
     },
   )
-    .withStacks({ claraDelegation: dnsStack })
+    .withStacks(perSubsite("Delegation", () => dnsStack))
     .build(app, CONFIG.domain);
 
   // -- CI Support -- //
@@ -220,7 +246,9 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   buildApp({
     account: process.env.CDK_DEFAULT_ACCOUNT,
     siteContentPath: resolve(import.meta.dirname, "..", "..", "site", "dist"),
-    claraContentPath: resolve(import.meta.dirname, "..", "..", "clara", "dist"),
+    subsiteContentPaths: Object.fromEntries(
+      SUBSITE_KEYS.map((key) => [key, resolve(import.meta.dirname, "..", "..", key, "dist")]),
+    ) as Record<SubsiteKey, string>,
     alertEmail,
   }).synth();
 }

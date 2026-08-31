@@ -17,6 +17,14 @@
         "Ref": "jasonduffettnetclarazoneE81AE0A0",
       },
     },
+    "ExportsOutputRefjasonduffettnetnaomizoneC7AC0F3BC47AD2D4": {
+      "Export": {
+        "Name": "JasonDuffettNetDnsStack:ExportsOutputRefjasonduffettnetnaomizoneC7AC0F3BC47AD2D4",
+      },
+      "Value": {
+        "Ref": "jasonduffettnetnaomizoneC7AC0F3B",
+      },
+    },
     "NameServers": {
       "Description": "Set these as the NS records at the domain registrar to delegate the zone.",
       "Value": {
@@ -134,6 +142,9 @@
             "/cdk/exports/JasonDuffettNetClaraCertStack/JasonDuffettNetDnsStackeuwest2RefjasonduffettnetclarazoneE81AE0A033C87109": {
               "Ref": "jasonduffettnetclarazoneE81AE0A0",
             },
+            "/cdk/exports/JasonDuffettNetNaomiCertStack/JasonDuffettNetDnsStackeuwest2RefjasonduffettnetnaomizoneC7AC0F3BC250070B": {
+              "Ref": "jasonduffettnetnaomizoneC7AC0F3B",
+            },
           },
           "region": "us-east-1",
         },
@@ -167,6 +178,29 @@
     "jasonduffettnetclarazoneE81AE0A0": {
       "Properties": {
         "Name": "clara.jasonduffett.net.",
+      },
+      "Type": "AWS::Route53::HostedZone",
+    },
+    "jasonduffettnetnaomiDelegation0F7A37F9": {
+      "Properties": {
+        "HostedZoneId": {
+          "Ref": "HostedZone",
+        },
+        "Name": "naomi.jasonduffett.net.",
+        "ResourceRecords": {
+          "Fn::GetAtt": [
+            "jasonduffettnetnaomizoneC7AC0F3B",
+            "NameServers",
+          ],
+        },
+        "TTL": "1800",
+        "Type": "NS",
+      },
+      "Type": "AWS::Route53::RecordSet",
+    },
+    "jasonduffettnetnaomizoneC7AC0F3B": {
+      "Properties": {
+        "Name": "naomi.jasonduffett.net.",
       },
       "Type": "AWS::Route53::HostedZone",
     },

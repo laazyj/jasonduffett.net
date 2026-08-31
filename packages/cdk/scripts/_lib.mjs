@@ -2,6 +2,17 @@
 
 export const CANONICAL_HOST = "jasonduffett.net";
 
+/**
+ * Subsite keys, matching `SUBSITE_KEYS` in `src/app.ts` and the `packages/<key>`
+ * Eleventy packages. Both post-deploy scripts derive their per-subsite origins
+ * from this one list, so a new subsite can't be smoke-tested but left unpinged
+ * (or the reverse).
+ */
+export const SUBSITE_KEYS = ["clara", "naomi"];
+
+/** `https://clara.jasonduffett.net` — the production origin for one subsite. */
+export const subsiteOrigin = (key) => `https://${key}.${CANONICAL_HOST}`;
+
 const DEFAULT_TIMEOUT_MS = 10_000;
 
 /**

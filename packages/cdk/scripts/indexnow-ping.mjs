@@ -15,7 +15,7 @@
 // Failures are logged but the script always exits 0 — IndexNow is a latency
 // optimisation, not the source of truth (Bing falls back to sitemap polling).
 
-import { fetchWithTimeout, resolveBaseUrl } from "./_lib.mjs";
+import { fetchWithTimeout, resolveBaseUrl, subsiteOrigin, SUBSITE_KEYS } from "./_lib.mjs";
 
 const { baseUrl: BASE_URL, isCanonicalApex } = resolveBaseUrl();
 const KEY = process.env.INDEXNOW_KEY;
@@ -30,7 +30,7 @@ if (!KEY) {
 // Subsites live on their own IndexNow hosts (each serves the key file and its
 // own sitemap). Only ping them against the production apex — a staging
 // BASE_URL override has no corresponding subsite origin.
-const SUBSITE_BASE_URLS = isCanonicalApex ? ["https://clara.jasonduffett.net"] : [];
+const SUBSITE_BASE_URLS = isCanonicalApex ? SUBSITE_KEYS.map(subsiteOrigin) : [];
 const baseUrls = [BASE_URL, ...SUBSITE_BASE_URLS];
 
 async function pingHost(baseUrl) {
