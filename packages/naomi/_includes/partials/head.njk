@@ -1,0 +1,29 @@
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{% if title %}{{ title }} — {{ site.title }}{% else %}{{ site.title }} — {{ site.fullTitle }}{% endif %}</title>
+<meta name="description" content="{{ summary or site.description }}" />
+<meta name="author" content="{{ site.author.name }}" />
+<meta name="theme-color" content="#0d1113" />
+<meta name="build-sha" content="{{ build.sha }}" />
+<link rel="canonical" href="{{ site.url }}{{ page.url }}" />
+<meta name="copyright" content="{{ site.copyright }}" />
+<meta name="tdm-reservation" content="1" />
+{% if site.copyrightUrl %}
+<meta name="tdm-policy" content="{{ site.copyrightUrl }}" />
+<link rel="license" href="{{ site.copyrightUrl }}" />
+{% endif %}
+<meta property="og:title" content="{% if title %}{{ title }}{% else %}{{ site.fullTitle }}{% endif %}" />
+<meta property="og:description" content="{{ summary or site.description }}" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="{{ site.url }}{{ page.url }}" />
+<meta property="og:site_name" content="{{ site.title }}" />
+<meta property="og:locale" content="en_GB" />
+<meta name="twitter:card" content="summary" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap"
+/>
+<link rel="stylesheet" href="{{ '/assets/styles.css' | rel }}" />
+{% include "partials/analytics.njk" %}

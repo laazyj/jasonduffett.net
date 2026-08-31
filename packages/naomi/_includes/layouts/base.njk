@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="{{ site.language }}">
+<head>
+  {% include "partials/head.njk" %}
+</head>
+<body>
+  <div class="noise" aria-hidden="true"></div>
+  <div class="wrap">
+    <header class="site">
+      <a class="brand" href="{{ '/' | rel }}">
+        <span class="brand-name">naomi</span><span class="brand-dot">.</span>
+      </a>
+      <span class="brand-expand">{{ site.fullTitle }}</span>
+    </header>
+
+    {{ content | safe }}
+
+    {% include "partials/site-footer.njk" %}
+  </div>
+  {% include "partials/consent-banner.njk" %}
+</body>
+</html>

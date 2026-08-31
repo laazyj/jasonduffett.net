@@ -1,0 +1,43 @@
+{#
+  The index itself. Rendered from `_data/matrix.json` so the dimensions and
+  levels stay editable as data rather than markup.
+
+  It is a real <table> — dimensions are rows, maturity levels are columns — so
+  screen readers and keyboard users get proper row/column semantics. On narrow
+  viewports CSS reflows each row into a stacked card and the `data-level`
+  attribute supplies the column heading each cell has lost.
+#}
+<div class="matrix-scroll" tabindex="0" role="region" aria-label="Maturity index table">
+  <table class="matrix">
+    <caption class="visually-hidden">
+      {{ site.fullTitle }}: maturity levels {{ matrix.levels[0].number }}–{{ matrix.levels[matrix.levels.length - 1].number }} across {{ matrix.dimensions.length }} dimensions.
+    </caption>
+    <thead>
+      <tr>
+        <th scope="col" class="matrix-corner">Dimension</th>
+        {% for level in matrix.levels %}
+        <th scope="col" class="matrix-level" data-level="{{ level.number }}">
+          <span class="level-number">{{ level.number }}</span>
+          <span class="level-name">{{ level.name }}</span>
+          <span class="level-summary">{{ level.summary }}</span>
+        </th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for dimension in matrix.dimensions %}
+      <tr id="dimension-{{ dimension.name | slug }}">
+        <th scope="row" class="matrix-dimension">
+          <span class="dimension-name">{{ dimension.name }}</span>
+          <span class="dimension-summary">{{ dimension.summary }}</span>
+        </th>
+        {% for cell in dimension.cells %}
+        <td class="matrix-cell" data-level="{{ matrix.levels[loop.index0].number }} · {{ matrix.levels[loop.index0].name }}">
+          {{ cell }}
+        </td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

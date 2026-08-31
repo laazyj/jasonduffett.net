@@ -1,0 +1,592 @@
+/* ------------------------------------------------------------------
+   naomi.jasonduffett.net — the Native AI Operational Maturity Index.
+   Reads as a sibling of the parent site's dark zine (same ink, paper,
+   Fraunces/Inter/JetBrains pairing, same paper grain) but with its own
+   accent: a cool signal green that ramps warm across the maturity
+   levels, so the matrix carries the colour rather than the chrome.
+   The web fonts are loaded via <link> in partials/head.njk so the
+   browser's preload scanner can fetch them in parallel with this file.
+   ------------------------------------------------------------------ */
+
+:root {
+  --ink: #0d1113;
+  --ink-2: #151b1e;
+  --paper: #e8e6df;
+  --paper-dim: #b9b6ac;
+  --muted: #7e857f;
+  --rule: #262d30;
+  --accent: #4fd1c5;
+  --accent-warm: #ffb454;
+  --measure: 40rem;
+  --serif: "Fraunces", georgia, serif;
+  --ui: "Inter", system-ui, -apple-system, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, menlo, monospace;
+
+  /* Level ramp: cool at "ad hoc", warm at "native". Referenced by the
+     matrix column headings and the cell rails so a reader can place a
+     column at a glance without reading the number. */
+  --level-0: #5b6b70;
+  --level-1: #4a8f96;
+  --level-2: #4fd1c5;
+  --level-3: #b7d06a;
+  --level-4: #ffb454;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 18px;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--ui);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* paper grain — fixed-position noise overlay, matching the parent site */
+.noise {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.92  0 0 0 0 0.89  0 0 0 0 0.83  0 0 0 1 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  background-size: 200px 200px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* layout ------------------------------------------------------------- */
+
+.wrap {
+  position: relative;
+  z-index: 2;
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 4rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+@media (width >= 900px) {
+  .wrap {
+    padding: 3rem 2.5rem 5rem;
+  }
+}
+
+.page {
+  flex: 1 0 auto;
+}
+
+/* header ------------------------------------------------------------- */
+
+header.site {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  padding-bottom: 1.25rem;
+  margin-bottom: 3rem;
+  border-bottom: 1px dashed var(--rule);
+}
+
+header.site a.brand {
+  font-family: var(--ui);
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--paper);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: baseline;
+}
+
+header.site a.brand .brand-dot {
+  color: var(--accent);
+  font-size: 1.4em;
+  line-height: 0;
+}
+
+header.site .brand-expand {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+}
+
+/* hero --------------------------------------------------------------- */
+
+.hero {
+  max-width: var(--measure);
+  margin-bottom: 3.5rem;
+}
+
+.kicker {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 0.75rem;
+}
+
+.hero-title {
+  font-family: var(--serif);
+  font-weight: 800;
+  font-size: clamp(3.5rem, 14vw, 6rem);
+  line-height: 0.9;
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+
+.hero-sub {
+  font-size: 1.15rem;
+  margin: 1.5rem 0 0;
+}
+
+.hero-note {
+  font-size: 0.95rem;
+  color: var(--paper-dim);
+  border-left: 2px solid var(--accent);
+  padding-left: 1rem;
+  margin: 1.5rem 0 0;
+}
+
+/* draft notice ------------------------------------------------------- */
+
+.notice {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  line-height: 1.6;
+  color: var(--paper-dim);
+  background: var(--ink-2);
+  border: 1px dashed var(--rule);
+  border-radius: 0.4rem;
+  padding: 0.85rem 1rem;
+  margin: 0 0 3rem;
+}
+
+.notice strong {
+  color: var(--accent-warm);
+}
+
+/* sections ----------------------------------------------------------- */
+
+.section {
+  margin-bottom: 3.5rem;
+}
+
+.section-title {
+  font-family: var(--ui);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 1.25rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+/* matrix ------------------------------------------------------------- */
+
+.matrix-scroll {
+  overflow-x: auto;
+
+  /* Keyboard users can scroll the region; give them a visible focus ring. */
+  border-radius: 0.4rem;
+}
+
+.matrix-scroll:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.matrix {
+  width: 100%;
+  min-width: 56rem;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.85rem;
+}
+
+.matrix th,
+.matrix td {
+  vertical-align: top;
+  padding: 0.85rem 0.9rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.matrix-corner {
+  font-family: var(--ui);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  width: 15rem;
+}
+
+.matrix-level {
+  width: 11rem;
+  border-top: 3px solid var(--level-0);
+}
+
+.matrix-level[data-level="1"] {
+  border-top-color: var(--level-1);
+}
+
+.matrix-level[data-level="2"] {
+  border-top-color: var(--level-2);
+}
+
+.matrix-level[data-level="3"] {
+  border-top-color: var(--level-3);
+}
+
+.matrix-level[data-level="4"] {
+  border-top-color: var(--level-4);
+}
+
+.level-number {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+
+.level-name {
+  display: block;
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
+  color: var(--paper);
+  margin: 0.15rem 0 0.35rem;
+}
+
+.level-summary {
+  display: block;
+  font-weight: 400;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.matrix-dimension {
+  background: var(--ink-2);
+}
+
+.dimension-name {
+  display: block;
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--paper);
+}
+
+.dimension-summary {
+  display: block;
+  font-weight: 400;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--muted);
+  margin-top: 0.25rem;
+}
+
+.matrix-cell {
+  color: var(--paper-dim);
+}
+
+.matrix tbody tr:hover .matrix-cell {
+  color: var(--paper);
+}
+
+/* Below the table's minimum width, reflow each row into a stacked card and
+   restore the column heading from `data-level` — the header row is hidden,
+   so without this the cells would lose the only thing that places them. */
+@media (width < 60rem) {
+  .matrix-scroll {
+    overflow-x: visible;
+  }
+
+  .matrix,
+  .matrix tbody,
+  .matrix tr,
+  .matrix th,
+  .matrix td {
+    display: block;
+    width: auto;
+  }
+
+  .matrix {
+    min-width: 0;
+  }
+
+  .matrix thead {
+    display: none;
+  }
+
+  .matrix tr {
+    border: 1px solid var(--rule);
+    border-radius: 0.4rem;
+    margin-bottom: 1.25rem;
+    overflow: hidden;
+  }
+
+  .matrix th,
+  .matrix td {
+    border-bottom: none;
+  }
+
+  .matrix-dimension {
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .matrix-cell {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.6rem 0.9rem;
+  }
+
+  .matrix-cell::before {
+    content: attr(data-level);
+    flex: 0 0 8.5rem;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    line-height: 1.6;
+    color: var(--muted);
+  }
+}
+
+/* download ----------------------------------------------------------- */
+
+.download {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 1.1rem 1.25rem;
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--accent);
+  border-radius: 0.4rem;
+  background: var(--ink-2);
+  color: var(--paper);
+  text-decoration: none;
+  max-width: 26rem;
+  margin: 0;
+}
+
+a.download:hover {
+  border-color: var(--accent);
+  border-left-color: var(--accent-warm);
+}
+
+.download--pending {
+  border-left-color: var(--muted);
+  color: var(--paper-dim);
+}
+
+.download-label {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.download-meta {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* notes + links ------------------------------------------------------ */
+
+.notes {
+  max-width: var(--measure);
+}
+
+.notes p {
+  margin: 0 0 1rem;
+}
+
+.links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-width: var(--measure);
+}
+
+.links li {
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.links a,
+.notes a,
+.prose a {
+  color: var(--accent);
+  text-underline-offset: 0.2em;
+  text-decoration-color: var(--rule);
+}
+
+.links a:hover,
+.notes a:hover,
+.prose a:hover {
+  text-decoration-color: var(--accent);
+}
+
+.link-note {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+/* prose (privacy, 404) ----------------------------------------------- */
+
+.prose {
+  max-width: var(--measure);
+}
+
+.prose h1 {
+  font-family: var(--serif);
+  font-weight: 800;
+  font-size: 2.6rem;
+  letter-spacing: -0.02em;
+  margin: 0 0 1rem;
+}
+
+.prose h2 {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 1.35rem;
+  margin: 2.25rem 0 0.5rem;
+}
+
+.prose code {
+  font-family: var(--mono);
+  font-size: 0.85em;
+  background: var(--ink-2);
+  border-radius: 0.3rem;
+  padding: 0.05rem 0.35rem;
+}
+
+/* footer ------------------------------------------------------------- */
+
+footer.site {
+  flex-shrink: 0;
+  margin-top: auto;
+  padding-top: 1.5rem;
+  border-top: 1px dashed var(--rule);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+footer.site a {
+  color: var(--muted);
+  text-decoration-color: var(--rule);
+}
+
+footer.site a:hover {
+  color: var(--accent);
+}
+
+/* cookie consent banner ---------------------------------------------- */
+
+.consent {
+  position: fixed;
+  left: 50%;
+  bottom: 1rem;
+  transform: translateX(-50%);
+  width: min(34rem, calc(100% - 2rem));
+  background: var(--ink-2);
+  color: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 0.5rem;
+  box-shadow: 0 12px 30px rgb(0 0 0 / 45%);
+  padding: 1rem 1.1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  z-index: 50;
+}
+
+.consent[hidden] {
+  display: none;
+}
+
+.consent-msg {
+  flex: 1 1 16rem;
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.consent-cta {
+  display: block;
+  color: var(--muted);
+}
+
+.consent-msg a {
+  color: var(--accent);
+}
+
+.consent-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.consent-btn {
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border-radius: 0.3rem;
+  padding: 0.45rem 1.1rem;
+  border: 1px solid var(--rule);
+  cursor: pointer;
+}
+
+.consent-btn--ghost {
+  background: transparent;
+  color: var(--muted);
+}
+
+.consent-btn--ghost:hover {
+  color: var(--paper);
+}
+
+.consent-btn--primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--ink);
+}
+
+.consent-btn--primary:hover {
+  background: var(--accent-warm);
+  border-color: var(--accent-warm);
+}

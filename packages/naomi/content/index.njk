@@ -1,0 +1,88 @@
+---
+layout: layouts/base.njk
+permalink: /
+---
+{#
+  Single-page site: the index, the notes that frame it, the links out, and the
+  PDF. The matrix content in `_data/matrix.json` is placeholder scaffolding —
+  the real dimensions, level descriptors and prose land later; the page
+  structure here is what they land into.
+#}
+<main class="page">
+  <section class="hero">
+    <p class="kicker">{{ site.fullTitle }}</p>
+    <h1 class="hero-title">NAOMI</h1>
+    <p class="hero-sub">
+      A single-page index for working out how far an engineering organisation has
+      actually moved — from a few people experimenting with AI, to an operating
+      model that assumes it.
+    </p>
+    <p class="hero-note">
+      Read across a dimension to find the description that is honestly true today.
+      The gap to the next column is the work.
+    </p>
+  </section>
+
+  {% if matrix.status == "placeholder" %}
+  <p class="notice" role="note">
+    <strong>Draft.</strong> The dimensions and level descriptors below are
+    placeholders while the index is being written. Treat the shape as real and
+    the wording as provisional.
+  </p>
+  {% endif %}
+
+  <section class="section" aria-labelledby="matrix-heading">
+    <h2 class="section-title" id="matrix-heading">The index</h2>
+    {% include "partials/matrix.njk" %}
+  </section>
+
+  <section class="section" aria-labelledby="how-heading">
+    <h2 class="section-title" id="how-heading">How to use it</h2>
+    <div class="notes">
+      <p>
+        Score each dimension independently. Organisations are rarely level across
+        the board, and the uneven ones are the interesting ones — a team running
+        automated evals on top of context nobody maintains has a different problem
+        from one with excellent context and no way to tell whether output is good.
+      </p>
+      <p>
+        A level is only claimed when the description holds without a named
+        individual holding it up. "One person could do this" is the previous
+        level.
+      </p>
+      <p>
+        The index is descriptive, not a target. Level 4 is not automatically the
+        right place to be; it is what the right place looks like when it is where
+        you need to be.
+      </p>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="download-heading">
+    <h2 class="section-title" id="download-heading">Download</h2>
+    {% set downloadLabel = site.pdf.label if site.pdf else "The printable index" %}
+    {% if site.pdf %}
+    <a class="download" href="{{ site.pdf.path | rel }}" download>
+      <span class="download-label">{{ downloadLabel }}</span>
+      <span class="download-meta">PDF{% if site.pdf.size %} · {{ site.pdf.size }}{% endif %}</span>
+    </a>
+    {% else %}
+    <p class="download download--pending" aria-disabled="true">
+      <span class="download-label">{{ downloadLabel }}</span>
+      <span class="download-meta">PDF · not published yet</span>
+    </p>
+    {% endif %}
+  </section>
+
+  <section class="section" aria-labelledby="links-heading">
+    <h2 class="section-title" id="links-heading">Elsewhere</h2>
+    <ul class="links">
+      {% for link in site.links %}
+      <li>
+        <a href="{{ link.href }}">{{ link.label }}</a>
+        {% if link.note %}<span class="link-note">{{ link.note }}</span>{% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+</main>

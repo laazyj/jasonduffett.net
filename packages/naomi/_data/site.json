@@ -1,0 +1,25 @@
+{
+  "title": "NAOMI",
+  "fullTitle": "Native AI Operational Maturity Index",
+  "description": "NAOMI — the Native AI Operational Maturity Index: a matrix for assessing how far an engineering organisation has moved from experimenting with AI to operating natively with it.",
+  "url": "https://naomi.jasonduffett.net",
+  "author": {
+    "name": "Jason Duffett"
+  },
+  "language": "en-GB",
+  "copyright": "© 2026 Jason Duffett. All rights reserved.",
+  "copyrightUrl": null,
+  "pdf": null,
+  "links": [
+    {
+      "label": "jasonduffett.net",
+      "href": "https://jasonduffett.net",
+      "note": "Essays on engineering practice, where the index came from."
+    },
+    {
+      "label": "About the author",
+      "href": "https://jasonduffett.net/about/",
+      "note": "Who wrote this, and why."
+    }
+  ]
+}

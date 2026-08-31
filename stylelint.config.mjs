@@ -1,4 +1,4 @@
-// Stylelint config for the repo's hand-authored CSS (the two Eleventy sites'
+// Stylelint config for the repo's hand-authored CSS (each Eleventy site's
 // assets/styles.css). Runs via `npm run lint:css`, folded into `npm run lint`
 // alongside ESLint, so CI's `npm run verify` gates on it too.
 //
