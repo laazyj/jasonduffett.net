@@ -26,6 +26,7 @@ jobs:
       ALERT_EMAIL: ${{ secrets.ALERT_EMAIL }}
       GA_MEASUREMENT_ID: ${{ vars.GA_MEASUREMENT_ID }}
       CLARA_GA_MEASUREMENT_ID: ${{ vars.CLARA_GA_MEASUREMENT_ID }}
+      NAOMI_GA_MEASUREMENT_ID: ${{ vars.NAOMI_GA_MEASUREMENT_ID }}
       INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

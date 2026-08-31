@@ -30,6 +30,9 @@
     "clara:build": "nx run @jasonduffett-net/clara:build",
     "clara:start": "nx run @jasonduffett-net/clara:start",
     "clara:clean": "nx run @jasonduffett-net/clara:clean",
+    "naomi:build": "nx run @jasonduffett-net/naomi:build",
+    "naomi:start": "nx run @jasonduffett-net/naomi:start",
+    "naomi:clean": "nx run @jasonduffett-net/naomi:clean",
     "verify": "npm run format:check && npm run build && npm run lint && npm run test",
     "prepare": "husky"
   },
