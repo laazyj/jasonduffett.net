@@ -1,35 +1,48 @@
 /* ------------------------------------------------------------------
    naomi.jasonduffett.net — the Native AI Operational Maturity Index.
-   Reads as a sibling of the parent site's dark zine (same ink, paper,
-   Fraunces/Inter/JetBrains pairing, same paper grain) but with its own
-   accent: a cool signal green that ramps warm across the maturity
-   levels, so the matrix carries the colour rather than the chrome.
-   The web fonts are loaded via <link> in partials/head.njk so the
-   browser's preload scanner can fetch them in parallel with this file.
+
+   The parent site's riso zine vocabulary — Fraunces italic, Caveat,
+   JetBrains Mono, burnt orange — inverted onto cream stock, so the
+   hosted page and the printable sheet carry one palette. The riso
+   accents are darkened from their dark-ground values to hold on paper.
+
+   Levels have their own ramp (--level-*): it is unused by the chrome
+   and waits for the matrix, so the frame and the index cannot drift.
+
+   Web fonts load via <link> in partials/head.njk so the preload
+   scanner fetches them alongside this file.
    ------------------------------------------------------------------ */
 
 :root {
-  --ink: #0d1113;
-  --ink-2: #151b1e;
-  --paper: #e8e6df;
-  --paper-dim: #b9b6ac;
-  --muted: #7e857f;
-  --rule: #262d30;
-  --accent: #4fd1c5;
-  --accent-warm: #ffb454;
+  --paper: #ece4d3;
+  --paper-2: #e5dcc8;
+  --ink: #1a1612;
+  --ink-deep: #0f0d0c;
+  --dim: #46403a;
+  --muted: #8a8275;
+  --rule: #cdc4b1;
+  --spot: #c2471a;
+
+  /* Three widths, and they are not the same thing. --frame is the page,
+     sized for the matrix. --measure is how wide prose is allowed to set.
+     --rail is the label column that gives the leftover width a job — the
+     same anatomy as the sheet's level rail. Everything hangs off one left
+     edge: prose stops at the measure, the matrix runs the full frame. */
+  --frame: 72rem;
   --measure: 40rem;
-  --serif: "Fraunces", georgia, serif;
-  --ui: "Inter", system-ui, -apple-system, sans-serif;
+  --rail: 12rem;
+  --gutter: 2.5rem;
+  --display: "Fraunces", georgia, serif;
+  --body: "Source Serif 4", georgia, serif;
+  --hand: "Caveat", "Source Serif 4", cursive;
   --mono: "JetBrains Mono", ui-monospace, menlo, monospace;
 
-  /* Level ramp: cool at "ad hoc", warm at "native". Referenced by the
-     matrix column headings and the cell rails so a reader can place a
-     column at a glance without reading the number. */
-  --level-0: #5b6b70;
-  --level-1: #4a8f96;
-  --level-2: #4fd1c5;
-  --level-3: #b7d06a;
-  --level-4: #ffb454;
+  /* Level ramp, held for the matrix: L3 down to the remedial L−1. */
+  --level-3: #5f7a12;
+  --level-2: #1f6f9c;
+  --level-1: var(--spot);
+  --level-0: var(--muted);
+  --level-minus-1: #ff7a3d;
 }
 
 * {
@@ -42,28 +55,40 @@ html {
 
 body {
   margin: 0;
-  min-height: 100vh;
-  background: var(--ink);
-  color: var(--paper);
-  font-family: var(--ui);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--body);
+  font-optical-sizing: auto;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   position: relative;
   overflow-x: hidden;
 }
 
-/* paper grain — fixed-position noise overlay, matching the parent site */
-.noise {
+::selection {
+  background: var(--spot);
+  color: var(--paper);
+}
+
+:focus-visible {
+  outline: 2px solid var(--spot);
+  outline-offset: 3px;
+}
+
+/* Paper grain. The parent site lays light noise over ink; on cream the
+   same texture has to be dark and multiplied, or it is invisible. */
+.grain {
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 1;
-  opacity: 0.05;
-  mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.92  0 0 0 0 0.89  0 0 0 0 0.83  0 0 0 1 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  opacity: 0.055;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.10  0 0 0 0 0.08  0 0 0 0 0.07  0 0 0 1 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
   background-size: 200px 200px;
 }
 
+/* Held for the matrix: its <table> wants a caption that is read but not
+   seen. Unused until then — like the level ramp above, deliberately. */
 .visually-hidden {
   position: absolute;
   width: 1px;
@@ -76,22 +101,36 @@ body {
   border: 0;
 }
 
+/* display type ------------------------------------------------------- */
+
+/* Fraunces, always italic: the wordmark, every section heading, and the
+   card titles. Each rule below sets only its size, weight and tracking. */
+.wordmark,
+.section-title,
+.callout-title,
+.download-label,
+.prose h1,
+.prose h2 {
+  font-family: var(--display);
+  font-style: italic;
+}
+
 /* layout ------------------------------------------------------------- */
 
 .wrap {
   position: relative;
   z-index: 2;
-  max-width: 72rem;
+  max-width: calc(var(--frame) + 2 * var(--gutter));
   margin: 0 auto;
-  padding: 2.5rem 1.5rem 4rem;
+  padding: 2.25rem 1.25rem 3rem;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
 }
 
-@media (width >= 900px) {
+@media (width >= 48rem) {
   .wrap {
-    padding: 3rem 2.5rem 5rem;
+    padding: 3rem var(--gutter) 4rem;
   }
 }
 
@@ -99,399 +138,427 @@ body {
   flex: 1 0 auto;
 }
 
-/* header ------------------------------------------------------------- */
+/* masthead ----------------------------------------------------------- */
 
-header.site {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 1.5rem;
-  flex-wrap: wrap;
-  padding-bottom: 1.25rem;
-  margin-bottom: 3rem;
-  border-bottom: 1px dashed var(--rule);
+.masthead {
+  margin-bottom: 2.75rem;
 }
 
-header.site a.brand {
-  font-family: var(--ui);
-  font-weight: 600;
-  font-size: 0.95rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--paper);
-  text-decoration: none;
+@media (width >= 64rem) {
+  .masthead {
+    display: grid;
+    grid-template-columns: minmax(0, auto) minmax(0, var(--measure));
+    justify-content: space-between;
+    align-items: end;
+    column-gap: var(--gutter);
+  }
+
+  /* The rule closes the whole block, not just the lockup. */
+  .masthead-rule {
+    grid-column: 1 / -1;
+  }
+}
+
+.masthead-lede {
+  margin-top: 1.75rem;
+}
+
+@media (width >= 64rem) {
+  .masthead-lede {
+    margin-top: 0;
+  }
+}
+
+.masthead-mark {
   display: inline-flex;
   align-items: baseline;
+  gap: 0.7rem;
+  text-decoration: none;
+  color: var(--ink);
 }
 
-header.site a.brand .brand-dot {
-  color: var(--accent);
-  font-size: 1.4em;
-  line-height: 0;
+.wordmark {
+  font-weight: 900;
+  font-size: clamp(2.9rem, 8vw, 4.6rem);
+  line-height: 0.82;
+  letter-spacing: -0.045em;
 }
 
-header.site .brand-expand {
+/* The version travels with the wordmark, as it does on the sheet. */
+
+/* One outlined spot chip, worn at two sizes: beside the wordmark, and as
+   the pending panel's badge. */
+.version-chip,
+.pending-badge {
   font-family: var(--mono);
-  font-size: 0.75rem;
-  letter-spacing: 0.02em;
-  color: var(--muted);
+  font-weight: 500;
+  line-height: 1;
+  color: var(--spot);
+  border: 1px solid var(--spot);
+  border-radius: 2px;
 }
 
-/* hero --------------------------------------------------------------- */
-
-.hero {
-  max-width: var(--measure);
-  margin-bottom: 3.5rem;
+.version-chip {
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  padding: 0.24em 0.5em 0.18em;
+  white-space: nowrap;
 }
 
-.kicker {
+.masthead-sub {
+  margin: 0.75rem 0 0;
   font-family: var(--mono);
-  font-size: 0.75rem;
-  letter-spacing: 0.14em;
+  font-weight: 500;
+  font-size: 0.6rem;
+  letter-spacing: 0.24em;
   text-transform: uppercase;
-  color: var(--accent);
-  margin: 0 0 0.75rem;
+  color: var(--spot);
 }
 
-.hero-title {
-  font-family: var(--serif);
-  font-weight: 800;
-  font-size: clamp(3.5rem, 14vw, 6rem);
-  line-height: 0.9;
-  letter-spacing: -0.03em;
+.masthead-rule {
+  position: relative;
+  margin-top: 1rem;
+  border-top: 1px dashed var(--rule);
+}
+
+/* The solid spot bar sits over the first stretch of the dashed rule. */
+.masthead-rule::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 0;
+  width: 7.2rem;
+  height: 3px;
+  background: var(--spot);
+}
+
+/* lede --------------------------------------------------------------- */
+
+.lede {
+  margin-bottom: 2.5rem;
+}
+
+.lede-text {
   margin: 0;
+  font-size: 1.12rem;
+  line-height: 1.5;
+  color: var(--dim);
+  text-wrap: pretty;
 }
 
-.hero-sub {
-  font-size: 1.15rem;
-  margin: 1.5rem 0 0;
-}
-
-.hero-note {
-  font-size: 0.95rem;
-  color: var(--paper-dim);
-  border-left: 2px solid var(--accent);
-  padding-left: 1rem;
-  margin: 1.5rem 0 0;
+.lede-note {
+  margin: 1rem 0 0;
+  font-family: var(--hand);
+  font-weight: 700;
+  font-size: 1.5rem;
+  line-height: 1.25;
+  color: var(--spot);
 }
 
 /* draft notice ------------------------------------------------------- */
 
 .notice {
-  font-family: var(--mono);
-  font-size: 0.8rem;
-  line-height: 1.6;
-  color: var(--paper-dim);
-  background: var(--ink-2);
-  border: 1px dashed var(--rule);
-  border-radius: 0.4rem;
-  padding: 0.85rem 1rem;
+  max-width: var(--measure);
   margin: 0 0 3rem;
+  padding: 0.75rem 0.9rem;
+  border-left: 3px solid var(--spot);
+  background: var(--paper-2);
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--dim);
 }
 
 .notice strong {
-  color: var(--accent-warm);
+  font-weight: 600;
+  color: var(--ink);
 }
 
 /* sections ----------------------------------------------------------- */
 
 .section {
-  margin-bottom: 3.5rem;
+  margin-bottom: 3.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--rule);
 }
 
 .section-title {
-  font-family: var(--ui);
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin: 0 0 1.25rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--rule);
+  margin: 0 0 1.1rem;
+  font-weight: 800;
+  font-size: 1.5rem;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--ink);
 }
 
-/* matrix ------------------------------------------------------------- */
-
-.matrix-scroll {
-  overflow-x: auto;
-
-  /* Keyboard users can scroll the region; give them a visible focus ring. */
-  border-radius: 0.4rem;
-}
-
-.matrix-scroll:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-.matrix {
-  width: 100%;
-  min-width: 56rem;
-  border-collapse: collapse;
-  text-align: left;
-  font-size: 0.85rem;
-}
-
-.matrix th,
-.matrix td {
-  vertical-align: top;
-  padding: 0.85rem 0.9rem;
-  border-bottom: 1px solid var(--rule);
-}
-
-.matrix-corner {
-  font-family: var(--ui);
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--muted);
-  width: 15rem;
-}
-
-.matrix-level {
-  width: 11rem;
-  border-top: 3px solid var(--level-0);
-}
-
-.matrix-level[data-level="1"] {
-  border-top-color: var(--level-1);
-}
-
-.matrix-level[data-level="2"] {
-  border-top-color: var(--level-2);
-}
-
-.matrix-level[data-level="3"] {
-  border-top-color: var(--level-3);
-}
-
-.matrix-level[data-level="4"] {
-  border-top-color: var(--level-4);
-}
-
-.level-number {
-  display: block;
-  font-family: var(--mono);
-  font-size: 0.7rem;
-  color: var(--muted);
-}
-
-.level-name {
-  display: block;
-  font-family: var(--serif);
-  font-weight: 600;
-  font-size: 1.05rem;
-  letter-spacing: -0.01em;
-  color: var(--paper);
-  margin: 0.15rem 0 0.35rem;
-}
-
-.level-summary {
-  display: block;
-  font-weight: 400;
-  font-size: 0.75rem;
-  line-height: 1.5;
-  color: var(--muted);
-}
-
-.matrix-dimension {
-  background: var(--ink-2);
-}
-
-.dimension-name {
-  display: block;
-  font-family: var(--serif);
-  font-weight: 600;
-  font-size: 1rem;
-  color: var(--paper);
-}
-
-.dimension-summary {
-  display: block;
-  font-weight: 400;
-  font-size: 0.75rem;
-  line-height: 1.5;
-  color: var(--muted);
-  margin-top: 0.25rem;
-}
-
-.matrix-cell {
-  color: var(--paper-dim);
-}
-
-.matrix tbody tr:hover .matrix-cell {
-  color: var(--paper);
-}
-
-/* Below the table's minimum width, reflow each row into a stacked card and
-   restore the column heading from `data-level` — the header row is hidden,
-   so without this the cells would lose the only thing that places them. */
-@media (width < 60rem) {
-  .matrix-scroll {
-    overflow-x: visible;
+/* Wide enough for the rail: the heading sits in it, the content sets to the
+   measure beside it, and both hang off the frame's left edge. */
+@media (width >= 64rem) {
+  .section {
+    display: grid;
+    grid-template-columns: var(--rail) minmax(0, 1fr);
+    column-gap: var(--gutter);
   }
 
-  .matrix,
-  .matrix tbody,
-  .matrix tr,
-  .matrix th,
-  .matrix td {
+  .section-title {
+    grid-column: 1;
+    margin-bottom: 0;
+  }
+
+  .section > :not(.section-title) {
+    grid-column: 2;
+    max-width: var(--measure);
+  }
+
+  /* The index opts out: the matrix gets the whole frame, not the column. */
+  .section--full {
     display: block;
-    width: auto;
   }
 
-  .matrix {
-    min-width: 0;
+  .section--full > :not(.section-title) {
+    max-width: none;
   }
+}
 
-  .matrix thead {
-    display: none;
-  }
+/* the index, pending ------------------------------------------------- */
 
-  .matrix tr {
-    border: 1px solid var(--rule);
-    border-radius: 0.4rem;
-    margin-bottom: 1.25rem;
-    overflow: hidden;
-  }
+.pending {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 13rem;
+  padding: 2rem 1.25rem;
+  border: 1px dashed var(--rule);
+  background: var(--paper-2);
+}
 
-  .matrix th,
-  .matrix td {
-    border-bottom: none;
+@media (width >= 48rem) {
+  .pending {
+    min-height: 20rem;
   }
+}
 
-  .matrix-dimension {
-    border-bottom: 1px solid var(--rule);
-  }
+/* A 6×6 ghost of the grid the matrix will occupy — texture, not data.
+   Masked out of the middle so the notice on top stays legible. */
+.pending::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(to right, var(--rule) 0 1px, transparent 1px 16.6667%),
+    repeating-linear-gradient(to bottom, var(--rule) 0 1px, transparent 1px 16.6667%);
+  mask-image: radial-gradient(ellipse at center, transparent 0%, transparent 26%, #000 66%);
+}
 
-  .matrix-cell {
-    display: flex;
-    gap: 0.75rem;
-    padding: 0.6rem 0.9rem;
-  }
+.pending-body {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.7rem;
+  max-width: 24rem;
+  text-align: center;
+}
 
-  .matrix-cell::before {
-    content: attr(data-level);
-    flex: 0 0 8.5rem;
-    font-family: var(--mono);
-    font-size: 0.7rem;
-    line-height: 1.6;
-    color: var(--muted);
-  }
+.pending-badge {
+  margin: 0;
+  font-size: 0.62rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  padding: 0.5em 0.85em 0.42em;
+}
+
+.pending-text {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--dim);
+  text-wrap: pretty;
+}
+
+/* prose blocks ------------------------------------------------------- */
+
+.prose-block p {
+  margin: 0 0 1rem;
+  text-wrap: pretty;
+}
+
+.prose-block p:last-child {
+  margin-bottom: 0;
+}
+
+/* callout ------------------------------------------------------------ */
+
+/* One bordered card. .callout stacks; .download sets its label and meta on
+   one line. The `a.` on the hover keeps it off p.download--pending. */
+.callout,
+.download {
+  border: 1px solid var(--rule);
+  background: var(--paper-2);
+  text-decoration: none;
+  color: var(--ink);
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.callout:hover,
+a.download:hover {
+  border-color: var(--spot);
+  background: var(--paper);
+}
+
+.callout {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 1.1rem 1.2rem;
+}
+
+.callout-kicker {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.callout-title {
+  font-weight: 800;
+  font-size: 1.22rem;
+  line-height: 1.18;
+  letter-spacing: -0.015em;
+}
+
+.callout:hover .callout-title {
+  color: var(--spot);
+}
+
+.callout-note {
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: var(--dim);
+  text-wrap: pretty;
+}
+
+.callout-meta {
+  margin-top: 0.25rem;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  color: var(--spot);
+}
+
+.callout-meta::after {
+  content: "→";
+  display: inline-block;
+  margin-left: 0.4em;
+  transition: transform 0.15s ease;
+}
+
+.callout:hover .callout-meta::after {
+  transform: translateX(0.25em);
 }
 
 /* download ----------------------------------------------------------- */
 
 .download {
   display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  padding: 1.1rem 1.25rem;
-  border: 1px solid var(--rule);
-  border-left: 3px solid var(--accent);
-  border-radius: 0.4rem;
-  background: var(--ink-2);
-  color: var(--paper);
-  text-decoration: none;
-  max-width: 26rem;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
   margin: 0;
-}
-
-a.download:hover {
-  border-color: var(--accent);
-  border-left-color: var(--accent-warm);
+  padding: 0.95rem 1.2rem;
 }
 
 .download--pending {
-  border-left-color: var(--muted);
-  color: var(--paper-dim);
+  border-style: dashed;
+  color: var(--muted);
 }
 
 .download-label {
-  font-family: var(--serif);
-  font-weight: 600;
-  font-size: 1.1rem;
+  font-weight: 800;
+  font-size: 1.05rem;
+  letter-spacing: -0.015em;
 }
 
 .download-meta {
   font-family: var(--mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.06em;
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--muted);
 }
 
-/* notes + links ------------------------------------------------------ */
-
-.notes {
-  max-width: var(--measure);
-}
-
-.notes p {
-  margin: 0 0 1rem;
-}
+/* links -------------------------------------------------------------- */
 
 .links {
   list-style: none;
-  padding: 0;
   margin: 0;
-  max-width: var(--measure);
+  padding: 0;
 }
 
 .links li {
   padding: 0.6rem 0;
-  border-bottom: 1px solid var(--rule);
+  border-bottom: 1px dashed var(--rule);
+}
+
+.links li:first-child {
+  border-top: 1px dashed var(--rule);
 }
 
 .links a,
-.notes a,
-.prose a {
-  color: var(--accent);
-  text-underline-offset: 0.2em;
+.prose-block a,
+.prose a,
+footer.site a {
+  color: var(--ink);
   text-decoration-color: var(--rule);
+  text-underline-offset: 0.18em;
 }
 
 .links a:hover,
-.notes a:hover,
-.prose a:hover {
-  text-decoration-color: var(--accent);
+.prose-block a:hover,
+.prose a:hover,
+footer.site a:hover {
+  color: var(--spot);
+  text-decoration-color: var(--spot);
 }
 
 .link-note {
   display: block;
-  font-size: 0.8rem;
+  font-size: 0.86rem;
   color: var(--muted);
 }
 
-/* prose (privacy, 404) ----------------------------------------------- */
-
-.prose {
-  max-width: var(--measure);
-}
+/* prose pages (privacy, 404) ----------------------------------------- */
 
 .prose h1 {
-  font-family: var(--serif);
-  font-weight: 800;
-  font-size: 2.6rem;
-  letter-spacing: -0.02em;
-  margin: 0 0 1rem;
+  font-weight: 900;
+  font-size: 2.1rem;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  margin: 0 0 1.25rem;
 }
 
 .prose h2 {
-  font-family: var(--serif);
-  font-weight: 600;
-  font-size: 1.35rem;
-  margin: 2.25rem 0 0.5rem;
+  font-weight: 800;
+  font-size: 1.32rem;
+  line-height: 1.15;
+  margin: 2.25rem 0 0.6rem;
+}
+
+.prose p,
+.prose li {
+  text-wrap: pretty;
 }
 
 .prose code {
   font-family: var(--mono);
-  font-size: 0.85em;
-  background: var(--ink-2);
-  border-radius: 0.3rem;
-  padding: 0.05rem 0.35rem;
+  font-size: 0.82em;
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  padding: 0.1em 0.35em;
 }
 
 /* footer ------------------------------------------------------------- */
@@ -499,20 +566,26 @@ a.download:hover {
 footer.site {
   flex-shrink: 0;
   margin-top: auto;
-  padding-top: 1.5rem;
+  padding-top: 1.25rem;
   border-top: 1px dashed var(--rule);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.4rem 1.5rem;
   font-family: var(--mono);
-  font-size: 0.72rem;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: var(--muted);
 }
 
 footer.site a {
   color: var(--muted);
-  text-decoration-color: var(--rule);
 }
 
-footer.site a:hover {
-  color: var(--accent);
+.footer-version {
+  text-transform: none;
 }
 
 /* cookie consent banner ---------------------------------------------- */
@@ -523,11 +596,10 @@ footer.site a:hover {
   bottom: 1rem;
   transform: translateX(-50%);
   width: min(34rem, calc(100% - 2rem));
-  background: var(--ink-2);
-  color: var(--paper);
-  border: 1px solid var(--rule);
-  border-radius: 0.5rem;
-  box-shadow: 0 12px 30px rgb(0 0 0 / 45%);
+  background: var(--paper);
+  color: var(--ink);
+  border: 1px solid var(--ink);
+  box-shadow: 0 10px 26px rgb(from var(--ink-deep) r g b / 22%);
   padding: 1rem 1.1rem;
   display: flex;
   flex-wrap: wrap;
@@ -544,6 +616,7 @@ footer.site a:hover {
   flex: 1 1 16rem;
   margin: 0;
   font-size: 0.85rem;
+  line-height: 1.45;
 }
 
 .consent-cta {
@@ -552,7 +625,7 @@ footer.site a:hover {
 }
 
 .consent-msg a {
-  color: var(--accent);
+  color: var(--spot);
 }
 
 .consent-actions {
@@ -562,11 +635,12 @@ footer.site a:hover {
 }
 
 .consent-btn {
-  font-family: inherit;
-  font-size: 0.85rem;
-  font-weight: 500;
-  border-radius: 0.3rem;
-  padding: 0.45rem 1.1rem;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border-radius: 2px;
+  padding: 0.55rem 1.1rem;
   border: 1px solid var(--rule);
   cursor: pointer;
 }
@@ -577,16 +651,23 @@ footer.site a:hover {
 }
 
 .consent-btn--ghost:hover {
-  color: var(--paper);
+  color: var(--ink);
+  border-color: var(--ink);
 }
 
 .consent-btn--primary {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--ink);
+  background: var(--spot);
+  border-color: var(--spot);
+  color: var(--paper);
 }
 
 .consent-btn--primary:hover {
-  background: var(--accent-warm);
-  border-color: var(--accent-warm);
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0.01ms !important;
+  }
 }

@@ -4,13 +4,30 @@
   {% include "partials/head.njk" %}
 </head>
 <body>
-  <div class="noise" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
   <div class="wrap">
-    <header class="site">
-      <a class="brand" href="{{ '/' | rel }}">
-        <span class="brand-name">naomi</span><span class="brand-dot">.</span>
-      </a>
-      <span class="brand-expand">{{ site.fullTitle }}</span>
+    {#
+      The masthead is the printed sheet's top block: the wordmark and its
+      version chip on the left, the standing description on the right, closed
+      by the spot rule. The lede is site-level copy (`site.lede`), so the
+      masthead is chrome on every page and carries the description on the home
+      page only — where the sheet carries it.
+    #}
+    <header class="masthead">
+      <div class="masthead-lockup">
+        <a class="masthead-mark" href="{{ '/' | rel }}">
+          <span class="wordmark">NAOMI</span>
+          <span class="version-chip">v{{ site.version }}</span>
+        </a>
+        <p class="masthead-sub">{{ site.fullTitle }}</p>
+      </div>
+      {% if page.url == "/" %}
+      <div class="masthead-lede">
+        <p class="lede-text">{{ site.lede.text }}</p>
+        <p class="lede-note">{{ site.lede.note }}</p>
+      </div>
+      {% endif %}
+      <div class="masthead-rule" aria-hidden="true"></div>
     </header>
 
     {{ content | safe }}
