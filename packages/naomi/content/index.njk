@@ -3,59 +3,61 @@ layout: layouts/base.njk
 permalink: /
 ---
 {#
-  Single-page site: the index, the notes that frame it, the links out, and the
-  PDF. The matrix content in `_data/matrix.json` is placeholder scaffolding —
-  the real dimensions, level descriptors and prose land later; the page
-  structure here is what they land into.
+  The frame, without the index. Every section below is styling and structure;
+  the prose is provisional and the matrix itself is a "coming soon" panel
+  standing in the footprint the real one will occupy.
 #}
 <main class="page">
-  <section class="hero">
-    <p class="kicker">{{ site.fullTitle }}</p>
-    <h1 class="hero-title">NAOMI</h1>
-    <p class="hero-sub">
-      A single-page index for working out how far an engineering organisation has
-      actually moved — from a few people experimenting with AI, to an operating
-      model that assumes it.
-    </p>
-    <p class="hero-note">
-      Read across a dimension to find the description that is honestly true today.
-      The gap to the next column is the work.
-    </p>
-  </section>
-
-  {% if matrix.status == "placeholder" %}
+  {% if site.draft %}
   <p class="notice" role="note">
-    <strong>Draft.</strong> The dimensions and level descriptors below are
-    placeholders while the index is being written. Treat the shape as real and
-    the wording as provisional.
+    <strong>Draft.</strong> The wording on this page is provisional while the
+    index is being written. Treat the shape as real and the copy as a stand-in.
   </p>
   {% endif %}
 
-  <section class="section" aria-labelledby="matrix-heading">
-    <h2 class="section-title" id="matrix-heading">The index</h2>
-    {% include "partials/matrix.njk" %}
+  <section class="section section--full" aria-labelledby="index-heading">
+    <h2 class="section-title" id="index-heading">The index</h2>
+    <div class="pending">
+      <div class="pending-body">
+        <p class="pending-badge">Coming soon</p>
+        <p class="pending-text">
+          Five pillars across the top, five levels down the side, and a cell for
+          every crossing. It lands here.
+        </p>
+      </div>
+    </div>
   </section>
 
-  <section class="section" aria-labelledby="how-heading">
-    <h2 class="section-title" id="how-heading">How to use it</h2>
-    <div class="notes">
+  <section class="section" aria-labelledby="read-heading">
+    <h2 class="section-title" id="read-heading">How to read it</h2>
+    <div class="prose-block">
       <p>
-        Score each dimension independently. Organisations are rarely level across
-        the board, and the uneven ones are the interesting ones — a team running
-        automated evals on top of context nobody maintains has a different problem
-        from one with excellent context and no way to tell whether output is good.
+        Read down a column to place a capability: find the description that is
+        honestly true today, not the one you intend to be true by Christmas. Read
+        across a row to see what a level costs everywhere else — levels are
+        rarely even, and the uneven ones are the interesting ones.
       </p>
       <p>
-        A level is only claimed when the description holds without a named
-        individual holding it up. "One person could do this" is the previous
-        level.
+        A level is only claimed when it holds without a named individual holding
+        it up. If the honest answer is “one person remembers to do this”, that is
+        the level below.
       </p>
       <p>
-        The index is descriptive, not a target. Level 4 is not automatically the
-        right place to be; it is what the right place looks like when it is where
-        you need to be.
+        The index is descriptive, not a target. The top level is not automatically
+        the right place to be; it is what the right place looks like when it is
+        where you need to be.
       </p>
     </div>
+  </section>
+
+  <section class="section" aria-labelledby="background-heading">
+    <h2 class="section-title" id="background-heading">Background</h2>
+    <a class="callout" href="{{ site.article.href }}">
+      <span class="callout-kicker">The introduction</span>
+      <span class="callout-title">{{ site.article.title }}</span>
+      {% if site.article.note %}<span class="callout-note">{{ site.article.note }}</span>{% endif %}
+      <span class="callout-meta">jasonduffett.net</span>
+    </a>
   </section>
 
   <section class="section" aria-labelledby="download-heading">

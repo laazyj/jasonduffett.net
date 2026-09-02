@@ -1,8 +1,15 @@
 {
   "title": "NAOMI",
   "fullTitle": "Native AI Operational Maturity Index",
-  "description": "NAOMI — the Native AI Operational Maturity Index: a matrix for assessing how far an engineering organisation has moved from experimenting with AI to operating natively with it.",
+  "description": "NAOMI — the Native AI Operational Maturity Index: five pillars and five levels for working out what holds in an engineering organisation when nobody is watching, and therefore how much can safely be delegated.",
   "url": "https://naomi.jasonduffett.net",
+  "version": "0.1",
+  "versionDate": "2026-09-02",
+  "draft": true,
+  "lede": {
+    "text": "Five pillars, five levels. The level names what holds the promise — nobody, a person, the system, an instrumented system, or a system that improves its own hold. What you may safely delegate follows from that, and from nothing else.",
+    "note": "When production is cheap, the scarce resource is assurance."
+  },
   "author": {
     "name": "Jason Duffett"
   },
@@ -10,6 +17,11 @@
   "copyright": "© 2026 Jason Duffett. All rights reserved.",
   "copyrightUrl": null,
   "pdf": null,
+  "article": {
+    "title": "Introducing NAOMI, a maturity model for AI Native engineering",
+    "href": "https://jasonduffett.net/tech/naomi-ai-native-maturity-model/",
+    "note": "Where the pillars and the levels came from, and a first draft of the cells."
+  },
   "links": [
     {
       "label": "jasonduffett.net",
