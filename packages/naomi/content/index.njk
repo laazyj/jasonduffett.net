@@ -3,9 +3,9 @@ layout: layouts/base.njk
 permalink: /
 ---
 {#
-  The frame, without the index. Every section below is styling and structure;
-  the prose is provisional and the matrix itself is a "coming soon" panel
-  standing in the footprint the real one will occupy.
+  The prose here is provisional. The matrix is a working PROTOTYPE rendered
+  from _data/matrix.json — levels 3 and −1 carry drafted content, 0–2 are
+  matched-length filler so density can be judged honestly.
 #}
 <main class="page">
   {% if site.draft %}
@@ -17,15 +17,7 @@ permalink: /
 
   <section class="section section--full" aria-labelledby="index-heading">
     <h2 class="section-title" id="index-heading">The index</h2>
-    <div class="pending">
-      <div class="pending-body">
-        <p class="pending-badge">Coming soon</p>
-        <p class="pending-text">
-          Five pillars across the top, five levels down the side, and a cell for
-          every crossing. It lands here.
-        </p>
-      </div>
-    </div>
+    {% include "partials/matrix.njk" %}
   </section>
 
   <section class="section" aria-labelledby="read-heading">
@@ -88,3 +80,5 @@ permalink: /
     </ul>
   </section>
 </main>
+
+<script src="{{ '/assets/matrix.js' | rel }}" defer></script>

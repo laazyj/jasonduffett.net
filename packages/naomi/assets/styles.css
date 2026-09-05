@@ -6,8 +6,9 @@
    hosted page and the printable sheet carry one palette. The riso
    accents are darkened from their dark-ground values to hold on paper.
 
-   Levels have their own ramp (--level-*): it is unused by the chrome
-   and waits for the matrix, so the frame and the index cannot drift.
+   Levels have their own ramp (--level-*): unused by the chrome, and read
+   by the matrix (assets/matrix.css), so the frame and the index share one
+   set of level colours and cannot drift.
 
    Web fonts load via <link> in partials/head.njk so the preload
    scanner fetches them alongside this file.
@@ -37,7 +38,7 @@
   --hand: "Caveat", "Source Serif 4", cursive;
   --mono: "JetBrains Mono", ui-monospace, menlo, monospace;
 
-  /* Level ramp, held for the matrix: L3 down to the remedial L−1. */
+  /* Level ramp, read by matrix.css: L3 down to the remedial L−1. */
   --level-3: #5f7a12;
   --level-2: #1f6f9c;
   --level-1: var(--spot);
@@ -87,8 +88,8 @@ body {
   background-size: 200px 200px;
 }
 
-/* Held for the matrix: its <table> wants a caption that is read but not
-   seen. Unused until then — like the level ramp above, deliberately. */
+/* Used by the matrix's <table> caption, and by the cell coordinate label
+   that matrix.css un-hides at the glyph rung. */
 .visually-hidden {
   position: absolute;
   width: 1px;
@@ -186,21 +187,16 @@ body {
 
 /* The version travels with the wordmark, as it does on the sheet. */
 
-/* One outlined spot chip, worn at two sizes: beside the wordmark, and as
-   the pending panel's badge. */
-.version-chip,
-.pending-badge {
+/* An outlined spot chip, locked up with the wordmark. */
+.version-chip {
   font-family: var(--mono);
   font-weight: 500;
+  font-size: 0.6rem;
   line-height: 1;
+  letter-spacing: 0.12em;
   color: var(--spot);
   border: 1px solid var(--spot);
   border-radius: 2px;
-}
-
-.version-chip {
-  font-size: 0.6rem;
-  letter-spacing: 0.12em;
   padding: 0.24em 0.5em 0.18em;
   white-space: nowrap;
 }
@@ -317,62 +313,6 @@ body {
   .section--full > :not(.section-title) {
     max-width: none;
   }
-}
-
-/* the index, pending ------------------------------------------------- */
-
-.pending {
-  position: relative;
-  display: grid;
-  place-items: center;
-  min-height: 13rem;
-  padding: 2rem 1.25rem;
-  border: 1px dashed var(--rule);
-  background: var(--paper-2);
-}
-
-@media (width >= 48rem) {
-  .pending {
-    min-height: 20rem;
-  }
-}
-
-/* A 6×6 ghost of the grid the matrix will occupy — texture, not data.
-   Masked out of the middle so the notice on top stays legible. */
-.pending::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image:
-    repeating-linear-gradient(to right, var(--rule) 0 1px, transparent 1px 16.6667%),
-    repeating-linear-gradient(to bottom, var(--rule) 0 1px, transparent 1px 16.6667%);
-  mask-image: radial-gradient(ellipse at center, transparent 0%, transparent 26%, #000 66%);
-}
-
-.pending-body {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.7rem;
-  max-width: 24rem;
-  text-align: center;
-}
-
-.pending-badge {
-  margin: 0;
-  font-size: 0.62rem;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  padding: 0.5em 0.85em 0.42em;
-}
-
-.pending-text {
-  margin: 0;
-  font-size: 0.95rem;
-  line-height: 1.5;
-  color: var(--dim);
-  text-wrap: pretty;
 }
 
 /* prose blocks ------------------------------------------------------- */

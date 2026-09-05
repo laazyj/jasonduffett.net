@@ -1,0 +1,80 @@
+{#
+  The index. A real <table> — pillars are columns, levels are rows — so
+  screen readers and keyboard users get proper row/column semantics.
+
+  There is exactly ONE copy of every cell's content, in the cell. Density is
+  a presentation concern: `data-rung` on the wrapper decides how much of that
+  content shows (full / condensed / collapsed / glyph), and expanding re-lays
+  the affected row so the open cell gets the full width, rather than
+  duplicating the copy into a separate detail panel.
+
+  No `data-rung` is set here. The ladder only ever subtracts, so without
+  JavaScript — and in print, where the ladder does not apply — every cell
+  renders in full, which is the correct fallback.
+#}
+<div class="m-wrap">
+  <div class="m-scroll">
+    <table class="m">
+      <caption class="visually-hidden">
+        {{ site.fullTitle }}: {{ matrix.pillars.length }} pillars across
+        {{ matrix.levels.length }} maturity levels, from
+        {{ matrix.levels[0].num }} down to
+        {{ matrix.levels[matrix.levels.length - 1].num }}.
+        Each cell can be expanded for its full description.
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col" class="m-corner">
+            <span class="m-corner-axis">pillars &rarr;</span>
+            <span class="m-corner-axis">levels &darr;</span>
+          </th>
+          {% for p in matrix.pillars %}
+          <th scope="col" class="m-col">
+            <button type="button" class="m-col-btn" data-col="{{ p.id }}" aria-expanded="false">
+              <span class="m-col-name">{{ p.name }}</span>
+              <span class="m-col-abbr" aria-hidden="true">{{ p.abbr }}</span>
+              <span class="m-col-def">{{ p.def }}</span>
+            </button>
+          </th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for lv in matrix.levels %}
+        <tr class="m-row{% if lv.remedial %} m-row--remedial{% endif %}" data-level="{{ lv.id }}">
+          <th scope="row" class="m-rail">
+            <button type="button" class="m-rail-btn" data-row="{{ lv.id }}" aria-expanded="false">
+              <span class="m-num">{{ lv.num }}</span>
+              <span class="m-assurance">{{ lv.assurance }}</span>
+              <span class="m-lead"><strong>{{ lv.lead }}</strong> {{ lv.rest }}</span>
+              <span class="m-ent">
+                <span class="m-ent-label">you may delegate</span>
+                {{ lv.entitlement }}
+              </span>
+            </button>
+          </th>
+          {% for p in matrix.pillars %}
+          {% set c = matrix.cells[lv.id + "." + p.id] %}
+          <td class="m-cell{% if c.draft %} m-cell--draft{% endif %}" data-pillar="{{ p.id }}">
+            <button
+              type="button"
+              class="m-cell-btn"
+              id="cell-{{ p.id }}-{{ lv.id }}"
+              data-cell="{{ p.id }}"
+              data-level="{{ lv.id }}"
+              aria-expanded="false"
+            >
+              <span class="m-head">{{ c.head }}</span>
+              <span class="visually-hidden m-sr">{{ p.name }}, level {{ lv.num }}</span>
+            </button>
+            <div class="m-body">
+              {% for pt in c.points %}<p class="m-point">{{ pt }}</p>{% endfor %}
+            </div>
+          </td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
