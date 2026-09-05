@@ -1,0 +1,420 @@
+/* ------------------------------------------------------------------
+   The index.
+
+   One copy of every cell's content, in the cell. `data-rung` on .m-wrap
+   decides how much of it shows; expanding sets .is-expanded on the row
+   and .is-open on the cell(s), which re-lays that row so the open cell
+   gets the full width. No duplicated copy, no separate detail panel.
+
+   Rungs, narrowing:
+     (none)     head + all points          the no-JS and print state
+     condensed  head + first point
+     collapsed  head only
+     glyph      a coloured square only
+
+   The ladder only ever SUBTRACTS from the full state, and lives inside
+   @media screen — so print, where no rung applies, shows everything.
+   ------------------------------------------------------------------ */
+
+.m-wrap {
+  --m-rail: 13rem;
+  --m-pad: 0.7rem;
+
+  margin-top: 1.25rem;
+}
+
+.m-scroll {
+  overflow-x: auto;
+}
+
+table.m {
+  width: 100%;
+  text-align: left;
+
+  /* Deliberately NOT border-collapse: collapse. Collapsed borders are painted
+     as one shared table-level layer, and Safari fails to invalidate it when a
+     hover repaints a single cell — the rule under the header row drops out in
+     segments, breaking at cell boundaries. With separate borders each cell
+     paints its own, so a cell repaint can only ever affect that cell.
+     Every border below is on one side only, so nothing doubles. */
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+/* shared treatments --------------------------------------------------- */
+
+.m-col-btn,
+.m-rail-btn,
+.m-cell-btn {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  text-align: left;
+  display: block;
+  width: 100%;
+}
+
+/* Fraunces, always italic — matching how styles.css groups the same
+   decision for the page's own headings. Each rule below sets only its
+   size, weight and tracking. */
+.m-col-name,
+.m-num,
+.m-head {
+  font-family: var(--display);
+  font-style: italic;
+}
+
+/* The mono micro-label, worn at several sizes. */
+.m-corner-axis,
+.m-col-abbr,
+.m-ent-label {
+  font-family: var(--mono);
+  text-transform: uppercase;
+}
+
+/* header row ---------------------------------------------------------- */
+
+.m-corner {
+  width: var(--m-rail);
+  padding: 0 var(--m-pad) 0.6rem 0;
+  vertical-align: bottom;
+  border-bottom: 1px solid var(--ink);
+  font-weight: 400;
+}
+
+.m-corner-axis {
+  display: block;
+  font-size: 0.52rem;
+  letter-spacing: 0.2em;
+  color: var(--muted);
+}
+
+.m-col {
+  padding: 0;
+  vertical-align: bottom;
+  border-bottom: 1px solid var(--ink);
+  border-left: 1px solid var(--rule);
+  font-weight: 400;
+}
+
+.m-col-btn {
+  padding: 0 var(--m-pad) 0.6rem;
+}
+
+.m-col-name {
+  display: block;
+  font-weight: 800;
+  font-size: 0.95rem;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.m-col-abbr {
+  display: none;
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+}
+
+.m-col-def {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.68rem;
+  line-height: 1.35;
+  color: var(--muted);
+}
+
+.m-col-btn:hover .m-col-name,
+.m-col-btn[aria-expanded="true"] .m-col-name {
+  color: var(--spot);
+}
+
+/* rows and the level rail ---------------------------------------------- */
+
+.m-row[data-level="l3"] {
+  --m-accent: var(--level-3);
+}
+
+.m-row[data-level="l2"] {
+  --m-accent: var(--level-2);
+}
+
+.m-row[data-level="l1"] {
+  --m-accent: var(--level-1);
+}
+
+.m-row[data-level="l0"] {
+  --m-accent: var(--level-0);
+}
+
+.m-row[data-level="lm1"] {
+  --m-accent: var(--level-minus-1);
+}
+
+/* The remedial row flips to ink, as it does on the sheet: a different
+   substrate, outside the system. --muted holds on both grounds, so it is
+   not overridden; --dim is the paper-side counterpart of the parent
+   site's --paper-dim, which this subsite does not define. */
+.m-row--remedial {
+  --paper-2: rgb(from var(--paper) r g b / 6%);
+  --ink: var(--paper);
+  --dim: #c9c1b0;
+  --rule: rgb(from var(--paper) r g b / 20%);
+
+  background: var(--ink-deep);
+  color: var(--paper);
+}
+
+.m-rail,
+.m-cell {
+  padding: 0;
+  vertical-align: top;
+  border-top: 1px solid var(--rule);
+  font-weight: 400;
+}
+
+.m-cell {
+  border-left: 1px solid var(--rule);
+}
+
+/* The header already draws the rule beneath itself. */
+tbody tr:first-child > .m-rail,
+tbody tr:first-child > .m-cell {
+  border-top: 0;
+}
+
+.m-rail-btn {
+  padding: var(--m-pad) var(--m-pad) 1rem 0;
+}
+
+.m-num {
+  font-weight: 900;
+  font-size: 1.9rem;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--m-accent);
+}
+
+.m-assurance {
+  margin-left: 0.4rem;
+  font-family: var(--hand);
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--ink);
+}
+
+.m-lead {
+  display: block;
+  margin-top: 0.4rem;
+  font-size: 0.74rem;
+  line-height: 1.4;
+  color: var(--dim);
+}
+
+.m-ent {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.68rem;
+  font-style: italic;
+  line-height: 1.4;
+  color: var(--dim);
+}
+
+.m-ent-label {
+  display: block;
+  font-style: normal;
+  font-size: 0.5rem;
+  letter-spacing: 0.2em;
+  color: var(--muted);
+}
+
+.m-rail-btn:hover .m-num,
+.m-rail-btn[aria-expanded="true"] .m-num {
+  color: var(--spot);
+}
+
+/* cells ----------------------------------------------------------------- */
+
+.m-cell-btn {
+  padding: var(--m-pad) var(--m-pad) 0.35rem;
+}
+
+.m-head {
+  display: block;
+  font-weight: 800;
+  font-size: 0.82rem;
+  line-height: 1.15;
+  color: var(--m-accent);
+}
+
+.m-cell-btn:hover .m-head {
+  text-decoration: underline;
+  text-decoration-color: var(--m-accent);
+  text-underline-offset: 0.18em;
+}
+
+.m-body {
+  padding: 0 var(--m-pad) var(--m-pad);
+}
+
+.m-point {
+  margin: 0;
+  font-size: 0.76rem;
+  line-height: 1.4;
+  color: var(--dim);
+  text-wrap: pretty;
+}
+
+.m-point + .m-point {
+  margin-top: 0.4rem;
+  padding-top: 0.4rem;
+  border-top: 1px solid var(--rule);
+}
+
+.m-cell--draft .m-head,
+.m-cell--draft .m-point {
+  opacity: 0.55;
+}
+
+/* the density ladder ---------------------------------------------------- */
+
+/* Screen only: print gets no rung, so it gets everything. */
+@media screen {
+  .m-wrap[data-rung="condensed"] .m-point + .m-point {
+    display: none;
+  }
+
+  .m-wrap[data-rung="collapsed"] .m-body,
+  .m-wrap[data-rung="glyph"] .m-body {
+    display: none;
+  }
+
+  .m-wrap[data-rung="collapsed"] .m-ent,
+  .m-wrap[data-rung="collapsed"] .m-col-def {
+    display: none;
+  }
+
+  .m-wrap[data-rung="collapsed"] {
+    --m-rail: 9rem;
+  }
+
+  .m-wrap[data-rung="glyph"] .m-head,
+  .m-wrap[data-rung="glyph"] .m-lead,
+  .m-wrap[data-rung="glyph"] .m-ent,
+  .m-wrap[data-rung="glyph"] .m-col-def,
+  .m-wrap[data-rung="glyph"] .m-col-name {
+    display: none;
+  }
+
+  .m-wrap[data-rung="glyph"] .m-col-abbr {
+    display: block;
+  }
+
+  .m-wrap[data-rung="glyph"] {
+    --m-rail: 4.75rem;
+  }
+
+  /* The glyph exists only at this rung, so it is drawn only here. */
+  .m-wrap[data-rung="glyph"] .m-cell-btn::before {
+    content: "";
+    display: block;
+    min-height: 1.6rem;
+    border-radius: 2px;
+    background: var(--m-accent);
+    opacity: 0.5;
+  }
+
+  .m-wrap[data-rung="glyph"] .m-row.is-expanded > .m-cell.is-open .m-cell-btn::before {
+    display: none;
+  }
+
+  /* Keep the tap target at 44px however narrow the column gets, and share
+     the width equally — content-sized columns leave the narrowest pillar
+     below that. */
+  .m-wrap[data-rung="glyph"] table.m {
+    table-layout: fixed;
+  }
+
+  .m-wrap[data-rung="glyph"] .m-cell-btn {
+    padding: 0.55rem 0.3rem;
+    min-height: 44px;
+  }
+
+  .m-wrap[data-rung="glyph"] .m-col-btn {
+    padding: 0 0.3rem 0.5rem;
+  }
+
+  .m-wrap[data-rung="glyph"] .m-assurance {
+    display: block;
+    margin-left: 0;
+    font-size: 0.8rem;
+    line-height: 1.1;
+  }
+
+  .m-wrap[data-rung="glyph"] .m-num {
+    font-size: 1.5rem;
+  }
+
+  /* The open cell takes the full width by spanning the pillar columns —
+     the script sets colspan, so table layout does the sizing. Its siblings
+     drop out. Rows above and below keep their column alignment. */
+  .m-row.is-expanded > .m-cell:not(.is-open) {
+    display: none;
+  }
+}
+
+/* an expanded cell ------------------------------------------------------ */
+
+/* Shows in full whatever the rung says. */
+.m-row.is-expanded > .m-cell.is-open .m-body,
+.m-row.is-expanded > .m-cell.is-open .m-point + .m-point,
+.m-row.is-expanded > .m-cell.is-open .m-head {
+  display: block;
+}
+
+.m-row.is-expanded > .m-cell.is-open .m-head {
+  font-size: 1rem;
+}
+
+.m-row.is-expanded > .m-cell.is-open {
+  background: var(--paper-2);
+}
+
+.m-row.is-expanded > .m-cell.is-open .m-body {
+  max-width: var(--measure);
+}
+
+.m-row.is-expanded > .m-cell.is-open .m-point + .m-point {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+}
+
+/* At the collapsed rung the rail has room for the entitlement again once
+   the row is open; at the glyph rung it does not, and the open cell's
+   kicker already names the level. */
+.m-wrap[data-rung="collapsed"] .m-row.is-expanded .m-ent {
+  display: block;
+}
+
+/* The coordinate label is hidden until its cell is open at the glyph rung,
+   where nothing else in the grid carries words. Un-hiding has to undo the
+   whole of .visually-hidden, not part of it. */
+.m-wrap[data-rung="glyph"] .m-row.is-expanded > .m-cell.is-open .m-sr {
+  position: static;
+  display: block;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  white-space: normal;
+  clip-path: none;
+
+  /* Clear of the heading's descenders and, more to the point, of its hover
+     underline, which sits inside the heading's line box. */
+  margin: 0.45rem 0 0.2rem;
+  font-family: var(--mono);
+  font-size: 0.52rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}

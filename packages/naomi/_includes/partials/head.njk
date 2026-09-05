@@ -27,4 +27,5 @@
 />
 <link rel="icon" href="{{ '/favicon.svg' | rel }}" type="image/svg+xml" />
 <link rel="stylesheet" href="{{ '/assets/styles.css' | rel }}" />
+{% if page.url == "/" %}<link rel="stylesheet" href="{{ '/assets/matrix.css' | rel }}" />{% endif %}
 {% include "partials/analytics.njk" %}

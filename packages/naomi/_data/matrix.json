@@ -1,0 +1,308 @@
+{
+  "pillars": [
+    {
+      "id": "flow",
+      "name": "Flow & Recoverability",
+      "def": "A change reaches production, and can be undone, quickly and safely.",
+      "abbr": "Flow"
+    },
+    {
+      "id": "verif",
+      "name": "Verification",
+      "def": "A change is known to be correct by someone who didn't write it.",
+      "abbr": "Verif"
+    },
+    {
+      "id": "context",
+      "name": "Context",
+      "def": "The system is understandable to whoever, or whatever, works on it next.",
+      "abbr": "Ctx"
+    },
+    {
+      "id": "product",
+      "name": "Product Integrity",
+      "def": "What ships is deliberate, wanted, and coherent with what's already there.",
+      "abbr": "Prod"
+    },
+    {
+      "id": "control",
+      "name": "Control & Accountability",
+      "def": "Every change has a named human owner and a bounded blast radius.",
+      "abbr": "Ctrl"
+    }
+  ],
+  "levels": [
+    {
+      "id": "l3",
+      "num": "3",
+      "assurance": "Self-correcting",
+      "lead": "The system improves its own hold.",
+      "rest": "Evidence routinely changes the constraints.",
+      "entitlement": "The safe-delegation boundary moves itself as evidence accumulates.",
+      "remedial": false
+    },
+    {
+      "id": "l2",
+      "num": "2",
+      "assurance": "Instrumented",
+      "lead": "The system knows whether it's holding.",
+      "rest": "The constraint is instrumented.",
+      "entitlement": "Delegation calibrated per class of change, from known failure rates.",
+      "remedial": false
+    },
+    {
+      "id": "l1",
+      "num": "1",
+      "assurance": "Constrained",
+      "lead": "The system holds it.",
+      "rest": "Constrained mechanically, whether or not anyone remembers.",
+      "entitlement": "Agents work against machine-checkable constraints; humans review intent and sample the rest.",
+      "remedial": false
+    },
+    {
+      "id": "l0",
+      "num": "0",
+      "assurance": "Owned",
+      "lead": "A person holds it.",
+      "rest": "Individual diligence, applied reliably.",
+      "entitlement": "Agents draft, humans approve everything. Attention is the throughput ceiling.",
+      "remedial": false
+    },
+    {
+      "id": "lm1",
+      "num": "−1",
+      "assurance": "Unowned",
+      "lead": "Nothing holds the promise.",
+      "rest": "Unowned and reactive.",
+      "entitlement": "Delegate nothing. Agents amplify the mess.",
+      "remedial": true
+    }
+  ],
+  "cells": {
+    "l3.flow": {
+      "head": "Recovery tunes itself",
+      "points": [
+        "Rollback drills run unprompted; results retune the gates.",
+        "Change-failure rate moves the pipeline's own risk model.",
+        "Blast radius shrinks where incidents cluster. No ticket."
+      ],
+      "draft": false
+    },
+    "l3.verif": {
+      "head": "The suite audits itself",
+      "points": [
+        "Mutation scores set review depth; weak suites lose autonomy.",
+        "Escaped defects rewrite the eval set the same week.",
+        "Where review adds nothing measurable, it stops being asked."
+      ],
+      "draft": false
+    },
+    "l3.context": {
+      "head": "Context repairs itself",
+      "points": [
+        "Agent confusion is logged, and opens a documentation defect.",
+        "Retrieval misses rewrite the interface that missed them.",
+        "Coupling thresholds move on evidence of what actually broke."
+      ],
+      "draft": false
+    },
+    "l3.product": {
+      "head": "Scope self-corrects",
+      "points": [
+        "Features that miss their predicted outcome retire on schedule.",
+        "The bar for new work rises where recent bets underperformed.",
+        "Coherence calls carry a hit rate, and the hit rate is public."
+      ],
+      "draft": false
+    },
+    "l3.control": {
+      "head": "Blast radius self-tunes",
+      "points": [
+        "Permissions narrow where agents have overreached before.",
+        "Token budgets reset from observed loop behaviour, not guesswork.",
+        "Provenance data changes who may approve what."
+      ],
+      "draft": false
+    },
+    "l2.flow": {
+      "head": "Filler cell title",
+      "points": [
+        "Stand-in copy occupying the space the real sentence needs.",
+        "Provisional line, matched to the length of a written point.",
+        "Temporary text sized like the sentence that will replace it."
+      ],
+      "draft": true
+    },
+    "l2.verif": {
+      "head": "Draft cell heading",
+      "points": [
+        "Provisional line, matched to the length of a written point.",
+        "Temporary text sized like the sentence that will replace it.",
+        "Placeholder sentence standing in for the real cell content."
+      ],
+      "draft": true
+    },
+    "l2.context": {
+      "head": "Stand-in heading",
+      "points": [
+        "Temporary text sized like the sentence that will replace it.",
+        "Placeholder sentence standing in for the real cell content.",
+        "Filler text at roughly the length the written point will run."
+      ],
+      "draft": true
+    },
+    "l2.product": {
+      "head": "Provisional title",
+      "points": [
+        "Placeholder sentence standing in for the real cell content.",
+        "Filler text at roughly the length the written point will run.",
+        "Draft wording, present only so the density can be tested."
+      ],
+      "draft": true
+    },
+    "l2.control": {
+      "head": "Placeholder heading",
+      "points": [
+        "Filler text at roughly the length the written point will run.",
+        "Draft wording, present only so the density can be tested.",
+        "Stand-in copy occupying the space the real sentence needs."
+      ],
+      "draft": true
+    },
+    "l1.flow": {
+      "head": "Draft cell heading",
+      "points": [
+        "Placeholder sentence standing in for the real cell content.",
+        "Filler text at roughly the length the written point will run.",
+        "Draft wording, present only so the density can be tested."
+      ],
+      "draft": true
+    },
+    "l1.verif": {
+      "head": "Stand-in heading",
+      "points": [
+        "Filler text at roughly the length the written point will run.",
+        "Draft wording, present only so the density can be tested.",
+        "Stand-in copy occupying the space the real sentence needs."
+      ],
+      "draft": true
+    },
+    "l1.context": {
+      "head": "Provisional title",
+      "points": [
+        "Draft wording, present only so the density can be tested.",
+        "Stand-in copy occupying the space the real sentence needs.",
+        "Provisional line, matched to the length of a written point."
+      ],
+      "draft": true
+    },
+    "l1.product": {
+      "head": "Placeholder heading",
+      "points": [
+        "Stand-in copy occupying the space the real sentence needs.",
+        "Provisional line, matched to the length of a written point.",
+        "Temporary text sized like the sentence that will replace it."
+      ],
+      "draft": true
+    },
+    "l1.control": {
+      "head": "Filler cell title",
+      "points": [
+        "Provisional line, matched to the length of a written point.",
+        "Temporary text sized like the sentence that will replace it.",
+        "Placeholder sentence standing in for the real cell content."
+      ],
+      "draft": true
+    },
+    "l0.flow": {
+      "head": "Stand-in heading",
+      "points": [
+        "Stand-in copy occupying the space the real sentence needs.",
+        "Provisional line, matched to the length of a written point.",
+        "Temporary text sized like the sentence that will replace it."
+      ],
+      "draft": true
+    },
+    "l0.verif": {
+      "head": "Provisional title",
+      "points": [
+        "Provisional line, matched to the length of a written point.",
+        "Temporary text sized like the sentence that will replace it.",
+        "Placeholder sentence standing in for the real cell content."
+      ],
+      "draft": true
+    },
+    "l0.context": {
+      "head": "Placeholder heading",
+      "points": [
+        "Temporary text sized like the sentence that will replace it.",
+        "Placeholder sentence standing in for the real cell content.",
+        "Filler text at roughly the length the written point will run."
+      ],
+      "draft": true
+    },
+    "l0.product": {
+      "head": "Filler cell title",
+      "points": [
+        "Placeholder sentence standing in for the real cell content.",
+        "Filler text at roughly the length the written point will run.",
+        "Draft wording, present only so the density can be tested."
+      ],
+      "draft": true
+    },
+    "l0.control": {
+      "head": "Draft cell heading",
+      "points": [
+        "Filler text at roughly the length the written point will run.",
+        "Draft wording, present only so the density can be tested.",
+        "Stand-in copy occupying the space the real sentence needs."
+      ],
+      "draft": true
+    },
+    "lm1.flow": {
+      "head": "No way back",
+      "points": [
+        "Releases are events; nobody is sure how to undo one.",
+        "Environments differ in ways only folklore explains.",
+        "Recovery is improvised live, by whoever is awake."
+      ],
+      "draft": false
+    },
+    "lm1.verif": {
+      "head": "Nobody checks",
+      "points": [
+        "Correctness is whatever the author believed at the time.",
+        "Tests exist. Nobody knows what they would catch.",
+        "Review is a rubber stamp, or absent entirely."
+      ],
+      "draft": false
+    },
+    "lm1.context": {
+      "head": "Nobody knows",
+      "points": [
+        "Instructions are stale, contradictory, or plain wrong.",
+        "Knowledge lives in individuals and leaves when they do.",
+        "Nothing describes the system short of reading all of it."
+      ],
+      "draft": false
+    },
+    "lm1.product": {
+      "head": "Nobody decides",
+      "points": [
+        "Work starts because someone asked, not because demand exists.",
+        "Nothing is ever retired. The surface only grows.",
+        "No one holds the authority to say no."
+      ],
+      "draft": false
+    },
+    "lm1.control": {
+      "head": "Nobody owns it",
+      "points": [
+        "Changes land with no traceable human owner.",
+        "Agent credentials are shared, broad and unaudited.",
+        "Spend is discovered on the invoice."
+      ],
+      "draft": false
+    }
+  }
+}

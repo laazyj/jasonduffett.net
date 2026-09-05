@@ -51,6 +51,20 @@ export default defineConfig(
       },
     },
   },
+  // Browser-side scripts, shipped verbatim from packages/*/assets and run in
+  // the page rather than in Node, so they need the DOM globals.
+  {
+    files: ["packages/*/assets/**/*.js"],
+    languageOptions: {
+      globals: {
+        document: "readonly",
+        window: "readonly",
+        history: "readonly",
+        location: "readonly",
+        matchMedia: "readonly",
+      },
+    },
+  },
   // Markdown content rules. Guards the SEO/accessibility regressions that are
   // expressible at the source level: every image needs alt text, one H1 per
   // page. Posts carry YAML frontmatter, so parse it rather than treating the

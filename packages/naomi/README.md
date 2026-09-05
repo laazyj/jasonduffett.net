@@ -16,29 +16,37 @@ npm run naomi:build   # write ./dist
 | --------------------- | ------------------------------------------------------------------------------ |
 | `_data/site.json`     | Title, description, version, draft flag, lede, copyright, links, article, PDF. |
 | `_includes/layouts/`  | The base layout: masthead, page slot, footer, consent banner.                  |
-| `_includes/partials/` | Head, footer, analytics, consent banner.                                       |
+| `_includes/partials/` | Head, footer, analytics, consent banner, and the matrix.                       |
 | `content/index.njk`   | The single page — lede, index, notes, background, download, links.             |
-| `assets/styles.css`   | All styling. Shipped verbatim; no build step.                                  |
+| `assets/styles.css`   | The frame's styling. Shipped verbatim; no build step.                          |
+| `assets/matrix.css`   | The index's styling, including the density ladder.                             |
+| `assets/matrix.js`    | The index's behaviour. The package's only browser script.                      |
+| `_data/matrix.json`   | The index: pillars, levels, and a cell for each crossing.                      |
 | `static/`             | Files served from the site root: `favicon.svg`, the IndexNow key.              |
 
 ## Status
 
-The index itself is **not on the page yet**. `content/index.njk` renders a
-"coming soon" panel in the footprint the matrix will occupy; everything around
-it — masthead, type, palette, sections, footer — is the finished frame. The
-prose is provisional placeholder while the index is written.
+The index is a **working prototype**, not finished work. The interaction model
+is real; the content is not. In `_data/matrix.json`, levels 3 and −1 carry
+drafted wording and levels 0–2 are matched-length filler, flagged per cell with
+`draft: true`, so density can be judged honestly before the copy exists.
 
 `site.draft` gates the draft notice. Set it to `false` when the copy is real.
+
+The density rung follows the viewport; there is no manual override. The matrix
+carries no `data-rung` in the markup — the ladder only ever subtracts from the
+full state and lives inside `@media screen`, so without JavaScript, and in
+print, every cell renders in full.
 `site.lede` is the standing description of the model; it renders beside the
 wordmark in the masthead on the home page, the way the intro sits beside it on
 the printed sheet.
 
-When the matrix lands it wants its own `_data/*.json` source and a partial
-rendering from it, so the wording stays editable as data rather than markup.
-Note that the cell wording will then exist twice — here, and inline in the
-introductory article at
-`packages/site/content/tech/2026-08-30-naomi-ai-native-maturity-model.md`.
-Decide which one is canonical before the second copy is written.
+**The cell wording now exists twice** — in `_data/matrix.json`, and inline in
+the introductory article at
+`packages/site/content/tech/2026-08-30-naomi-ai-native-maturity-model.md`. The
+pillar definitions are verbatim identical; the cells are a re-worded
+compression. Which copy is canonical is **still undecided**, and wants settling
+before the real wording is written, or the two will drift.
 
 The page is one wide frame, sized for the matrix rather than for prose, with
 three separate widths in `assets/styles.css`:
