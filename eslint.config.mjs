@@ -40,6 +40,7 @@ export default defineConfig(
       "packages/cdk/scripts/*.mjs",
       "packages/site/scripts/*.mjs",
       "packages/*/eleventy.config.js",
+      "packages/*/_data/**/*.js",
     ],
     languageOptions: {
       globals: {

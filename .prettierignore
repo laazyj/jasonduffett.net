@@ -12,3 +12,7 @@ packages/cdk/test/__snapshots__/
 # Prettier's prose formatting.
 AGENTS.md
 CLAUDE.md
+# Foreign material: the canonical NAOMI model, authored outside this repo and
+# shared with the PDF generator. Kept byte-for-byte as supplied so the two
+# cannot diverge on formatting alone.
+packages/naomi/model/

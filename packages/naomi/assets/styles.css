@@ -230,10 +230,6 @@ body {
 
 /* lede --------------------------------------------------------------- */
 
-.lede {
-  margin-bottom: 2.5rem;
-}
-
 .lede-text {
   margin: 0;
   font-size: 1.12rem;
@@ -251,22 +247,41 @@ body {
   color: var(--spot);
 }
 
-/* draft notice ------------------------------------------------------- */
+/* AI-Native markers -------------------------------------------------- */
 
-.notice {
+.markers {
   max-width: var(--measure);
   margin: 0 0 3rem;
-  padding: 0.75rem 0.9rem;
+  padding: 0.9rem 1.1rem;
   border-left: 3px solid var(--spot);
   background: var(--paper-2);
+}
+
+.markers-heading {
+  margin: 0 0 0.6rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.markers-list {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.markers-list li + li {
+  margin-top: 0.5rem;
+}
+
+.markers-list li {
   font-size: 0.88rem;
   line-height: 1.5;
   color: var(--dim);
+  text-wrap: pretty;
 }
 
-.notice strong {
-  font-weight: 600;
-  color: var(--ink);
+.markers-list li::marker {
+  color: var(--spot);
 }
 
 /* sections ----------------------------------------------------------- */

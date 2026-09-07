@@ -3,17 +3,18 @@ layout: layouts/base.njk
 permalink: /
 ---
 {#
-  The prose here is provisional. The matrix is a working PROTOTYPE rendered
-  from _data/matrix.json — levels 3 and −1 carry drafted content, 0–2 are
-  matched-length filler so density can be judged honestly.
+  Rendered from `model/naomi.json` via `_data/matrix.js`. The prose in the
+  closing sections is still the site's own and remains provisional.
 #}
 <main class="page">
-  {% if site.draft %}
-  <p class="notice" role="note">
-    <strong>Draft.</strong> The wording on this page is provisional while the
-    index is being written. Treat the shape as real and the copy as a stand-in.
-  </p>
-  {% endif %}
+  <div class="markers">
+    <h2 class="markers-heading">
+      The observable markers of an AI Native organisation:
+    </h2>
+    <ul class="markers-list">
+      {% for m in matrix.markers %}<li>{{ m }}</li>{% endfor %}
+    </ul>
+  </div>
 
   <section class="section section--full" aria-labelledby="index-heading">
     <h2 class="section-title" id="index-heading">The index</h2>
