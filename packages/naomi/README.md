@@ -14,7 +14,7 @@ npm run naomi:build   # write ./dist
 
 | Path                  | What it holds                                                           |
 | --------------------- | ----------------------------------------------------------------------- |
-| `model/naomi.json`    | **The canonical model.** Read-only; shared with the PDF generator.      |
+| `model/naomi.json`    | **The canonical model.** shared with the PDF generator.                 |
 | `_data/matrix.js`     | The checked view of it — the only door templates see the model through. |
 | `_data/site.json`     | Site chrome: title, description, copyright, links, article, PDF.        |
 | `_includes/layouts/`  | The base layout: masthead, page slot, footer, consent banner.           |
@@ -28,9 +28,8 @@ npm run naomi:build   # write ./dist
 ## The data source
 
 `model/naomi.json` is the **canonical model** — pillars, levels, and the
-behaviours in every cell — and is shared with the (future) PDF generator. It is
-never edited to suit the web view, and `packages/naomi/model/` is listed in
-`.prettierignore` so the repo's formatter leaves it byte-for-byte as supplied.
+behaviours in every cell — and is shared with the PDF generator. It is
+never edited to suit the web view.
 
 It sits outside `_data/` deliberately: Eleventy would otherwise also expose it
 as a global, and templates could reach the raw model around the checks below.

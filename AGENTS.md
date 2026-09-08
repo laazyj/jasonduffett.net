@@ -39,14 +39,6 @@ the branch is pushed, so skipping the local scan is safe for secret-free
 changes. Do **not** use `--no-verify` if you are committing something that
 might actually be a secret.
 
-## Foreign material
-
-`packages/naomi/model/naomi.json` is the canonical NAOMI model. It is authored
-outside this repo and shared with the PDF generator: **do not edit or reformat
-it.** The directory is in `.prettierignore` for that reason. Everything the
-site needs from it is derived and checked in `packages/naomi/_data/matrix.js`,
-which is the only door templates see it through.
-
 ## Build system
 
 Use npx nx to run build/test scripts — this is an nx monorepo.

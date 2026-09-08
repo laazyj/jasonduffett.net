@@ -3,8 +3,8 @@ import { readFileSync } from "node:fs";
 /*
   The model, made ready for the page — and the only door to it.
 
-  `model/naomi.json` is canonical, authored outside this repo and shared with
-  the (future) PDF generator. It is never edited to suit the web view, and it
+  `model/naomi.json` is canonical and shared with the PDF generator. 
+  It is never edited to suit the web view, and it
   lives outside `_data/` deliberately so Eleventy does not also expose it as a
   global: everything the templates see passes through here, where it is
   derived and checked.
