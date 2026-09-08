@@ -4,9 +4,9 @@
    or a whole pillar (column). Opening sets .is-expanded on the affected
    row(s) and .is-open on the cell(s); the stylesheet does the rest.
 
-   The density rung follows the viewport. The page works without this file:
-   with no `data-rung` set, the ladder in the stylesheet subtracts nothing
-   and every cell renders in full. That is also what print gets. */
+   Density is not this file's concern — the stylesheet decides it from the
+   viewport width. This is interaction only, and the page reads correctly
+   without it. */
 (function () {
   "use strict";
 
@@ -18,31 +18,10 @@
   const pillars = Array.from(table.querySelectorAll(".m-col-btn"), (b) => b.dataset.col);
   const levels = rows.map((r) => r.dataset.level);
 
-  // Built once: the grid is static, so every later lookup is a map hit
-  // rather than an attribute-selector query.
-  const cellBtns = new Map();
-  table.querySelectorAll(".m-cell-btn").forEach((b) => {
-    cellBtns.set(b.dataset.cell + "." + b.dataset.level, b);
-  });
-  const cellAt = (p, l) => cellBtns.get(p + "." + l);
+  // The template already indexes every cell button by id; reuse that rather
+  // than building a second index of the same thing.
+  const cellAt = (p, l) => document.getElementById(`cell-${p}-${l}`);
   const rowFor = (l) => rows[levels.indexOf(l)];
-
-  /* ---- density rungs ------------------------------------------------ */
-
-  // Thresholds are viewport widths, in px to match the stylesheet's own
-  // media queries. Note those resolve `rem` against 16px, not the 18px
-  // root, which is why neither expresses these in rem.
-  const RUNGS = [
-    { rung: "full", min: 1200 },
-    { rung: "condensed", min: 1000 },
-    { rung: "collapsed", min: 700 },
-    { rung: "glyph", min: 0 },
-  ];
-
-  function applyRung() {
-    const rung = RUNGS.find((r) => window.innerWidth >= r.min).rung;
-    if (wrap.dataset.rung !== rung) wrap.dataset.rung = rung;
-  }
 
   /* ---- open / close -------------------------------------------------- */
 
@@ -182,15 +161,6 @@
     const col = e.target.closest(".m-col-btn");
     if (col) openCol(col.dataset.col);
   });
-
-  // Only crossings matter, so listen for those rather than debouncing every
-  // frame of a resize.
-  RUNGS.forEach((r) => {
-    if (r.min > 0)
-      window.matchMedia(`(min-width: ${r.min}px)`).addEventListener("change", applyRung);
-  });
-
-  applyRung();
 
   /* ---- deep links ----------------------------------------------------- */
 

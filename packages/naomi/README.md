@@ -12,56 +12,95 @@ npm run naomi:build   # write ./dist
 
 ## Layout
 
-| Path                  | What it holds                                                                  |
-| --------------------- | ------------------------------------------------------------------------------ |
-| `_data/site.json`     | Title, description, version, draft flag, lede, copyright, links, article, PDF. |
-| `_includes/layouts/`  | The base layout: masthead, page slot, footer, consent banner.                  |
-| `_includes/partials/` | Head, footer, analytics, consent banner, and the matrix.                       |
-| `content/index.njk`   | The single page — lede, index, notes, background, download, links.             |
-| `assets/styles.css`   | The frame's styling. Shipped verbatim; no build step.                          |
-| `assets/matrix.css`   | The index's styling, including the density ladder.                             |
-| `assets/matrix.js`    | The index's behaviour. The package's only browser script.                      |
-| `_data/matrix.json`   | The index: pillars, levels, and a cell for each crossing.                      |
-| `static/`             | Files served from the site root: `favicon.svg`, the IndexNow key.              |
+| Path                  | What it holds                                                           |
+| --------------------- | ----------------------------------------------------------------------- |
+| `model/naomi.json`    | **The canonical model.** shared with the PDF generator.                 |
+| `_data/matrix.js`     | The checked view of it — the only door templates see the model through. |
+| `_data/site.json`     | Site chrome: title, description, copyright, links, article, PDF.        |
+| `_includes/layouts/`  | The base layout: masthead, page slot, footer, consent banner.           |
+| `_includes/partials/` | Head, footer, analytics, consent banner, and the matrix.                |
+| `content/index.njk`   | The single page — markers, index, how to read it, background, links.    |
+| `assets/styles.css`   | The frame's styling. Shipped verbatim; no build step.                   |
+| `assets/matrix.css`   | The index's styling, including the density ladder.                      |
+| `assets/matrix.js`    | The index's behaviour. The package's only browser script.               |
+| `static/`             | Files served from the site root: `favicon.svg`, the IndexNow key.       |
 
-## Status
+## The data source
 
-The index is a **working prototype**, not finished work. The interaction model
-is real; the content is not. In `_data/matrix.json`, levels 3 and −1 carry
-drafted wording and levels 0–2 are matched-length filler, flagged per cell with
-`draft: true`, so density can be judged honestly before the copy exists.
+`model/naomi.json` is the **canonical model** — pillars, levels, and the
+behaviours in every cell — and is shared with the PDF generator. It is
+never edited to suit the web view.
 
-`site.draft` gates the draft notice. Set it to `false` when the copy is real.
+It sits outside `_data/` deliberately: Eleventy would otherwise also expose it
+as a global, and templates could reach the raw model around the checks below.
+`_data/matrix.js` is the only door, and re-exports the version, date,
+definition and markers as well as the matrix itself.
 
-The density rung follows the viewport; there is no manual override. The matrix
-carries no `data-rung` in the markup — the ladder only ever subtracts from the
-full state and lives inside `@media screen`, so without JavaScript, and in
-print, every cell renders in full.
-`site.lede` is the standing description of the model; it renders beside the
-wordmark in the masthead on the home page, the way the intro sits beside it on
-the printed sheet.
+That file derives what the page needs and the model does not itself express:
+levels reversed so the matrix reads downward, the level description split into
+a claim and a gloss, cells re-keyed `<level>.<pillar>`, a real minus for
+negative ordinals, a short label per pillar for the narrowest width, and the
+level's colour token, which the row then carries inline.
 
-**The cell wording now exists twice** — in `_data/matrix.json`, and inline in
-the introductory article at
-`packages/site/content/tech/2026-08-30-naomi-ai-native-maturity-model.md`. The
-pillar definitions are verbatim identical; the cells are a re-worded
-compression. Which copy is canonical is **still undecided**, and wants settling
-before the real wording is written, or the two will drift.
+It also **asserts**, so a model change the page cannot render fails the build
+rather than shipping a blank cell or a colourless row:
 
-The page is one wide frame, sized for the matrix rather than for prose, with
-three separate widths in `assets/styles.css`:
+- every field it forwards exists and is non-empty;
+- every pillar has a short label in `SHORT_LABELS`;
+- every level id has a colour token in `ACCENT_TOKENS`;
+- every level x pillar has a cell, and every cell has a behaviour;
+- every level description is two sentences.
 
-- `--frame` (72rem) is the page. The matrix gets all of it.
-- `--measure` (40rem) is how wide prose is allowed to set.
-- `--rail` (12rem) is the label column that holds section headings.
+Add a pillar and the build stops with the pillar's id and what to do about it.
 
-Above 1024px each `.section` becomes a rail plus a content column; below it
-they stack. `.section--full` opts out so its content spans the whole frame —
-that is what the pending panel uses, and what the matrix will use. Everything
-hangs off one left edge: prose stops at the measure, the matrix runs on.
+The model carries **no per-cell headline**, so the first behaviour is the
+cell's label — its visible text at the middle width and its click target
+everywhere. That decision lives in `_data/matrix.js`, not the template. A
+headline field in the model would let a fourth step back into the ladder,
+between "first behaviour" and "colour only".
 
-Note that media-query `rem` resolves against 16px, not the 18px set on `html`,
-so the `64rem` breakpoint fires at 1024px.
+Version and date come from `naomi.model`, so they cannot drift from the content
+they describe.
+
+## The matrix
+
+Density is decided by media queries in `assets/matrix.css`, not by JavaScript:
+
+| Width       | A cell shows             |
+| ----------- | ------------------------ |
+| `>= 1200px` | all three behaviours     |
+| `< 1200px`  | the first behaviour only |
+| `< 1000px`  | a coloured block only    |
+
+The ladder only ever subtracts, and is gated on `(scripting: enabled)` — it
+hides only what expanding can bring back, so without a script it does not apply
+and every cell renders in full. Print gets everything for the same reason.
+Thresholds are in `px`: media-query `rem` resolves against 16px rather than the
+18px root, so `rem` there would not mean what it means elsewhere here.
+
+`assets/matrix.js` is interaction only — expanding a cell, a level or a pillar,
+keyboard grid navigation, and `#cell-<pillar>-<level>` deep links.
+
+The remedial row's band extends past the table by `--m-bleed`. Its rail text
+sits flush left to line up with every other row, which on an ink ground put the
+words hard against the edge of the black, so the band grows rather than the
+text moving.
+
+### Safari
+
+Three things here are workarounds for Safari specifically, each commented in
+place. Grep for `SAFARI:` before simplifying any of them — all three render
+correctly in headless WebKit and incorrectly in Safari itself, so a local check
+will not catch a regression:
+
+- `border-collapse: separate`, not `collapse`. Collapsed borders are painted as
+  one shared table-level layer that Safari fails to invalidate on hover,
+  dropping the rule under the header in segments.
+- The remedial band is positioned boxes, not `box-shadow` on the `<tr>`. Safari
+  does not reliably paint shadows on table boxes.
+- Density is CSS, not a class set from retained `MediaQueryList` objects. A
+  `MediaQueryList` with no strong reference can be collected in Safari, taking
+  its listener with it.
 
 ## Design
 
@@ -70,15 +109,16 @@ Caveat, JetBrains Mono, burnt orange — **inverted onto cream stock**, so the
 hosted page and the printable sheet carry one palette and one set of accents.
 The riso hues are darkened from their dark-ground values to hold on paper.
 
-`--level-3` … `--level-minus-1` in `assets/styles.css` are the level ramp. They
-are deliberately unused by the chrome and wait for the matrix, so the frame and
-the index cannot drift apart.
+`--level-3` … `--level-minus-1` in `assets/styles.css` are the level ramp, used
+by `assets/matrix.css` and by nothing in the chrome. The mapping from level id
+to token is five hand-written rules; `_data/matrix.js` asserts every id in the
+model has one.
 
-The site version is one data source with two call sites: `site.version`
-renders as a chip locked up with the wordmark (`_includes/layouts/base.njk`)
-and, with `site.versionDate`, as a provenance line in the footer
-(`_includes/partials/site-footer.njk`). Bump both together — nothing enforces
-the pairing.
+The site version is the model's version. `naomi.model.version` renders as a
+chip locked up with the wordmark (`_includes/layouts/base.njk`) and, with
+`naomi.model.date`, as a provenance line in the footer
+(`_includes/partials/site-footer.njk`). Both come from one object in the
+canonical file, so they cannot be bumped out of step.
 
 ## Content
 

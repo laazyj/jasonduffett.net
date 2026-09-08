@@ -2,14 +2,8 @@
   "title": "NAOMI",
   "fullTitle": "Native AI Operational Maturity Index",
   "description": "NAOMI — the Native AI Operational Maturity Index: five pillars and five levels for working out what holds in an engineering organisation when nobody is watching, and therefore how much can safely be delegated.",
+  "ledeNote": "When production is cheap, the scarce resource is assurance.",
   "url": "https://naomi.jasonduffett.net",
-  "version": "0.1",
-  "versionDate": "2026-09-02",
-  "draft": true,
-  "lede": {
-    "text": "Five pillars, five levels. The level names what holds the promise — nobody, a person, the system, an instrumented system, or a system that improves its own hold. What you may safely delegate follows from that, and from nothing else.",
-    "note": "When production is cheap, the scarce resource is assurance."
-  },
   "author": {
     "name": "Jason Duffett"
   },
