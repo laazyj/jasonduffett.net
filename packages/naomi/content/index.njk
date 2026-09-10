@@ -7,14 +7,30 @@ permalink: /
   closing sections is still the site's own and remains provisional.
 #}
 <main class="page">
-  <div class="markers">
-    <h2 class="markers-heading">
-      The observable markers of an AI Native organisation:
-    </h2>
-    <ul class="markers-list">
-      {% for m in matrix.markers %}<li>{{ m }}</li>{% endfor %}
-    </ul>
-  </div>
+  {#
+    The standfirst, and the one block competing with the index for the fold.
+    Three sentences of it: what the model is, why the levels measure
+    assurance, and what a level entitles you to. Keep it this short.
+  #}
+  <section class="section" aria-labelledby="intro-heading">
+    <h2 class="section-title" id="intro-heading">Introduction</h2>
+    <div class="intro">
+      <p>
+        A maturity model: five pillars across, five levels down. Each cell is
+        an observable practice state — what a team does, not what it intends.
+      </p>
+      <p>
+        Agents make production cheap; checking the result does not get cheaper
+        with it. So the levels measure assurance.
+        <em class="intro-gloss">{{ matrix.spine.plainGloss }}</em>
+        They run <span class="intro-ladder">{{ matrix.spine.shortForm }}</span>.
+      </p>
+      <p>
+        Each level states what it entitles you to delegate: more assurance,
+        more delegation.
+      </p>
+    </div>
+  </section>
 
   <section class="section section--full" aria-labelledby="index-heading">
     <h2 class="section-title" id="index-heading">The index</h2>
@@ -40,6 +56,18 @@ permalink: /
         the right place to be; it is what the right place looks like when it is
         where you need to be.
       </p>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="markers-heading">
+    <h2 class="section-title" id="markers-heading">AI Native</h2>
+    <div class="markers">
+      <p class="markers-heading">
+        Markers observed in an AI Native organisation:
+      </p>
+      <ul class="markers-list">
+        {% for m in matrix.markers %}<li>{{ m }}</li>{% endfor %}
+      </ul>
     </div>
   </section>
 

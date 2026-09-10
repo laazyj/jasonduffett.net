@@ -247,11 +247,48 @@ body {
   color: var(--spot);
 }
 
+/* introduction ------------------------------------------------------- */
+
+/* The standfirst. Its section places and measures it; this sets it one size
+   down from the prose blocks below, because it is the only thing between the
+   masthead and the index. Length is the real control — three sentences,
+   anything longer pushes the matrix under the fold. */
+.intro {
+  margin: 0;
+}
+
+.intro p {
+  margin: 0 0 0.7rem;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--dim);
+  text-wrap: pretty;
+}
+
+.intro p:last-child {
+  margin-bottom: 0;
+}
+
+/* The model's own plain gloss of the spine, set apart from the sentence
+   carrying it. */
+.intro-gloss {
+  color: var(--ink);
+}
+
+/* The rungs, in the machine face: read as a sequence, not as prose. */
+.intro-ladder {
+  font-family: var(--mono);
+  font-size: 0.82em;
+  color: var(--spot);
+}
+
 /* AI-Native markers -------------------------------------------------- */
 
+/* An aside inside its section, so this sets only the box. Width is the
+   section's business: the measure once the grid is on, and the full column
+   below it — the same as the prose blocks and callouts around it. */
 .markers {
-  max-width: var(--measure);
-  margin: 0 0 3rem;
+  margin: 0;
   padding: 0.9rem 1.1rem;
   border-left: 3px solid var(--spot);
   background: var(--paper-2);

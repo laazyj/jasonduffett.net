@@ -19,6 +19,7 @@ const fail = (msg) => {
 // Forwarding a renamed or emptied field ships the word "undefined", or a
 // blank cell, with nothing failing. Check what we pass on.
 function required(obj, fields, what) {
+  if (!obj) fail(`${what} is missing`);
   fields.forEach((f) => {
     const v = obj[f];
     if (v === undefined || v === null || v === "") fail(`${what} has no "${f}"`);
@@ -111,10 +112,27 @@ levels.forEach((l) =>
 const framing = required(source.framing.aiNative, ["definition", "markers"], "framing.aiNative");
 if (!framing.markers.length) fail("framing.aiNative.markers is empty");
 
+/*
+  The introduction prints the ladder from the model's own short form, which is
+  shared with the PDF and so is not derived here. Nothing in the JSON keeps it
+  in step with the level names the matrix renders, so check it: rename a level
+  and the sentence above the index would otherwise go on naming the old rung.
+*/
+const spine = required(source.framing.spine, ["shortForm", "plainGloss"], "framing.spine");
+const rungs = levels
+  .slice()
+  .reverse() // levels are highest-first; the ladder reads up from the bottom
+  .map((l) => l.assurance.toLowerCase())
+  .join(" → ");
+if (rungs !== spine.shortForm) {
+  fail(`framing.spine.shortForm says "${spine.shortForm}" but the levels read "${rungs}"`);
+}
+
 export default {
   ...required(source.model, ["version", "date"], "model"),
   definition: framing.definition,
   markers: framing.markers,
+  spine: { shortForm: spine.shortForm, plainGloss: spine.plainGloss },
   levels,
   pillars,
   cells,
