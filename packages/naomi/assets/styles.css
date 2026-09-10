@@ -154,8 +154,11 @@ body {
 
 /* masthead ----------------------------------------------------------- */
 
+/* The rule at the foot of the masthead is the first section's rule, so it
+   stands the same 1.25rem clear of what follows as every section rule does
+   — on the prose pages too, where the page's h1 follows it directly. */
 .masthead {
-  margin-bottom: 2.75rem;
+  margin-bottom: 1.25rem;
 }
 
 @media (width >= 64rem) {
@@ -340,6 +343,13 @@ body {
   margin-bottom: 3.25rem;
   padding-top: 1.25rem;
   border-top: 1px solid var(--rule);
+}
+
+/* The masthead closes itself with the spot rule, so the first section does
+   not draw a second one a gap below it. */
+.page > .section:first-child {
+  padding-top: 0;
+  border-top: 0;
 }
 
 .section-title {
