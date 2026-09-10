@@ -271,7 +271,14 @@ tbody tr:first-child > .m-cell {
 /* cells ----------------------------------------------------------------- */
 
 .m-cell-btn {
-  padding: var(--m-pad);
+  padding: var(--m-pad) var(--m-pad) 0;
+}
+
+/* The text is the button's sibling now, so it closes the cell the button used
+   to close. The top value is the accent's own former bottom margin, moved
+   here so the gap under the accent does not double. */
+.m-text {
+  padding: 0.45rem var(--m-pad) var(--m-pad);
 }
 
 /* The level accent, which the cells would otherwise not carry now that
@@ -282,7 +289,6 @@ tbody tr:first-child > .m-cell {
   display: block;
   width: 1.6rem;
   height: 3px;
-  margin-bottom: 0.45rem;
   border-radius: 2px;
   background: var(--m-accent);
 }
@@ -296,6 +302,24 @@ tbody tr:first-child > .m-cell {
    Underlining one behaviour would say the others are not clickable. */
 .m-cell:hover {
   background: var(--paper-2);
+}
+
+/* Focus lands on the button, which is now only the accent — so draw the ring
+   on the cell the button acts for. Width and colour mirror the global
+   :focus-visible in styles.css; only the offset differs, and has to, because
+   this ring sits inside a table cell rather than outside a box.
+
+   Not :focus-within, which cannot tell a keyboard from a mouse and would ring
+   the cell whenever the accent was clicked. Where :has() is missing both rules
+   drop and the button keeps its own ring — around the accent alone, which is
+   a worse indicator than this, not merely a smaller one. */
+.m-cell:has(.m-cell-btn:focus-visible) {
+  outline: 2px solid var(--spot);
+  outline-offset: -2px;
+}
+
+.m-cell:has(.m-cell-btn:focus-visible) .m-cell-btn {
+  outline: 0;
 }
 
 .m-point {
@@ -346,7 +370,7 @@ tbody tr:first-child > .m-cell {
 }
 
 @media screen and (scripting: enabled) and (width < 1000px) {
-  .m-point,
+  .m-text,
   .m-lead,
   .m-col-name {
     display: none;
@@ -415,6 +439,10 @@ tbody tr:first-child > .m-cell {
 
 /* Shows in full whatever the rung says. The text sets to the measure; the
    button stays full width, because the whole cell is still the target. */
+.m-row.is-expanded > .m-cell.is-open .m-text {
+  display: block;
+}
+
 .m-row.is-expanded > .m-cell.is-open .m-point {
   display: block;
   max-width: var(--measure);

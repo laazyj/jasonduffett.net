@@ -150,6 +150,31 @@
 
   /* ---- wiring -------------------------------------------------------- */
 
+  /*
+    Selecting a behaviour by dragging across it ends in a click on the cell,
+    and collapsing the cell someone just selected from would take the
+    selection with it.
+
+    Tell the two apart by whether the pointer travelled, not by whether a
+    selection exists: the browser holds a selection open through mousedown so
+    the text can be dragged, so a plain click inside one still reads as
+    selected at click time and would be swallowed. A click never travels;
+    a drag always does. Keyboard activation carries no pointer at all, which
+    `detail` reports as 0; a synthesised click can carry a detail without ever
+    having been preceded by a pointerdown, hence the guard on the position.
+  */
+  const DRAG_SLOP = 4;
+  let pointerDownAt = null;
+
+  table.addEventListener("pointerdown", (e) => {
+    pointerDownAt = [e.clientX, e.clientY];
+  });
+
+  function draggedTo(e) {
+    if (!e.detail || !pointerDownAt) return false;
+    return Math.hypot(e.clientX - pointerDownAt[0], e.clientY - pointerDownAt[1]) > DRAG_SLOP;
+  }
+
   // One delegated listener for all three ways in.
   //
   // Resolve a cell from the <td>, not from the button. Rows are as tall as
@@ -159,7 +184,10 @@
   // inside the button.
   table.addEventListener("click", (e) => {
     const cell = e.target.closest(".m-cell");
-    if (cell) return openCell(cell.querySelector(".m-cell-btn"));
+    if (cell) {
+      if (draggedTo(e)) return;
+      return openCell(cell.querySelector(".m-cell-btn"));
+    }
     const rail = e.target.closest(".m-rail-btn");
     if (rail) return openRow(rail.dataset.row);
     const col = e.target.closest(".m-col-btn");
