@@ -59,8 +59,20 @@
           </th>
           {% for p in matrix.pillars %}
           <td class="m-cell" data-pillar="{{ p.id }}">
-            {# Every behaviour is inside the one button: they are peers, so
-               each is the same click target as the next. #}
+            {#
+              The behaviours sit beside the button rather than inside it:
+              text inside a button cannot be selected, and this is a table
+              people quote from. The button is the cell's control — focus,
+              keyboard, aria-expanded, the deep-link target — and wraps only
+              the level accent. The click surface is the whole cell, which is
+              matrix.js's business, so no behaviour is a better target than
+              any other whichever element it happens to sit in.
+
+              The description stays pointed at the text at every rung, including
+              the narrow ones where the stylesheet hides it: the density ladder
+              is about what there is room to show, and a screen reader has room
+              for all of it.
+            #}
             <button
               type="button"
               class="m-cell-btn"
@@ -68,12 +80,15 @@
               data-cell="{{ p.id }}"
               data-level="{{ lv.id }}"
               aria-expanded="false"
+              aria-describedby="text-{{ p.id }}-{{ lv.id }}"
             >
               <span class="visually-hidden m-sr">{{ p.name }}, level {{ lv.ordinalLabel }}</span>
-              {% for text in matrix.cells[lv.id + "." + p.id] %}
-              <span class="m-point">{{ text }}</span>
-              {% endfor %}
             </button>
+            <div class="m-text" id="text-{{ p.id }}-{{ lv.id }}">
+              {% for text in matrix.cells[lv.id + "." + p.id] %}
+              <p class="m-point">{{ text }}</p>
+              {% endfor %}
+            </div>
           </td>
           {% endfor %}
         </tr>
