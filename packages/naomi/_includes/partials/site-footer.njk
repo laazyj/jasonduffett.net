@@ -1,6 +1,7 @@
 <footer class="site">
   <span class="footer-meta">
-    {{ site.copyright }}
+    &copy; {{ currentYear }} {{ site.author.name }}
+    · <a rel="license" href="{{ site.defaultLicense }}">{{ site.licenseName }}</a>
     · <a href="https://jasonduffett.net">jasonduffett.net</a>
     · <a href="{{ '/privacy/' | rel }}">privacy</a>
     {% if analytics.measurementId %}· <a href="#" data-consent-reopen>cookies</a>{% endif %}
