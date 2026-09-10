@@ -16,7 +16,7 @@ npm run naomi:build   # write ./dist
 | --------------------- | ----------------------------------------------------------------------- |
 | `model/naomi.json`    | **The canonical model.** shared with the PDF generator.                 |
 | `_data/matrix.js`     | The checked view of it — the only door templates see the model through. |
-| `_data/site.json`     | Site chrome: title, description, copyright, links, article, PDF.        |
+| `_data/site.json`     | Site chrome: title, description, licence, links, article, PDF.          |
 | `_includes/layouts/`  | The base layout: masthead, page slot, footer, consent banner.           |
 | `_includes/partials/` | Head, footer, analytics, consent banner, and the matrix.                |
 | `content/index.njk`   | The single page — markers, index, how to read it, background, links.    |
@@ -129,10 +129,12 @@ card in a disabled state. To publish it, drop the file in `assets/` and set:
 "pdf": { "path": "/assets/naomi.pdf", "label": "The printable index", "size": "1.2 MB" }
 ```
 
-Licensing for the index content is deliberately unresolved: the pages carry an
-all-rights-reserved copyright notice and `tdm-reservation: 1`, and `site.copyrightUrl`
-is `null` so no licence document is linked. Point it at one when the terms are
-decided.
+The index content is licensed **CC BY 4.0**, matching the apex site. The pages
+carry `<link rel="license">`, a `copyright` meta naming the licence, and
+`tdm-reservation: 0` with a `tdm-policy` pointing at the apex site's licence
+policy — so text and data mining, AI training included, is permitted with
+attribution. The terms live in `site.json` as `defaultLicense`, `licenseName`
+and `licensePolicyUrl`, the same three keys the apex site uses.
 
 ## Analytics
 

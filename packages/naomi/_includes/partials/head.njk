@@ -6,12 +6,10 @@
 <meta name="theme-color" content="#ece4d3" />
 <meta name="build-sha" content="{{ build.sha }}" />
 <link rel="canonical" href="{{ site.url }}{{ page.url }}" />
-<meta name="copyright" content="{{ site.copyright }}" />
-<meta name="tdm-reservation" content="1" />
-{% if site.copyrightUrl %}
-<meta name="tdm-policy" content="{{ site.copyrightUrl }}" />
-<link rel="license" href="{{ site.copyrightUrl }}" />
-{% endif %}
+<link rel="license" href="{{ site.defaultLicense }}" />
+<meta name="copyright" content="© {{ currentYear }} {{ site.author.name }}, {{ site.licenseName }}" />
+<meta name="tdm-reservation" content="0" />
+<meta name="tdm-policy" content="{{ site.licensePolicyUrl }}" />
 <meta property="og:title" content="{% if title %}{{ title }}{% else %}{{ site.fullTitle }}{% endif %}" />
 <meta property="og:description" content="{{ summary or site.description }}" />
 <meta property="og:type" content="website" />

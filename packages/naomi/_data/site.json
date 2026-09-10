@@ -8,8 +8,9 @@
     "name": "Jason Duffett"
   },
   "language": "en-GB",
-  "copyright": "© 2026 Jason Duffett. All rights reserved.",
-  "copyrightUrl": null,
+  "defaultLicense": "https://creativecommons.org/licenses/by/4.0/",
+  "licenseName": "CC BY 4.0",
+  "licensePolicyUrl": "https://jasonduffett.net/about/#license",
   "pdf": null,
   "article": {
     "title": "Introducing NAOMI, a maturity model for AI Native engineering",
