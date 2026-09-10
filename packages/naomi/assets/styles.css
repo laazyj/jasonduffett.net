@@ -52,6 +52,19 @@
 
 html {
   font-size: 18px;
+
+  /* SAFARI (iOS): decline the text autosizer. It picks a font-size boost for
+     a text block from that block's width, and the index changes cell widths
+     as you use it — opening a pillar puts colSpan on a cell, so it is briefly
+     the full width of the table. The boost is computed there and survives the
+     cell narrowing again, leaving that one cell's type larger than its
+     neighbours' until reload. iOS and Chrome Android only: desktop Safari and
+     headless WebKit do not autosize, so neither catches it.
+
+     100%, not none — this declines the automatic inflation without taking
+     away the reader's own zoom. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {

@@ -18,9 +18,6 @@
   const pillars = Array.from(table.querySelectorAll(".m-col-btn"), (b) => b.dataset.col);
   const levels = rows.map((r) => r.dataset.level);
 
-  // The template already indexes every cell button by id; reuse that rather
-  // than building a second index of the same thing.
-  const cellAt = (p, l) => document.getElementById(`cell-${p}-${l}`);
   const rowFor = (l) => rows[levels.indexOf(l)];
 
   /* ---- open / close -------------------------------------------------- */
@@ -64,12 +61,11 @@
     openRows.push(row);
   }
 
-  function openCell(p, l) {
-    const btn = cellAt(p, l);
+  function openCell(btn) {
     const already = isOpen(btn);
     collapseAll();
     if (already) return;
-    expandRow(rowFor(l));
+    expandRow(rowFor(btn.dataset.level));
     expandCell(btn.closest(".m-cell"), true);
     setHash(btn.id);
   }
@@ -127,7 +123,9 @@
   // by collapsing that expansion first, so focus is never trapped.
   function focusCell(pi, li) {
     if (pi < 0 || pi >= pillars.length || li < 0 || li >= levels.length) return;
-    const btn = cellAt(pillars[pi], levels[li]);
+    // The template already indexes every cell button by id; reuse that index
+    // rather than building a second one.
+    const btn = document.getElementById(`cell-${pillars[pi]}-${levels[li]}`);
     if (isCellHidden(btn)) collapseAll();
     btn.focus();
   }
@@ -153,9 +151,15 @@
   /* ---- wiring -------------------------------------------------------- */
 
   // One delegated listener for all three ways in.
+  //
+  // Resolve a cell from the <td>, not from the button. Rows are as tall as
+  // their tallest cell and the button is only as tall as its behaviours, so a
+  // short cell has dead space below its text that looks every bit as clickable
+  // as the rest of it — and a click there lands on the <td>, never on anything
+  // inside the button.
   table.addEventListener("click", (e) => {
-    const cell = e.target.closest(".m-cell-btn");
-    if (cell) return openCell(cell.dataset.cell, cell.dataset.level);
+    const cell = e.target.closest(".m-cell");
+    if (cell) return openCell(cell.querySelector(".m-cell-btn"));
     const rail = e.target.closest(".m-rail-btn");
     if (rail) return openRow(rail.dataset.row);
     const col = e.target.closest(".m-col-btn");
@@ -170,7 +174,7 @@
   function openFromHash() {
     const target = document.getElementById(location.hash.slice(1));
     if (!target || !target.classList.contains("m-cell-btn") || isOpen(target)) return;
-    openCell(target.dataset.cell, target.dataset.level);
+    openCell(target);
     target.scrollIntoView({ block: "center" });
   }
 
