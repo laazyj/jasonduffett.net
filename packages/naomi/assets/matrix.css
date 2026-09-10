@@ -16,7 +16,9 @@
    everything.
 
    SAFARI: three workarounds below are load-bearing and each says why.
-   Search this file for SAFARI before "simplifying" any of them.
+   Search this file for SAFARI before "simplifying" any of them. A fourth,
+   which this file's colSpan changes are what trigger, is on html in
+   styles.css.
    ------------------------------------------------------------------ */
 
 .m-wrap {
@@ -171,6 +173,9 @@ table.m {
 
 .m-cell {
   border-left: 1px solid var(--rule);
+
+  /* The whole cell is the click target, not just the button — see matrix.js. */
+  cursor: pointer;
 }
 
 /* The remedial band extends past the table as two boxes, one on each end
@@ -266,7 +271,7 @@ tbody tr:first-child > .m-cell {
 /* cells ----------------------------------------------------------------- */
 
 .m-cell-btn {
-  padding: var(--m-pad) var(--m-pad) 0.35rem;
+  padding: var(--m-pad);
 }
 
 /* The level accent, which the cells would otherwise not carry now that
@@ -282,25 +287,19 @@ tbody tr:first-child > .m-cell {
   background: var(--m-accent);
 }
 
-.m-cell-btn:is(:hover, [aria-expanded="true"])::before {
+.m-cell:hover .m-cell-btn::before,
+.m-cell-btn[aria-expanded="true"]::before {
   width: 2.6rem;
 }
 
-.m-cell-btn:hover .m-point--first {
-  text-decoration: underline;
-  text-decoration-color: var(--m-accent);
-  text-underline-offset: 0.18em;
-}
-
-.m-body {
-  padding: 0 var(--m-pad) var(--m-pad);
-}
-
-.m-point--first {
-  display: block;
+/* The whole cell answers the pointer, because the whole cell is the target.
+   Underlining one behaviour would say the others are not clickable. */
+.m-cell:hover {
+  background: var(--paper-2);
 }
 
 .m-point {
+  display: block;
   margin: 0;
   font-size: 0.76rem;
   line-height: 1.4;
@@ -308,8 +307,8 @@ tbody tr:first-child > .m-cell {
   text-wrap: pretty;
 }
 
-/* The body continues the list the button started. */
-.m-body .m-point {
+/* Each behaviour after the first continues the list. */
+.m-point + .m-point {
   margin-top: 0.4rem;
   padding-top: 0.4rem;
   border-top: 1px solid var(--rule);
@@ -335,7 +334,7 @@ tbody tr:first-child > .m-cell {
   Cumulative: whatever the first hides, the second hides too.
 */
 @media screen and (scripting: enabled) and (width < 1200px) {
-  .m-body,
+  .m-point + .m-point,
   .m-ent,
   .m-col-def {
     display: none;
@@ -347,7 +346,7 @@ tbody tr:first-child > .m-cell {
 }
 
 @media screen and (scripting: enabled) and (width < 1000px) {
-  .m-point--first,
+  .m-point,
   .m-lead,
   .m-col-name {
     display: none;
@@ -414,21 +413,18 @@ tbody tr:first-child > .m-cell {
 
 /* an expanded cell ------------------------------------------------------ */
 
-/* Shows in full whatever the rung says. */
-.m-row.is-expanded > .m-cell.is-open .m-body,
-.m-row.is-expanded > .m-cell.is-open .m-point--first {
+/* Shows in full whatever the rung says. The text sets to the measure; the
+   button stays full width, because the whole cell is still the target. */
+.m-row.is-expanded > .m-cell.is-open .m-point {
   display: block;
+  max-width: var(--measure);
 }
 
 .m-row.is-expanded > .m-cell.is-open {
   background: var(--paper-2);
 }
 
-.m-row.is-expanded > .m-cell.is-open .m-body {
-  max-width: var(--measure);
-}
-
-.m-row.is-expanded > .m-cell.is-open .m-body .m-point {
+.m-row.is-expanded > .m-cell.is-open .m-point + .m-point {
   margin-top: 0.5rem;
   padding-top: 0.5rem;
 }

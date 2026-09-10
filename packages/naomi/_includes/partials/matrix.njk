@@ -58,8 +58,9 @@
             </button>
           </th>
           {% for p in matrix.pillars %}
-          {% set cell = matrix.cells[lv.id + "." + p.id] %}
           <td class="m-cell" data-pillar="{{ p.id }}">
+            {# Every behaviour is inside the one button: they are peers, so
+               each is the same click target as the next. #}
             <button
               type="button"
               class="m-cell-btn"
@@ -69,11 +70,10 @@
               aria-expanded="false"
             >
               <span class="visually-hidden m-sr">{{ p.name }}, level {{ lv.ordinalLabel }}</span>
-              <span class="m-point m-point--first">{{ cell.label }}</span>
+              {% for text in matrix.cells[lv.id + "." + p.id] %}
+              <span class="m-point">{{ text }}</span>
+              {% endfor %}
             </button>
-            <div class="m-body">
-              {% for text in cell.rest %}<p class="m-point">{{ text }}</p>{% endfor %}
-            </div>
           </td>
           {% endfor %}
         </tr>

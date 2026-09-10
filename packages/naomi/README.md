@@ -88,8 +88,8 @@ text moving.
 
 ### Safari
 
-Three things here are workarounds for Safari specifically, each commented in
-place. Grep for `SAFARI:` before simplifying any of them — all three render
+Four things here are workarounds for Safari specifically, each commented in
+place. Grep for `SAFARI:` before simplifying any of them — every one renders
 correctly in headless WebKit and incorrectly in Safari itself, so a local check
 will not catch a regression:
 
@@ -101,6 +101,11 @@ will not catch a regression:
 - Density is CSS, not a class set from retained `MediaQueryList` objects. A
   `MediaQueryList` with no strong reference can be collected in Safari, taking
   its listener with it.
+- `text-size-adjust: 100%` on `html` in [`assets/styles.css`](assets/styles.css),
+  the one of the four that is not in `matrix.css`. iOS boosts a text block's
+  font size from the block's width; opening a pillar sets `colSpan` on a cell,
+  and the boost computed at that width outlives the cell narrowing again. iOS
+  and Chrome Android only — desktop Safari does not autosize either.
 
 ## Design
 

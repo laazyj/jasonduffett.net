@@ -85,10 +85,10 @@ const pillars = source.pillars.map((p) => {
 });
 
 /*
-  The model carries no per-cell headline, so the first behaviour is the
-  cell's label — its visible text at the condensed rung and its click target
-  everywhere. Stated here rather than in the template, so the day the model
-  gains a headline it is one line to change.
+  A cell is its behaviours, and the model ranks them no further than the
+  order they are written in. Nothing here promotes one of them to a headline:
+  the template renders them alike, and the stylesheet decides how many of
+  them a given width has room for.
 */
 const cells = {};
 source.pillars.forEach((p) => {
@@ -98,7 +98,7 @@ source.pillars.forEach((p) => {
       return b.text;
     });
     if (!texts.length) fail(`cell ${p.id}/${c.level} has no behaviours`);
-    cells[`${c.level}.${p.id}`] = { label: texts[0], rest: texts.slice(1) };
+    cells[`${c.level}.${p.id}`] = texts;
   });
 });
 
