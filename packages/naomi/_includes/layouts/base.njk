@@ -6,29 +6,9 @@
 <body>
   <div class="grain" aria-hidden="true"></div>
   <div class="wrap">
-    {#
-      The masthead is the printed sheet's top block: the wordmark and its
-      version chip on the left, the model's own definition on the right,
-      closed by the spot rule. The masthead is chrome on every page and
-      carries the definition on the home page only — where the sheet
-      carries it.
-    #}
-    <header class="masthead">
-      <div class="masthead-lockup">
-        <a class="masthead-mark" href="{{ '/' | rel }}">
-          <span class="wordmark">NAOMI</span>
-          <span class="version-chip">v{{ matrix.version }}</span>
-        </a>
-        <p class="masthead-sub">{{ site.fullTitle }}</p>
-      </div>
-      {% if page.url == "/" %}
-      <div class="masthead-lede">
-        <p class="lede-text">{{ matrix.definition }}</p>
-        <p class="lede-note">{{ site.ledeNote }}</p>
-      </div>
-      {% endif %}
-      <div class="masthead-rule" aria-hidden="true"></div>
-    </header>
+    {# The definition belongs to the pages that are about the model. #}
+    {% set mastheadLede = (page.url == "/") %}
+    {% include "partials/masthead.njk" %}
 
     {{ content | safe }}
 

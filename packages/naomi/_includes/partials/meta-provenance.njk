@@ -1,0 +1,15 @@
+{#
+  Who wrote this and what may be done with it. Shared by every head — the
+  hosted pages (partials/head.njk) and the printable sheet
+  (layouts/sheet.njk), which carries no analytics, no canonical and no Open
+  Graph but does carry this.
+
+  It is one block because it is one statement: the licence, the attribution
+  and the mining policy have to agree, and the sheet is the copy most likely
+  to be read years after the site has moved on.
+#}
+<meta name="author" content="{{ site.author.name }}" />
+<link rel="license" href="{{ site.defaultLicense }}" />
+<meta name="copyright" content="© {{ currentYear }} {{ site.author.name }}, {{ site.licenseName }}" />
+<meta name="tdm-reservation" content="0" />
+<meta name="tdm-policy" content="{{ site.licensePolicyUrl }}" />
