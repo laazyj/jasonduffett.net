@@ -118,7 +118,11 @@ if (!framing.markers.length) fail("framing.aiNative.markers is empty");
   in step with the level names the matrix renders, so check it: rename a level
   and the sentence above the index would otherwise go on naming the old rung.
 */
-const spine = required(source.framing.spine, ["shortForm", "plainGloss"], "framing.spine");
+const spine = required(
+  source.framing.spine,
+  ["shortForm", "plainGloss", "assessmentQuestion"],
+  "framing.spine",
+);
 const rungs = levels
   .slice()
   .reverse() // levels are highest-first; the ladder reads up from the bottom
@@ -132,7 +136,11 @@ export default {
   ...required(source.model, ["version", "date"], "model"),
   definition: framing.definition,
   markers: framing.markers,
-  spine: { shortForm: spine.shortForm, plainGloss: spine.plainGloss },
+  spine: {
+    shortForm: spine.shortForm,
+    plainGloss: spine.plainGloss,
+    assessmentQuestion: spine.assessmentQuestion,
+  },
   levels,
   pillars,
   cells,

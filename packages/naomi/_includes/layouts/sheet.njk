@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="{{ site.language }}">
+<head>
+  {#
+    Not partials/head.njk. That head is built for the hosted pages — Google
+    Fonts over the network, analytics, the consent banner's hooks, canonical
+    and Open Graph tags. The sheet is a render target: it must not reach the
+    network (a silent fallback to Georgia would produce a plausible-looking,
+    wrong PDF), and it has no reader to consent to anything.
+
+    The title is load-bearing beyond the tab: Chrome writes it into the PDF's
+    Title metadata, which is what a reader sees in a viewer's title bar and
+    what a library catalogues.
+  #}
+  <meta charset="utf-8" />
+  <title>{{ site.fullTitle }} v{{ matrix.version }}</title>
+  <meta name="robots" content="noindex" />
+  {% include "partials/meta-provenance.njk" %}
+  <link rel="stylesheet" href="{{ '/assets/styles.css' | rel }}" />
+  <link rel="stylesheet" href="{{ '/assets/matrix.css' | rel }}" />
+  <link rel="stylesheet" href="{{ '/assets/sheet.css' | rel }}" />
+</head>
+<body class="sheet">
+  {#
+    No script. assets/matrix.js opens a cell from location.hash on load and
+    sets colSpan as it goes, and matrix.css hides the siblings of an open cell
+    in every medium including print — so a sheet rendered with the script
+    running could print a row four pillars short.
+  #}
+  {% set mastheadLede = true %}
+  {% include "partials/masthead.njk" %}
+  {{ content | safe }}
+</body>
+</html>

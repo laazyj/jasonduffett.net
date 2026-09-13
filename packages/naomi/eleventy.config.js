@@ -23,6 +23,11 @@ export default function (eleventyConfig) {
     sha: process.env.GITHUB_SHA || "dev",
   }));
 
+  // The bare host of an absolute URL, for print, where a scheme is noise and
+  // nothing is clickable. Parsed rather than string-trimmed so a trailing
+  // slash, a port or an http:// preview origin cannot end up on the sheet.
+  eleventyConfig.addFilter("host", (url) => new URL(url).host);
+
   // Convert a root-absolute path ("/assets/x.css") into one relative to the
   // current page, so the site renders under any URL prefix without a build-time
   // pathPrefix. Mirrors the filter on the parent site.

@@ -40,9 +40,19 @@
    pull the same amount back off the margin, leaving the table where it
    was. */
 .m-scroll {
-  overflow-x: auto;
   margin-inline: calc(-1 * var(--m-bleed));
   padding-inline: var(--m-bleed);
+}
+
+/* Screen only: scrolling is an affordance of a viewport, and paper has none.
+   This does not rescue the hosted page's own print output — at Letter the
+   table overflows the page whether the box scrolls or not, which is what the
+   sheet exists for — it just stops the sheet's full-width table sitting in a
+   scroll container that has nothing to scroll. */
+@media screen {
+  .m-scroll {
+    overflow-x: auto;
+  }
 }
 
 table.m {
@@ -356,37 +366,41 @@ tbody tr:first-child > .m-cell {
   the honest unit for a threshold measured against the table's real width.
 
   Cumulative: whatever the first hides, the second hides too.
+
+  Scoped away from `body.sheet`. `scripting: enabled` reports what the browser
+  allows, not whether this document loaded matrix.js — and the printable sheet
+  loads none. The premise above ("hides only what expanding can bring back")
+  is therefore false there, and the sheet is a fixed A3 page whose width has
+  nothing to do with the viewport's. Excluding it here rather than letting
+  sheet.css undo the effects keeps the ladder's membership in one place: undo
+  from outside can only ever restore what it remembers to.
 */
 @media screen and (scripting: enabled) and (width < 1200px) {
-  .m-point + .m-point,
-  .m-ent,
-  .m-col-def {
+  body:not(.sheet) :is(.m-point + .m-point, .m-ent, .m-col-def) {
     display: none;
   }
 
-  .m-wrap {
+  body:not(.sheet) .m-wrap {
     --m-rail: 9rem;
   }
 }
 
 @media screen and (scripting: enabled) and (width < 1000px) {
-  .m-text,
-  .m-lead,
-  .m-col-name {
+  body:not(.sheet) :is(.m-text, .m-lead, .m-col-name) {
     display: none;
   }
 
-  .m-col-abbr {
+  body:not(.sheet) .m-col-abbr {
     display: block;
   }
 
-  .m-wrap {
+  body:not(.sheet) .m-wrap {
     --m-rail: 4.75rem;
   }
 
   /* The accent marker becomes the whole cell — until the cell is opened,
      when it reverts to the bar every other width shows. */
-  .m-cell:not(.is-open) .m-cell-btn::before {
+  body:not(.sheet) .m-cell:not(.is-open) .m-cell-btn::before {
     width: 100%;
     height: auto;
     min-height: 1.6rem;
@@ -394,34 +408,34 @@ tbody tr:first-child > .m-cell {
     opacity: 0.55;
   }
 
-  .m-cell:not(.is-open) .m-cell-btn:hover::before {
+  body:not(.sheet) .m-cell:not(.is-open) .m-cell-btn:hover::before {
     opacity: 1;
   }
 
   /* Keep the tap target at 44px however narrow the column gets, and share
      the width equally — content-sized columns leave the narrowest pillar
      below that. */
-  table.m {
+  body:not(.sheet) table.m {
     table-layout: fixed;
   }
 
-  .m-cell-btn {
+  body:not(.sheet) .m-cell-btn {
     padding: 0.55rem 0.3rem;
     min-height: 44px;
   }
 
-  .m-col-btn {
+  body:not(.sheet) .m-col-btn {
     padding: 0 0.3rem 0.5rem;
   }
 
-  .m-assurance {
+  body:not(.sheet) .m-assurance {
     display: block;
     margin-left: 0;
     font-size: 0.8rem;
     line-height: 1.1;
   }
 
-  .m-num {
+  body:not(.sheet) .m-num {
     font-size: 1.5rem;
   }
 }

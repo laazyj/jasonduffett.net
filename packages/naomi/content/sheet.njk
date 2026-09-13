@@ -1,0 +1,25 @@
+---
+layout: layouts/sheet.njk
+permalink: /sheet/
+eleventyExcludeFromCollections: true
+---
+{# The index itself, the same partial the home page renders. #}
+{% include "partials/matrix.njk" %}
+
+{#
+  The sheet's own footer, in place of the site footer: provenance and one line
+  of how-to-read. No anchors — this is printed, and a link nobody can follow
+  is just underlined text.
+#}
+<footer class="sheet-foot">
+  <p class="sheet-read">
+    Each cell is an observable practice state. {{ matrix.spine.assessmentQuestion }}
+  </p>
+  <p class="sheet-meta">
+    <span>&copy; {{ currentYear }} {{ site.author.name }}</span>
+    <span>{{ site.licenseName }}</span>
+    <span>v{{ matrix.version }}</span>
+    <span>{{ matrix.date }}</span>
+    <span class="sheet-uri">{{ site.url | host }}</span>
+  </p>
+</footer>
