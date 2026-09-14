@@ -24,8 +24,7 @@ export default defineConfig(
             "eslint.config.mjs",
             "stylelint.config.mjs",
             "packages/*/eleventy.config.js",
-            "packages/site/scripts/*.mjs",
-            "packages/cdk/scripts/*.mjs",
+            "packages/*/scripts/*.mjs",
           ],
         },
       },
@@ -37,10 +36,10 @@ export default defineConfig(
   },
   {
     files: [
-      "packages/cdk/scripts/*.mjs",
-      "packages/site/scripts/*.mjs",
+      "packages/*/scripts/*.mjs",
       "packages/*/eleventy.config.js",
       "packages/*/_data/**/*.js",
+      "packages/*/test/**/*.js",
     ],
     languageOptions: {
       globals: {
