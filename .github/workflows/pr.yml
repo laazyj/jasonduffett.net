@@ -38,6 +38,40 @@ jobs:
 
       - run: npm run verify
 
+  # Regenerates the A3 sheet from the *current* model and asserts it still
+  # fits one page. `verify` already tests the committed sheet; this catches a
+  # content edit that would break the next one, before anybody bumps a version
+  # and generates it. Uses the Chrome preinstalled on the runner image, so
+  # there is no browser to install and no third-party action to pin.
+  sheet:
+    name: sheet
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: npm
+
+      # See AGENTS.md § Build system.
+      - name: Pin npm
+        run: npm install -g npm@11
+
+      - run: npm ci
+
+      # Out of tree: this is a fit check, not a release, and the committed
+      # sheet belongs to whatever version is on main. The `pdf` target builds
+      # first, and nothing here restates the filename — the test derives it
+      # from the model, the same way the generator does.
+      - name: render the sheet from the current model
+        run: npx nx run @jasonduffett-net/naomi:pdf -- --out "$RUNNER_TEMP/sheet"
+
+      - name: check it
+        env:
+          NAOMI_SHEET_DIR: ${{ runner.temp }}/sheet
+        run: npx nx run @jasonduffett-net/naomi:test
+
   cdk-diff:
     name: cdk diff
     runs-on: ubuntu-latest

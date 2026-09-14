@@ -7,7 +7,9 @@
   "scripts": {
     "clean": "rm -rf dist",
     "build": "eleventy",
-    "start": "eleventy --serve --quiet"
+    "start": "eleventy --serve --quiet",
+    "pdf": "node scripts/build-sheet.mjs",
+    "test": "vitest run"
   },
   "nx": {
     "targets": {
@@ -25,10 +27,27 @@
       },
       "start": {
         "cache": false
+      },
+      "pdf": {
+        "dependsOn": [
+          "build"
+        ],
+        "cache": false
+      },
+      "test": {
+        "inputs": [
+          "default",
+          "^default",
+          {
+            "env": "NAOMI_SHEET_DIR"
+          }
+        ]
       }
     }
   },
   "devDependencies": {
-    "@11ty/eleventy": "^3.1.6"
+    "@11ty/eleventy": "^3.1.6",
+    "pdfjs-dist": "^6.3.289",
+    "vitest": "^5.0.0"
   }
 }

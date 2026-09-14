@@ -12,18 +12,24 @@ npm run naomi:build   # write ./dist
 
 ## Layout
 
-| Path                  | What it holds                                                           |
-| --------------------- | ----------------------------------------------------------------------- |
-| `model/naomi.json`    | **The canonical model.** shared with the PDF generator.                 |
-| `_data/matrix.js`     | The checked view of it — the only door templates see the model through. |
-| `_data/site.json`     | Site chrome: title, description, licence, links, article, PDF.          |
-| `_includes/layouts/`  | The base layout: masthead, page slot, footer, consent banner.           |
-| `_includes/partials/` | Head, footer, analytics, consent banner, and the matrix.                |
-| `content/index.njk`   | The single page — markers, index, how to read it, background, links.    |
-| `assets/styles.css`   | The frame's styling. Shipped verbatim; no build step.                   |
-| `assets/matrix.css`   | The index's styling, including the density ladder.                      |
-| `assets/matrix.js`    | The index's behaviour. The package's only browser script.               |
-| `static/`             | Files served from the site root: `favicon.svg`, the IndexNow key.       |
+| Path                      | What it holds                                                             |
+| ------------------------- | ------------------------------------------------------------------------- |
+| `model/naomi.json`        | **The canonical model.** Shared with the sheet.                           |
+| `_data/matrix.js`         | The checked view of it — the only door templates see the model through.   |
+| `_data/sheet.js`          | The generated sheet, as the download card sees it. Derived, not declared. |
+| `_data/site.json`         | Site chrome: title, description, licence, links, article.                 |
+| `_includes/layouts/`      | `base.njk` for the hosted pages, `sheet.njk` for the printable one.       |
+| `_includes/partials/`     | Head, masthead, provenance meta, footer, analytics, consent, the matrix.  |
+| `content/index.njk`       | The single page — intro, index, how to read it, markers, background.      |
+| `content/sheet.njk`       | The printable sheet: masthead, the index in full, a provenance footer.    |
+| `assets/styles.css`       | The frame's styling. Shipped verbatim; no build step.                     |
+| `assets/matrix.css`       | The index's styling, including the density ladder.                        |
+| `assets/sheet.css`        | The sheet's page geometry and type scale. Nothing else.                   |
+| `assets/matrix.js`        | The index's behaviour. The package's only browser script.                 |
+| `assets/fonts/`           | The four families, vendored so the sheet needs no network.                |
+| `scripts/build-sheet.mjs` | Prints the sheet to PDF with the Chrome already on the machine.           |
+| `test/sheet.test.js`      | What stops a broken sheet being distributed.                              |
+| `static/`                 | Served from the site root: `favicon.svg`, the IndexNow key, `downloads/`. |
 
 ## The data source
 
@@ -53,11 +59,13 @@ rather than shipping a blank cell or a colourless row:
 
 Add a pillar and the build stops with the pillar's id and what to do about it.
 
-The model carries **no per-cell headline**, so the first behaviour is the
-cell's label — its visible text at the middle width and its click target
-everywhere. That decision lives in `_data/matrix.js`, not the template. A
-headline field in the model would let a fourth step back into the ladder,
-between "first behaviour" and "colour only".
+The model carries **no per-cell headline**, and nothing promotes one behaviour
+over the others: `_data/matrix.js` hands the template a flat list, the template
+renders them alike, and the whole cell — not any one behaviour — is the click
+target. What the middle width shows is the first behaviour only, which is the
+stylesheet's decision about room, not a claim that it is the important one. A
+headline field in the model would let a fourth step into the ladder, between
+"first behaviour" and "colour only".
 
 Version and date come from `naomi.model`, so they cannot drift from the content
 they describe.
@@ -107,6 +115,81 @@ will not catch a regression:
   and the boost computed at that width outlives the cell narrowing again. iOS
   and Chrome Android only — desktop Safari does not autosize either.
 
+## The printable sheet
+
+`/sheet/` is the whole index on one A3 landscape page — masthead, all 25 cells
+at full content, a provenance footer. It is `noindex` and out of the sitemap,
+because it is a render target rather than a destination, though it doubles as a
+browser print view.
+
+It is **not a second implementation**. `styles.css` and `matrix.css` do the
+work and `partials/matrix.njk` is the same partial the home page renders;
+`assets/sheet.css` sets page geometry and the type scale that geometry needs,
+and nothing else. Every size in the other two files is in `rem`, so the root
+`font-size` is the single lever that fits 25 cells to a page.
+
+Two details there are load-bearing and look like mistakes:
+
+- The page box is `1587px 1123px`, not `A3 landscape`. Chrome's PDF MediaBox
+  comes out a fraction wider than the integer pixel width it lays out at, and
+  nothing in CSS can paint past the layout viewport — so `A3 landscape` leaves
+  a 2pt hairline of unpainted white down the right edge of a full-bleed sheet.
+  A whole number of pixels leaves none, and is A3 to within a quarter of a
+  millimetre.
+- The density ladder in `matrix.css` is scoped away from `body.sheet`. Its
+  `scripting: enabled` gate reports what the browser allows, not whether the
+  document loaded `matrix.js` — and the sheet loads none.
+
+```sh
+npm run naomi:pdf     # writes static/downloads/naomi-v<version>.pdf
+npm test              # asserts it is one A3 page and nothing is missing
+```
+
+**Chrome has to be on the machine.** Nothing is bundled: `--print-to-pdf`
+honours the `@page` size and paints backgrounds, which is all the sheet needs,
+so there is no browser in `devDependencies` and no DevTools protocol code.
+`scripts/build-sheet.mjs` looks at `CHROME_PATH`, then the usual names on
+`PATH`, then the macOS app bundles, and says which it tried if it finds none.
+
+Released sheets are **committed**. The CloudFront bucket deployment prunes, so
+anything not in `dist` is deleted on deploy — a sheet lives in the repo, is
+passthrough-copied forward by every build, and a link printed on paper keeps
+resolving after the model has moved on.
+
+### Testing it
+
+`test/sheet.test.js` checks two different things, because we distribute two
+different things:
+
+- **Every sheet in `static/downloads/`** gets the file-level invariants — one
+  A3 landscape page, the four vendored families embedded, a plausible size.
+  Older versions are still served, so they are still worth checking.
+- **The sheet for the current version** also gets the content assertions: all
+  75 behaviours, every pillar name and promise, every level name, description
+  and entitlement, the provenance line, and no `undefined` leaking from a
+  renamed model field.
+
+The single-page assertion is the one that matters: content that outgrows A3
+fails rather than shipping with a level stranded on page two.
+
+A missing sheet is normally not a failure — a fresh clone has none, and the
+download card renders its disabled state. It **is** a failure when
+`NAOMI_SHEET_DIR` is set (someone rendered one and asked for it to be checked)
+or on CI (this version is on its way to being published). Otherwise a version
+bumped without regenerating would ship the site with its only download silently
+gone, and every test would skip green.
+
+`NAOMI_SHEET_DIR` is also how the CI fit-check works: render from the current
+model into a temp directory and point the test at it, without touching the
+tree.
+
+Two things to know before writing assertions against a PDF. Renderers break a
+word at a hyphen, so `false-positive` comes back in two pieces and poppler's
+`pdftotext` rejoins them as `falsepositive`; the test compares with hyphens
+flattened away. And these are Type 3 fonts — Chrome flattens a variable font
+instance — which pdfjs reports only as "sans-serif", so the font assertion
+reads Chrome's own `/FontName` entries instead.
+
 ## Design
 
 The palette is the parent site's riso zine vocabulary — Fraunces italic,
@@ -127,12 +210,11 @@ canonical file, so they cannot be bumped out of step.
 
 ## Content
 
-The PDF is not published yet. `site.pdf` is `null`, which renders the download
-card in a disabled state. To publish it, drop the file in `assets/` and set:
-
-```json
-"pdf": { "path": "/assets/naomi.pdf", "label": "The printable index", "size": "1.2 MB" }
-```
+The download card is derived, not declared. `_data/sheet.js` looks for
+`static/downloads/naomi-v<version>.pdf` — the version being the model's — and
+the card renders its disabled state when there is no sheet for this version
+yet. There is no field to bump and no file size to keep in step; publishing a
+sheet is `npm run naomi:pdf` and committing the result.
 
 The index content is licensed **CC BY 4.0**, matching the apex site. The pages
 carry `<link rel="license">`, a `copyright` meta naming the licence, and
