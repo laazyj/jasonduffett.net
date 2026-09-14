@@ -134,6 +134,9 @@ if (rungs !== spine.shortForm) {
 
 export default {
   ...required(source.model, ["version", "date"], "model"),
+  // Asserted rather than merely forwarded: the model is pre-1.0, and a
+  // version bump that dropped the caveat would quietly ship it as finished.
+  status: required(source.model.status, ["label", "note"], "model.status"),
   definition: framing.definition,
   markers: framing.markers,
   spine: {

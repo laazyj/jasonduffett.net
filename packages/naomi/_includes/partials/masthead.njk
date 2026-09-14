@@ -10,12 +10,20 @@
   `mastheadLede` decides whether the definition and the tagline show. The
   chrome carries the masthead on every page; only the pages that are *about*
   the model carry its definition.
+
+  The status chip rides with the version because it says the same kind of
+  thing: where the model is, not what this page is. 0.1.0 says pre-1.0 to
+  whoever reads semver and the chip says it to everyone else, so both travel
+  on every page — the printed sheet included, where a reader has no site to
+  check the caveat against. Which part of it is unfinished is the index's
+  business, and the note over the index says that.
 #}
 <header class="masthead">
   <div class="masthead-lockup">
     <a class="masthead-mark" href="{{ '/' | rel }}">
       <span class="wordmark">NAOMI</span>
       <span class="version-chip">v{{ matrix.version }}</span>
+      <span class="version-chip version-chip--status">{{ matrix.status.label }}</span>
     </a>
     <p class="masthead-sub">{{ site.fullTitle }}</p>
   </div>
