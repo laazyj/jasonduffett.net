@@ -3,7 +3,11 @@
     "id": "naomi",
     "name": "Native AI Operational Maturity Index (NAOMI)",
     "version": "0.1.0",
-    "date": "2026-08-30"
+    "date": "2026-08-30",
+    "status": {
+      "label": "Pre-release",
+      "note": "The pillars and the levels are steady. The cells are demonstrative — a first draft, still being tested in anger on the way to 1.0, so expect individual lines to move."
+    }
   },
 
   "framing": {

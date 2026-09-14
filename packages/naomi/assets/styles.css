@@ -214,8 +214,9 @@ body {
 
 .masthead-mark {
   display: inline-flex;
+  flex-wrap: wrap;
   align-items: baseline;
-  gap: 0.7rem;
+  gap: 0.5rem 0.7rem;
   text-decoration: none;
   color: var(--ink);
 }
@@ -241,6 +242,15 @@ body {
   border-radius: 2px;
   padding: 0.24em 0.5em 0.18em;
   white-space: nowrap;
+}
+
+/* The version is a fact and the status is a claim about it, so the status
+   chip is filled where the version chip is outlined — the same object, one
+   of them insisting. The inherited border is still load-bearing: it paints
+   nothing against the fill, and it is what keeps the two chips one height. */
+.version-chip--status {
+  background: var(--spot);
+  color: var(--paper);
 }
 
 .masthead-sub {
@@ -324,16 +334,40 @@ body {
   color: var(--spot);
 }
 
-/* AI-Native markers -------------------------------------------------- */
+/* asides ------------------------------------------------------------- */
 
-/* An aside inside its section, so this sets only the box. Width is the
+/* Two blocks are asides about the thing beside them — the pre-release note
+   over the index, and the AI-Native markers — and they share one anatomy: a
+   spot stripe on the second paper. Each sets only the box. Width is the
    section's business: the measure once the grid is on, and the full column
    below it — the same as the prose blocks and callouts around it. */
+.provisional,
 .markers {
   margin: 0;
   padding: 0.9rem 1.1rem;
   border-left: 3px solid var(--spot);
   background: var(--paper-2);
+}
+
+/* The pre-release note. It sits over the index rather than beside it, so it
+   is the one aside that owns the gap to what it is talking about. */
+.provisional {
+  margin-bottom: 1.4rem;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--dim);
+  text-wrap: pretty;
+}
+
+.provisional-label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--spot);
 }
 
 .markers-heading {
@@ -408,12 +442,14 @@ body {
     max-width: var(--measure);
   }
 
-  /* The index opts out: the matrix gets the whole frame, not the column. */
+  /* The index opts out: the matrix gets the whole frame, not the column.
+     The note over it does not — a sentence about the index is prose, and
+     keeps the measure the rule above already gave it. */
   .section--full {
     display: block;
   }
 
-  .section--full > :not(.section-title) {
+  .section--full > :not(.section-title, .provisional) {
     max-width: none;
   }
 }
@@ -553,6 +589,7 @@ a.download:hover {
 .links a,
 .prose-block a,
 .prose a,
+.provisional a,
 footer.site a {
   color: var(--ink);
   text-decoration-color: var(--rule);
@@ -562,6 +599,7 @@ footer.site a {
 .links a:hover,
 .prose-block a:hover,
 .prose a:hover,
+.provisional a:hover,
 footer.site a:hover {
   color: var(--spot);
   text-decoration-color: var(--spot);
