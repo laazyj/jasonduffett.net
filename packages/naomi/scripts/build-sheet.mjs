@@ -30,12 +30,19 @@
   so every check here is fatal rather than a warning.
 */
 import { execFileSync, spawnSync } from "node:child_process";
-import { mkdirSync, readFileSync, statSync } from "node:fs";
+import { mkdirSync, readFileSync, renameSync, rmSync, statSync } from "node:fs";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import process from "node:process";
 
-import { MIN_BYTES, sheetDir, sheetFilename } from "./sheet-file.mjs";
+import { A3_LANDSCAPE, MIN_BYTES, PAGE_TOLERANCE, sheetDir, sheetFilename } from "./sheet-file.mjs";
+import {
+  contentDigest,
+  manifestName,
+  renderDigest,
+  sha256,
+  writeManifest,
+} from "./sheet-manifest.mjs";
 
 const packageDir = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -123,12 +130,14 @@ function resolveChrome() {
 */
 const argv = process.argv.slice(2);
 let outDir = fileURLToPath(sheetDir);
+let publishing = true;
 for (let i = 0; i < argv.length; i++) {
   const eq = argv[i].startsWith("--out=");
   if (!eq && argv[i] !== "--out") die(`unrecognised argument ${argv[i]} (only --out <dir>)`);
   const value = eq ? argv[i].slice("--out=".length) : argv[++i];
   if (!value) die("--out needs a directory");
   outDir = resolve(value);
+  publishing = false;
 }
 const source = join(packageDir, "dist", "sheet", "index.html");
 
@@ -138,13 +147,21 @@ if (!statSync(source, { throwIfNoEntry: false })) {
 
 const { bin, version } = resolveChrome();
 const target = join(outDir, sheetFilename);
+
+/*
+  Chrome renders to a scratch name and the result is only moved into place once
+  it has been checked. A sheet that does not fit one page must never exist at
+  the path the site links and git tracks, even briefly — there is no CI step
+  rendering a second copy to catch it afterwards.
+*/
+const scratch = `${target}.pending`;
 mkdirSync(outDir, { recursive: true });
 
 const flags = [
   "--headless",
   "--disable-gpu",
   "--no-pdf-header-footer",
-  `--print-to-pdf=${target}`,
+  `--print-to-pdf=${scratch}`,
   pathToFileURL(source).href,
 ];
 
@@ -159,24 +176,80 @@ try {
   die(`Chrome failed to render the sheet.\n\n${err.stderr?.toString().trim() ?? err.message}`);
 }
 
-/* ---- did it actually produce a PDF? ---------------------------------- */
+/* ---- is it the sheet, or just a file? -------------------------------- */
 
-// Cheap checks only. That the sheet is one A3 page carrying every behaviour
-// is what test/sheet.test.js asserts, against this same file.
+/*
+  Everything that has to be true before this replaces what we distribute. The
+  single-page check is the one that earns the scratch file: a sheet that has
+  outgrown A3 is the failure this whole artefact is most likely to hit, and
+  the fix — the root font-size in assets/sheet.css — is not something to
+  discover from a reader.
+*/
+const reject = (why) => {
+  rmSync(scratch, { force: true });
+  die(why);
+};
+
 let bytes;
 try {
-  bytes = readFileSync(target);
+  bytes = readFileSync(scratch);
 } catch {
-  die(`Chrome reported success but wrote nothing to ${target}.`);
+  die(`Chrome reported success but wrote nothing to ${scratch}.`);
 }
 
 if (bytes.subarray(0, 5).toString() !== "%PDF-") {
-  die(`${target} is not a PDF — it starts ${JSON.stringify(bytes.subarray(0, 16).toString())}.`);
+  reject(
+    `Chrome wrote something that is not a PDF — it starts ${JSON.stringify(bytes.subarray(0, 16).toString())}.`,
+  );
 }
 if (bytes.length < MIN_BYTES) {
-  die(`${target} is only ${bytes.length} bytes, which is too small to be the whole index.`);
+  reject(`the sheet is only ${bytes.length} bytes, which is too small to be the whole index.`);
 }
 
-console.log(`[sheet] ${basename(target)} — ${(bytes.length / 1024).toFixed(0)}KB, ${version}`);
+const { getDocument } = await import("pdfjs-dist/legacy/build/pdf.mjs");
+const doc = await getDocument({ data: new Uint8Array(bytes), useSystemFonts: false }).promise;
+
+if (doc.numPages !== 1) {
+  reject(
+    `the sheet came out ${doc.numPages} pages, and it has to be one.\n\n` +
+      `The index has outgrown A3 at the current type scale. Lower\n` +
+      `\`font-size\` on \`html\` in assets/sheet.css until it fits, or take\n` +
+      `something out of the model.`,
+  );
+}
+
+const [, , width, height] = (await doc.getPage(1)).view;
+if (
+  Math.abs(width - A3_LANDSCAPE.width) > PAGE_TOLERANCE ||
+  Math.abs(height - A3_LANDSCAPE.height) > PAGE_TOLERANCE
+) {
+  reject(
+    `the sheet is ${width.toFixed(2)} x ${height.toFixed(2)}pt, not A3 landscape ` +
+      `(${A3_LANDSCAPE.width} x ${A3_LANDSCAPE.height}). Check the @page rule in assets/sheet.css.`,
+  );
+}
+
+renameSync(scratch, target);
+
+/* ---- record what it was made from ------------------------------------ */
+
+/*
+  Only for a real publication. A scratch render into some other directory has
+  handed out nothing and must not claim in the manifest that it has.
+*/
+if (publishing) {
+  writeManifest(sheetFilename, {
+    generated: new Date().toISOString().slice(0, 10),
+    chrome: version,
+    bytes: bytes.length,
+    sha256: sha256(bytes),
+    content: contentDigest(source),
+    render: renderDigest(source, join(packageDir, "dist", "assets")),
+  });
+  console.log(`[sheet] recorded in ${manifestName}`);
+}
+
+console.log(
+  `[sheet] ${basename(target)} — one A3 page, ${(bytes.length / 1024).toFixed(0)}KB, ${version}`,
+);
 console.log(`[sheet] ${target}`);
-console.log(`[sheet] run \`npm test\` to check it is one A3 page and nothing is missing.`);

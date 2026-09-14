@@ -173,22 +173,46 @@ The single-page assertion is the one that matters: content that outgrows A3
 fails rather than shipping with a level stranded on page two.
 
 A missing sheet is normally not a failure — a fresh clone has none, and the
-download card renders its disabled state. It **is** a failure when
-`NAOMI_SHEET_DIR` is set (someone rendered one and asked for it to be checked)
-or on CI (this version is on its way to being published). Otherwise a version
-bumped without regenerating would ship the site with its only download silently
-gone, and every test would skip green.
+download card renders its disabled state. It **is** a failure on CI, where this
+version is on its way to being published: otherwise a version bumped without
+regenerating would ship the site with its only download silently gone, and
+every test would skip green.
 
-`NAOMI_SHEET_DIR` is also how the CI fit-check works: render from the current
-model into a temp directory and point the test at it, without touching the
-tree.
+### One page is enforced where it is decided
 
-Two things to know before writing assertions against a PDF. Renderers break a
-word at a hyphen, so `false-positive` comes back in two pieces and poppler's
-`pdftotext` rejoins them as `falsepositive`; the test compares with hyphens
-flattened away. And these are Type 3 fonts — Chrome flattens a variable font
-instance — which pdfjs reports only as "sans-serif", so the font assertion
-reads Chrome's own `/FontName` entries instead.
+`scripts/build-sheet.mjs` renders to a scratch file and only moves it into
+place once it has checked the result is a single A3 page. A sheet that has
+outgrown the page never reaches `static/downloads/` at all, so there is nothing
+for a later check to catch.
+
+That matters because **page fit is not only a function of content**. The lever
+is `font-size` on `html` in [`assets/sheet.css`](assets/sheet.css), and a
+change there — or to `matrix.css`, or to a font — moves nothing in the model. A
+digest of the content cannot see it; only rendering can.
+
+### Staleness, and `sheets.json`
+
+Checking that every string in the model appears in the PDF is blind to two
+things: a behaviour **removed** from the model (the sheet keeps showing it, and
+every remaining string is still present) and a behaviour **moved** between
+cells (every string is still somewhere). `sheets.json` closes both with a
+digest of the built page's text, in the order the page says it.
+
+Derived from the page, not from a list of model fields. A hand-written list was
+tried first and had already missed `site.fullTitle` on the day it was written —
+a second model of what the template prints has nothing keeping it in step.
+
+| Field     | What it is                                                                                                                                        |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `content` | Digest of the built page's text. **Enforced.**                                                                                                    |
+| `render`  | Digest of the page and the assets beside it. Provenance only — what matters about a styling change is fit, and that is enforced in the generator. |
+| `sha256`  | The PDF itself, tying the record to the artefact so a sheet replaced by hand is caught                                                            |
+| `chrome`  | The one input that is not in the tree                                                                                                             |
+
+**CI needs no Chrome and renders nothing.** It used to render a sheet from the
+current model to ask whether the next one would still fit; the generator
+refusing to write a sheet that does not fit answers that question at the point
+it arises, on the file that will actually be published.
 
 ## Design
 

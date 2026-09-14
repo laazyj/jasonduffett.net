@@ -35,12 +35,8 @@
         "cache": false
       },
       "test": {
-        "inputs": [
-          "default",
-          "^default",
-          {
-            "env": "NAOMI_SHEET_DIR"
-          }
+        "dependsOn": [
+          "build"
         ]
       }
     }
