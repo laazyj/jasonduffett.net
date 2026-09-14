@@ -27,14 +27,21 @@ npm run naomi:build   # write ./dist
 
 ## The data source
 
-`model/naomi.json` is the **canonical model** — pillars, levels, and the
-behaviours in every cell — and is shared with the PDF generator. It is
-never edited to suit the web view.
+`model/naomi.json` is the **canonical model** — pillars, levels, the
+behaviours in every cell, and how finished the model claims to be — and is
+shared with the PDF generator. It is never edited to suit the web view.
+
+`model.status` is the pre-release caveat: `label` for the chip, `note` for the
+sentence over the index. It is in the model rather than in `site.json` because
+it is a claim about the model, not about the site — a printed sheet handed
+round a room needs it at least as much as the page does, and the two must not
+be able to disagree about it. Editorial copy about the _site_ still belongs in
+`site.json`, as `ledeNote` and `article.note` do.
 
 It sits outside `_data/` deliberately: Eleventy would otherwise also expose it
 as a global, and templates could reach the raw model around the checks below.
-`_data/matrix.js` is the only door, and re-exports the version, date,
-definition and markers as well as the matrix itself.
+`_data/matrix.js` is the only door, and re-exports the version, date, status,
+definition, spine and markers as well as the matrix itself.
 
 That file derives what the page needs and the model does not itself express:
 levels reversed so the matrix reads downward, the level description split into
@@ -49,7 +56,9 @@ rather than shipping a blank cell or a colourless row:
 - every pillar has a short label in `SHORT_LABELS`;
 - every level id has a colour token in `ACCENT_TOKENS`;
 - every level x pillar has a cell, and every cell has a behaviour;
-- every level description is two sentences.
+- every level description is two sentences;
+- `model.status` carries a `label` and a `note`, so a version bump cannot drop
+  the pre-release caveat and ship the model as though it were finished.
 
 Add a pillar and the build stops with the pillar's id and what to do about it.
 
@@ -124,6 +133,13 @@ chip locked up with the wordmark (`_includes/layouts/base.njk`) and, with
 `naomi.model.date`, as a provenance line in the footer
 (`_includes/partials/site-footer.njk`). Both come from one object in the
 canonical file, so they cannot be bumped out of step.
+
+`naomi.model.status.label` renders as a second chip beside it, **filled** where
+the version chip is outlined: the version is a fact and the status is a claim
+about it. Both chips are chrome and travel on every page, because where the
+model is does not depend on which page you are reading. Which part of it is
+unfinished does, so `status.note` renders once, as the aside over the index —
+the cells being the part still under test.
 
 ## Content
 
