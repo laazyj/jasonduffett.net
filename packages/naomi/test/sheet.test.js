@@ -7,43 +7,46 @@ import { describe, expect, it, beforeAll } from "vitest";
 
 import matrix from "../_data/matrix.js";
 import site from "../_data/site.json" with { type: "json" };
-import { MIN_BYTES, sheetDir, sheetFilename } from "../scripts/sheet-file.mjs";
+import {
+  A3_LANDSCAPE,
+  MIN_BYTES,
+  PAGE_TOLERANCE,
+  sheetDir,
+  sheetFilename,
+} from "../scripts/sheet-file.mjs";
+import { contentDigest, readManifest, sha256 } from "../scripts/sheet-manifest.mjs";
 
 /*
   The sheet is the one thing here distributed as a binary and read offline, so
-  it is the one thing a bad build cannot be walked back. These assertions are
-  what stand between a content edit and a PDF with a level missing off the
-  bottom of the page.
+  it is the one thing a bad build cannot be walked back.
 
   Two scopes, because we distribute two different things:
 
-  - Every sheet in the archive gets the file-level invariants. Older versions
-    are still served (the bucket deployment prunes, so they stay reachable
-    only by being committed), and something we still hand out is something
-    still worth checking.
-  - The sheet for the *current* version also gets the content assertions,
-    because that is the only one the model can still speak for.
+  - Every sheet in static/downloads/ gets the file-level invariants. Older
+    versions stay reachable only by being committed — the bucket deployment
+    prunes — so anything we still hand out is worth still checking.
+  - The sheet for the *current* version also gets the content assertions and
+    the digest, because it is the only one the model can still speak for.
 
-  NAOMI_SHEET_DIR points this somewhere else — CI renders from the current
-  model into a temp dir to ask whether the *next* sheet would still fit,
-  before any version bump.
+  What is NOT here: a check that a sheet fits one page before it is written.
+  scripts/build-sheet.mjs renders to a scratch file and refuses to move it into
+  place unless it is a single A3 page, so a sheet that does not fit never
+  reaches this directory in the first place.
 */
 
-const dir = process.env.NAOMI_SHEET_DIR ?? fileURLToPath(sheetDir);
+const dir = fileURLToPath(sheetDir);
 const currentPath = join(dir, sheetFilename);
 const current = statSync(currentPath, { throwIfNoEntry: false })?.isFile() ?? false;
+const builtPage = fileURLToPath(new URL("../dist/sheet/index.html", import.meta.url));
 
 /*
   A missing sheet is normally fine — a fresh clone has none until someone runs
-  `npm run naomi:pdf`, and the download card renders its disabled state.
-
-  It is not fine when someone has pointed us at one, or on CI. An explicit
-  NAOMI_SHEET_DIR means a sheet was just rendered and is waiting to be checked;
-  a CI run means this version is on its way to being published. Skipping in
-  either case is how a job goes green having asserted nothing at all, which is
-  worse than having no test.
+  `npm run naomi:pdf`, and the download card renders its disabled state. It is
+  not fine on CI, where this version is on its way to being published:
+  otherwise a version bumped without regenerating ships the site with its only
+  download silently gone, and every test below skips green.
 */
-const required = Boolean(process.env.NAOMI_SHEET_DIR || process.env.CI);
+const required = Boolean(process.env.CI);
 
 const archive = (() => {
   try {
@@ -54,12 +57,6 @@ const archive = (() => {
     return [];
   }
 })();
-
-// A3 landscape. Not 1190.55 x 841.89: the page box is declared in whole CSS
-// pixels (see assets/sheet.css), which lands a fraction under A3 and is the
-// only way to get a full-bleed sheet with no unpainted edge.
-const A3_LANDSCAPE = { width: 1189.92, height: 841.92 };
-const TOLERANCE = 1.5;
 
 const open = async (path) => {
   const bytes = readFileSync(path);
@@ -84,14 +81,10 @@ const flat = (s) =>
     .trim();
 
 it("has a sheet to check", () => {
-  // Guards the case where everything below quietly skips: a wrong
-  // NAOMI_SHEET_DIR, or a version bumped without regenerating.
   if (required && !current) {
     throw new Error(
-      `no sheet at ${currentPath}. ` +
-        (process.env.NAOMI_SHEET_DIR
-          ? "NAOMI_SHEET_DIR is set, so one was expected there."
-          : `this is CI, so v${matrix.version} must ship with its sheet — run \`npm run naomi:pdf\`.`),
+      `no sheet at ${currentPath}. This is CI, so v${matrix.version} must ship ` +
+        "with its sheet — run `npm run naomi:pdf` and commit the result.",
     );
   }
   expect(required ? current : true).toBe(true);
@@ -108,16 +101,13 @@ describe.each(archive)("%s", (filename) => {
   });
 
   it("is a single page", () => {
-    // The whole point of the artefact. Content that outgrows A3 fails here
-    // rather than shipping with a level stranded on page two; the lever is
-    // the root font-size in assets/sheet.css.
     expect(doc.numPages).toBe(1);
   });
 
   it("is A3 landscape", async () => {
     const [, , width, height] = (await doc.getPage(1)).view;
-    expect(Math.abs(width - A3_LANDSCAPE.width)).toBeLessThan(TOLERANCE);
-    expect(Math.abs(height - A3_LANDSCAPE.height)).toBeLessThan(TOLERANCE);
+    expect(Math.abs(width - A3_LANDSCAPE.width)).toBeLessThan(PAGE_TOLERANCE);
+    expect(Math.abs(height - A3_LANDSCAPE.height)).toBeLessThan(PAGE_TOLERANCE);
   });
 
   it("embeds the fonts it sets in", () => {
@@ -147,6 +137,33 @@ describe.each(archive)("%s", (filename) => {
     // else, so reaching this at all has already proved it.
     expect(bytes.length).toBeGreaterThan(MIN_BYTES);
     expect(bytes.length).toBeLessThan(5_000_000);
+  });
+});
+
+/* ---- is the one we ship still the one the model describes? ------------ */
+
+describe.runIf(current)("sheets.json", () => {
+  const entry = readManifest()[sheetFilename];
+
+  it("records the sheet we ship", () => {
+    expect(entry, `no entry for ${sheetFilename} — run \`npm run naomi:pdf\``).toBeDefined();
+    // Ties the record to the artefact: without this the manifest could
+    // describe a sheet that was replaced by hand.
+    expect(entry.sha256).toBe(sha256(readFileSync(currentPath)));
+  });
+
+  it("was generated from the page as it now builds", () => {
+    /*
+      The gap the content assertions cannot see. They check every string the
+      model carries is somewhere in the PDF, which stays true when a behaviour
+      is deleted from the model or moved to another cell. The digest is of the
+      built page's text, in order, so both show up — as does anything else the
+      sheet says, without a list of fields to keep in step.
+    */
+    expect(
+      entry.content,
+      "the committed sheet predates the current page — run `npm run naomi:pdf`",
+    ).toBe(contentDigest(builtPage));
   });
 });
 

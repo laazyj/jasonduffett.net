@@ -28,6 +28,15 @@ export const sheetDir = new URL("../static/downloads/", import.meta.url);
 
 export const publicPath = `/downloads/${sheetFilename}`;
 
+/*
+  A3 landscape as Chrome actually writes it. Not 1190.55 x 841.89: the page
+  box is declared in whole CSS pixels (assets/sheet.css), which lands a
+  fraction under A3 and is the only way to get a full-bleed sheet with no
+  unpainted edge.
+*/
+export const A3_LANDSCAPE = { width: 1189.92, height: 841.92 };
+export const PAGE_TOLERANCE = 1.5;
+
 // Below this it cannot be the whole index — 25 cells of text with four fonts
 // embedded. A truncated or stub file is the realistic way a render goes wrong
 // while still leaving something on disk.
