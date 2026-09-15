@@ -89,14 +89,15 @@ permalink: /
       until a sheet has been generated for this version, which is what the
       disabled state is for.
     #}
+    {% set downloadLabel = "The printable index" %}
     {% if sheet %}
     <a class="download" href="{{ sheet.path | rel }}" download>
-      <span class="download-label">The printable index</span>
+      <span class="download-label">{{ downloadLabel }}</span>
       <span class="download-meta">PDF · A3 · {{ sheet.size }}</span>
     </a>
     {% else %}
     <p class="download download--pending" aria-disabled="true">
-      <span class="download-label">The printable index</span>
+      <span class="download-label">{{ downloadLabel }}</span>
       <span class="download-meta">PDF · not published yet</span>
     </p>
     {% endif %}

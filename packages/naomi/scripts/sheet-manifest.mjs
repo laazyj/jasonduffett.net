@@ -1,9 +1,7 @@
 import { createHash } from "node:crypto";
-import { readdirSync, readFileSync, writeFileSync } from "node:fs";
-import { basename, join, relative, resolve } from "node:path";
+import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { basename, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
-
-import { sheetDir } from "./sheet-file.mjs";
 
 /*
   What each released sheet was generated from, so a committed PDF cannot
@@ -28,7 +26,7 @@ import { sheetDir } from "./sheet-file.mjs";
     belongs — scripts/build-sheet.mjs will not write a sheet that does not.
 */
 
-const packageDir = resolve(fileURLToPath(sheetDir), "..", "..");
+const packageDir = fileURLToPath(new URL("..", import.meta.url));
 const manifestPath = join(packageDir, "sheets.json");
 
 export const manifestName = basename(manifestPath);
@@ -54,9 +52,8 @@ export function sheetText(sheetHtmlPath) {
   const html = readFileSync(sheetHtmlPath, "utf8");
   return html
     .slice(html.indexOf("<body"))
-    .replace(/<(script|style)[\s\S]*?<\/\1>/gi, " ")
     .replace(/<[^>]+>/g, " ")
-    .replace(/(&copy;|©)\s*\d{4}/g, "$1 YYYY")
+    .replace(/&copy;\s*\d{4}/g, "&copy; YYYY")
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -96,12 +93,13 @@ export function renderDigest(sheetHtmlPath, assetsDir) {
   return digest.digest("hex");
 }
 
+/*
+  Absent is fine — nothing has been published yet. Malformed is not: swallowing
+  a parse error here would let writeManifest replace the record of every
+  earlier release with a single entry.
+*/
 export function readManifest() {
-  try {
-    return JSON.parse(readFileSync(manifestPath, "utf8"));
-  } catch {
-    return {};
-  }
+  return existsSync(manifestPath) ? JSON.parse(readFileSync(manifestPath, "utf8")) : {};
 }
 
 // Key-sorted so the file reads as an ordered list of releases and a new entry

@@ -19,23 +19,29 @@
                   macOS app bundles.
 
   Usage:
-    node scripts/build-sheet.mjs [--out <dir>]
+    node scripts/build-sheet.mjs
 
-    --out   where to write. Defaults to static/downloads/, which is
-            git-tracked and passthrough-copied into the site — that is how
-            older versions stay reachable. CI points this at a temp dir to
-            check the current model still fits without dirtying the tree.
+  It writes static/downloads/naomi-v<version>.pdf, which is git-tracked and
+  passthrough-copied into the site — that is how older versions stay
+  reachable — and records what it was made from in sheets.json.
 
   Exit 0 on success, 1 on any failure. This writes an artefact we distribute,
   so every check here is fatal rather than a warning.
 */
 import { execFileSync, spawnSync } from "node:child_process";
 import { mkdirSync, readFileSync, renameSync, rmSync, statSync } from "node:fs";
-import { basename, dirname, join, resolve } from "node:path";
+import { basename, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import process from "node:process";
 
-import { A3_LANDSCAPE, MIN_BYTES, PAGE_TOLERANCE, sheetDir, sheetFilename } from "./sheet-file.mjs";
+import {
+  builtAssetsDir,
+  builtSheetPage,
+  readable,
+  sheetDir,
+  sheetFilename,
+} from "./sheet-file.mjs";
+import { fontFaults, openPdf, pageFaults, sizeFaults } from "./sheet-checks.mjs";
 import {
   contentDigest,
   manifestName,
@@ -43,8 +49,6 @@ import {
   sha256,
   writeManifest,
 } from "./sheet-manifest.mjs";
-
-const packageDir = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
 const die = (msg) => {
   console.error(`build-sheet: ${msg}`);
@@ -81,65 +85,55 @@ function chromeVersion(bin) {
 }
 
 function resolveChrome() {
-  const tried = [];
-
   const explicit = process.env.CHROME_PATH;
   if (explicit) {
     const version = chromeVersion(explicit);
     if (version) return { bin: explicit, version };
     die(
-      `CHROME_PATH is set to ${explicit}, which is not a working Chrome.\n\n` +
-        `It was asked for --version and did not answer like one. Correct it, or\n` +
+      `CHROME_PATH is set to ${explicit}, which is not a working Chrome.
+
+` +
+        `It was asked for --version and did not answer like one. Correct it, or
+` +
         `unset CHROME_PATH to fall back to the usual locations.`,
     );
   }
-  tried.push("$CHROME_PATH (not set)");
 
-  for (const name of ON_PATH) {
-    const version = chromeVersion(name);
-    if (version) return { bin: name, version };
-  }
-  tried.push(`${ON_PATH.join(", ")} (not on PATH)`);
-
-  for (const path of APP_BUNDLES) {
-    const version = chromeVersion(path);
-    if (version) return { bin: path, version };
-    tried.push(`${path} (not found)`);
+  for (const bin of [...ON_PATH, ...APP_BUNDLES]) {
+    const version = chromeVersion(bin);
+    if (version) return { bin, version };
   }
 
   die(
-    `no usable Chrome found.\n\n` +
-      `Looked for (${process.platform}):\n` +
-      tried.map((t) => `  ${t}`).join("\n") +
-      `\n\n` +
-      `The sheet is rendered by the Chrome you already have — nothing is bundled.\n` +
-      `Fix by one of:\n` +
-      `  - install Google Chrome           https://google.com/chrome\n` +
-      `  - point at an existing install    CHROME_PATH=/path/to/chrome npm run naomi:pdf\n` +
-      `  - on CI, use the runner's preinstalled Chrome (ubuntu-latest has one)`,
+    `no usable Chrome found.
+
+` +
+      `Looked for (${process.platform}):
+` +
+      `  $CHROME_PATH (not set)
+` +
+      `  ${ON_PATH.join(", ")} (not on PATH)
+` +
+      APP_BUNDLES.map(
+        (p) => `  ${p} (not found)
+`,
+      ).join("") +
+      `
+` +
+      `The sheet is rendered by the Chrome you already have — nothing is bundled.
+` +
+      `Fix by one of:
+` +
+      `  - install Google Chrome           https://google.com/chrome
+` +
+      `  - point at an existing install    CHROME_PATH=/path/to/chrome npm run naomi:pdf`,
   );
 }
 
 /* ---- rendering ------------------------------------------------------- */
 
-/*
-  One flag. Both spellings, because `--out=dir` silently falling through to
-  the default would write a fit-check into the git-tracked directory the
-  default points at — and anything unrecognised is a mistake worth stopping
-  for, for the same reason.
-*/
-const argv = process.argv.slice(2);
-let outDir = fileURLToPath(sheetDir);
-let publishing = true;
-for (let i = 0; i < argv.length; i++) {
-  const eq = argv[i].startsWith("--out=");
-  if (!eq && argv[i] !== "--out") die(`unrecognised argument ${argv[i]} (only --out <dir>)`);
-  const value = eq ? argv[i].slice("--out=".length) : argv[++i];
-  if (!value) die("--out needs a directory");
-  outDir = resolve(value);
-  publishing = false;
-}
-const source = join(packageDir, "dist", "sheet", "index.html");
+const outDir = fileURLToPath(sheetDir);
+const source = fileURLToPath(builtSheetPage);
 
 if (!statSync(source, { throwIfNoEntry: false })) {
   die(`${source} is missing — run the build first (npx nx run @jasonduffett-net/naomi:build).`);
@@ -179,15 +173,17 @@ try {
 /* ---- is it the sheet, or just a file? -------------------------------- */
 
 /*
-  Everything that has to be true before this replaces what we distribute. The
-  single-page check is the one that earns the scratch file: a sheet that has
-  outgrown A3 is the failure this whole artefact is most likely to hit, and
-  the fix — the root font-size in assets/sheet.css — is not something to
-  discover from a reader.
+  Everything that has to be true before this replaces what we distribute, asked
+  of the scratch file. The checks live in sheet-checks.mjs because the test
+  asks the same questions of every sheet in the archive; only the reaction
+  differs.
+
+  All of them run, so a bad render reports everything wrong with it rather than
+  one thing at a time.
 */
-const reject = (why) => {
+const reject = (faults) => {
   rmSync(scratch, { force: true });
-  die(why);
+  die(`the render was not published.\n\n${faults.map((f) => `  - ${f}`).join("\n")}`);
 };
 
 let bytes;
@@ -197,59 +193,29 @@ try {
   die(`Chrome reported success but wrote nothing to ${scratch}.`);
 }
 
-if (bytes.subarray(0, 5).toString() !== "%PDF-") {
-  reject(
-    `Chrome wrote something that is not a PDF — it starts ${JSON.stringify(bytes.subarray(0, 16).toString())}.`,
-  );
-}
-if (bytes.length < MIN_BYTES) {
-  reject(`the sheet is only ${bytes.length} bytes, which is too small to be the whole index.`);
+let doc;
+try {
+  doc = await openPdf(bytes);
+} catch (err) {
+  reject([`Chrome wrote something it cannot read back as a PDF: ${err.message}`]);
 }
 
-const { getDocument } = await import("pdfjs-dist/legacy/build/pdf.mjs");
-const doc = await getDocument({ data: new Uint8Array(bytes), useSystemFonts: false }).promise;
-
-if (doc.numPages !== 1) {
-  reject(
-    `the sheet came out ${doc.numPages} pages, and it has to be one.\n\n` +
-      `The index has outgrown A3 at the current type scale. Lower\n` +
-      `\`font-size\` on \`html\` in assets/sheet.css until it fits, or take\n` +
-      `something out of the model.`,
-  );
-}
-
-const [, , width, height] = (await doc.getPage(1)).view;
-if (
-  Math.abs(width - A3_LANDSCAPE.width) > PAGE_TOLERANCE ||
-  Math.abs(height - A3_LANDSCAPE.height) > PAGE_TOLERANCE
-) {
-  reject(
-    `the sheet is ${width.toFixed(2)} x ${height.toFixed(2)}pt, not A3 landscape ` +
-      `(${A3_LANDSCAPE.width} x ${A3_LANDSCAPE.height}). Check the @page rule in assets/sheet.css.`,
-  );
-}
+const faults = [...sizeFaults(bytes), ...(await pageFaults(doc)), ...fontFaults(bytes)];
+if (faults.length) reject(faults);
 
 renameSync(scratch, target);
 
 /* ---- record what it was made from ------------------------------------ */
 
-/*
-  Only for a real publication. A scratch render into some other directory has
-  handed out nothing and must not claim in the manifest that it has.
-*/
-if (publishing) {
-  writeManifest(sheetFilename, {
-    generated: new Date().toISOString().slice(0, 10),
-    chrome: version,
-    bytes: bytes.length,
-    sha256: sha256(bytes),
-    content: contentDigest(source),
-    render: renderDigest(source, join(packageDir, "dist", "assets")),
-  });
-  console.log(`[sheet] recorded in ${manifestName}`);
-}
+writeManifest(sheetFilename, {
+  generated: new Date().toISOString().slice(0, 10),
+  chrome: version,
+  bytes: bytes.length,
+  sha256: sha256(bytes),
+  content: contentDigest(source),
+  render: renderDigest(source, fileURLToPath(builtAssetsDir)),
+});
 
-console.log(
-  `[sheet] ${basename(target)} — one A3 page, ${(bytes.length / 1024).toFixed(0)}KB, ${version}`,
-);
+console.log(`[sheet] ${basename(target)} — one A3 page, ${readable(bytes.length)}, ${version}`);
 console.log(`[sheet] ${target}`);
+console.log(`[sheet] recorded in ${manifestName}`);

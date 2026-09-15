@@ -12,24 +12,25 @@ npm run naomi:build   # write ./dist
 
 ## Layout
 
-| Path                      | What it holds                                                             |
-| ------------------------- | ------------------------------------------------------------------------- |
-| `model/naomi.json`        | **The canonical model.** Shared with the sheet.                           |
-| `_data/matrix.js`         | The checked view of it — the only door templates see the model through.   |
-| `_data/sheet.js`          | The generated sheet, as the download card sees it. Derived, not declared. |
-| `_data/site.json`         | Site chrome: title, description, licence, links, article.                 |
-| `_includes/layouts/`      | `base.njk` for the hosted pages, `sheet.njk` for the printable one.       |
-| `_includes/partials/`     | Head, masthead, provenance meta, footer, analytics, consent, the matrix.  |
-| `content/index.njk`       | The single page — intro, index, how to read it, markers, background.      |
-| `content/sheet.njk`       | The printable sheet: masthead, the index in full, a provenance footer.    |
-| `assets/styles.css`       | The frame's styling. Shipped verbatim; no build step.                     |
-| `assets/matrix.css`       | The index's styling, including the density ladder.                        |
-| `assets/sheet.css`        | The sheet's page geometry and type scale. Nothing else.                   |
-| `assets/matrix.js`        | The index's behaviour. The package's only browser script.                 |
-| `assets/fonts/`           | The four families, vendored so the sheet needs no network.                |
-| `scripts/build-sheet.mjs` | Prints the sheet to PDF with the Chrome already on the machine.           |
-| `test/sheet.test.js`      | What stops a broken sheet being distributed.                              |
-| `static/`                 | Served from the site root: `favicon.svg`, the IndexNow key, `downloads/`. |
+| Path                       | What it holds                                                             |
+| -------------------------- | ------------------------------------------------------------------------- |
+| `model/naomi.json`         | **The canonical model.** Shared with the sheet.                           |
+| `_data/matrix.js`          | The checked view of it — the only door templates see the model through.   |
+| `_data/sheet.js`           | The generated sheet, as the download card sees it. Derived, not declared. |
+| `_data/site.json`          | Site chrome: title, description, licence, links, article.                 |
+| `_includes/layouts/`       | `base.njk` for the hosted pages, `sheet.njk` for the printable one.       |
+| `_includes/partials/`      | Head, masthead, provenance meta, footer, analytics, consent, the matrix.  |
+| `content/index.njk`        | The single page — intro, index, how to read it, markers, background.      |
+| `content/sheet.njk`        | The printable sheet: masthead, the index in full, a provenance footer.    |
+| `assets/styles.css`        | The frame's styling. Shipped verbatim; no build step.                     |
+| `assets/matrix.css`        | The index's styling, including the density ladder.                        |
+| `assets/sheet.css`         | The sheet's page geometry and type scale. Nothing else.                   |
+| `assets/matrix.js`         | The index's behaviour. The package's only browser script.                 |
+| `assets/fonts/`            | The four families, vendored so the sheet needs no network.                |
+| `scripts/build-sheet.mjs`  | Prints the sheet to PDF with the Chrome already on the machine.           |
+| `scripts/sheet-checks.mjs` | What has to be true of a sheet. The generator and the test share it.      |
+| `test/sheet.test.js`       | What stops a broken sheet being distributed.                              |
+| `static/`                  | Served from the site root: `favicon.svg`, the IndexNow key, `downloads/`. |
 
 ## The data source
 
@@ -176,18 +177,26 @@ different things:
 The single-page assertion is the one that matters: content that outgrows A3
 fails rather than shipping with a level stranded on page two.
 
-A missing sheet is normally not a failure — a fresh clone has none, and the
-download card renders its disabled state. It **is** a failure on CI, where this
-version is on its way to being published: otherwise a version bumped without
-regenerating would ship the site with its only download silently gone, and
-every test would skip green.
+Once a sheet has been published, every later version owes one: the download
+card is derived from the model's version, so bumping it without regenerating
+ships the site with its only download silently gone. That is read off
+`sheets.json` rather than `process.env.CI`, so it fails in the same place
+locally as on a runner — at the bump, not at the push.
 
 ### One page is enforced where it is decided
 
 `scripts/build-sheet.mjs` renders to a scratch file and only moves it into
-place once it has checked the result is a single A3 page. A sheet that has
-outgrown the page never reaches `static/downloads/` at all, so there is nothing
-for a later check to catch.
+place once the result passes every check in `scripts/sheet-checks.mjs` — one
+A3 page, the four declared families embedded, a plausible size. A sheet that
+fails never reaches `static/downloads/` at all, so there is nothing for a later
+check to catch.
+
+The test asks those same questions of every sheet in the archive. That is not
+duplication: the generator gates what may be written, the test gates what is
+still distributed. They share the checks so they cannot drift — an earlier
+split by hand had already lost the font check from the generator's side, which
+meant a render that fell back to a system face was written and committed and
+only noticed on the next `npm test`.
 
 That matters because **page fit is not only a function of content**. The lever
 is `font-size` on `html` in [`assets/sheet.css`](assets/sheet.css), and a
