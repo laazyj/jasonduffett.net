@@ -83,11 +83,17 @@ permalink: /
 
   <section class="section" aria-labelledby="download-heading">
     <h2 class="section-title" id="download-heading">Download</h2>
-    {% set downloadLabel = site.pdf.label if site.pdf else "The printable index" %}
-    {% if site.pdf %}
-    <a class="download" href="{{ site.pdf.path | rel }}" download>
+    {#
+      `sheet` is derived from the model's version in _data/sheet.js, so the
+      card cannot point at a stale file or quote a stale size. It is null
+      until a sheet has been generated for this version, which is what the
+      disabled state is for.
+    #}
+    {% set downloadLabel = "The printable index" %}
+    {% if sheet %}
+    <a class="download" href="{{ sheet.path | rel }}" download>
       <span class="download-label">{{ downloadLabel }}</span>
-      <span class="download-meta">PDF{% if site.pdf.size %} · {{ site.pdf.size }}{% endif %}</span>
+      <span class="download-meta">PDF · A3 · {{ sheet.size }}</span>
     </a>
     {% else %}
     <p class="download download--pending" aria-disabled="true">

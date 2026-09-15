@@ -95,17 +95,25 @@ html {
      styles.css and matrix.css is in rem, so this one value scales the whole
      index at once — which is what makes 25 cells of full content fit one
      page. Arrived at by measurement, not taste: the sheet still fits at
-     12.75px and spills onto a second page at 13px. This sits a little under
-     that edge on purpose — the margin is what the model has to grow into,
-     and what absorbs any difference between the Chrome that renders it here
-     and the one that renders it on CI.
+     13.25px and spills onto a second page at 13.5px. This sits a step under
+     that edge so the model has somewhere to grow before the number has to
+     move.
+
+     The margin used to be wider, to absorb any difference between the Chrome
+     that renders here and the one on CI. CI no longer renders, and
+     scripts/build-sheet.mjs refuses to publish a sheet that has spilled, so a
+     misfit cannot reach anyone — the margin now only saves re-tuning.
+
+     This number depends on the `print` in styles.css's wide-layout queries:
+     take that away, the masthead stacks again, and this has to come back
+     down.
 
      Not a uniform scale, and it does not claim to be: lengths already in px
      stay put — hairline borders and the accent bar, which should stay
      hairlines — and media-query lengths resolve against 16px whatever the
      root is. Changing this number is how you respond to the sheet spilling
      onto a second page. */
-  font-size: 12.25px;
+  font-size: 13px;
 }
 
 body.sheet {
