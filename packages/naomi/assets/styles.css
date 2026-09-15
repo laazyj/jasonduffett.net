@@ -142,7 +142,8 @@ body {
   min-height: 100vh;
 }
 
-@media (width >= 48rem) {
+/* Wide layout — and print. See the note above the 64rem queries below. */
+@media (width >= 48rem), print {
   .wrap {
     padding: 3rem var(--gutter) 4rem;
   }
@@ -161,7 +162,31 @@ body {
   margin-bottom: 1.25rem;
 }
 
-@media (width >= 64rem) {
+/*
+  The wide layout, and every one of these queries names `print` as well as a
+  width. That is not belt-and-braces: a print media query cannot be told how
+  wide the paper is.
+
+  Chrome evaluates `width` in print against the *default paper size*, not
+  against the `@page` size a document declares — measured at about 746px here,
+  A4 portrait less its margins. So `64rem` is false in print however wide the
+  page really is, including on the 1587px A3 sheet, which was stacking the
+  definition under the wordmark and spending 137pt of an 842pt page on a
+  masthead. Naming `print` reclaimed 38pt of that.
+
+  Note what this does NOT say: that paper is wide. By the query's own terms it
+  is narrow — 746px is under the 1024px this breakpoint gates. The claim is
+  that printed output wants the wide layout regardless, which is a decision,
+  not a measurement.
+
+  All four wide-layout queries carry it — the 48rem one above and the three
+  64rem ones — so printed pages get the whole wide layout rather than a
+  two-column masthead over single-column sections. Only the masthead reaches
+  the sheet; the rest is about printing the hosted pages, which was checked
+  and does now put the section headings in the rail. (Their table still
+  overflows Letter, which is what the sheet is for.)
+*/
+@media (width >= 64rem), print {
   .masthead {
     display: grid;
     grid-template-columns: minmax(0, auto) minmax(0, var(--measure));
@@ -180,7 +205,8 @@ body {
   margin-top: 1.75rem;
 }
 
-@media (width >= 64rem) {
+/* Paired with the grid above; `print` for the same reason. */
+@media (width >= 64rem), print {
   .masthead-lede {
     margin-top: 0;
   }
@@ -361,9 +387,11 @@ body {
   color: var(--ink);
 }
 
-/* Wide enough for the rail: the heading sits in it, the content sets to the
-   measure beside it, and both hang off the frame's left edge. */
-@media (width >= 64rem) {
+/* Wide enough for the rail — or printed, where the width query cannot tell:
+   the heading sits in the rail, the content sets to the measure beside it,
+   and both hang off the frame's left edge. See the note above the masthead
+   queries for why `print` is named. */
+@media (width >= 64rem), print {
   .section {
     display: grid;
     grid-template-columns: var(--rail) minmax(0, 1fr);

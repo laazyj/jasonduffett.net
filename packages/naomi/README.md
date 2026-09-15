@@ -128,7 +128,7 @@ work and `partials/matrix.njk` is the same partial the home page renders;
 and nothing else. Every size in the other two files is in `rem`, so the root
 `font-size` is the single lever that fits 25 cells to a page.
 
-Two details there are load-bearing and look like mistakes:
+Three details there are load-bearing and look like mistakes:
 
 - The page box is `1587px 1123px`, not `A3 landscape`. Chrome's PDF MediaBox
   comes out a fraction wider than the integer pixel width it lays out at, and
@@ -139,6 +139,10 @@ Two details there are load-bearing and look like mistakes:
 - The density ladder in `matrix.css` is scoped away from `body.sheet`. Its
   `scripting: enabled` gate reports what the browser allows, not whether the
   document loaded `matrix.js` — and the sheet loads none.
+- Every wide-layout query in `styles.css` names `print` alongside its width.
+  A print media query cannot be told how wide the paper is, and without it the
+  masthead stacks and spends 137pt of an 842pt page. The mechanism is
+  documented above those queries; do not tidy the `print` away.
 
 ```sh
 npm run naomi:pdf     # writes static/downloads/naomi-v<version>.pdf
