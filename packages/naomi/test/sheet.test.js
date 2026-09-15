@@ -1,19 +1,13 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import process from "node:process";
 
-import { describe, expect, it, beforeAll } from "vitest";
+import { describe, expect, it, afterAll, beforeAll } from "vitest";
 
 import matrix from "../_data/matrix.js";
 import site from "../_data/site.json" with { type: "json" };
-import {
-  A3_LANDSCAPE,
-  MIN_BYTES,
-  PAGE_TOLERANCE,
-  sheetDir,
-  sheetFilename,
-} from "../scripts/sheet-file.mjs";
+import { builtSheetPage, sheetDir, sheetFilename } from "../scripts/sheet-file.mjs";
+import { fontFaults, openPdf, pageFaults, sizeFaults } from "../scripts/sheet-checks.mjs";
 import { contentDigest, readManifest, sha256 } from "../scripts/sheet-manifest.mjs";
 
 /*
@@ -22,48 +16,60 @@ import { contentDigest, readManifest, sha256 } from "../scripts/sheet-manifest.m
 
   Two scopes, because we distribute two different things:
 
-  - Every sheet in static/downloads/ gets the file-level invariants. Older
-    versions stay reachable only by being committed — the bucket deployment
-    prunes — so anything we still hand out is worth still checking.
-  - The sheet for the *current* version also gets the content assertions and
-    the digest, because it is the only one the model can still speak for.
+  - Every sheet in static/downloads/ gets the file-level checks. Older versions
+    stay reachable only by being committed — the bucket deployment prunes — so
+    anything we still hand out is worth still checking.
+  - The sheet for the current version also gets the content assertions and the
+    manifest digest, because it is the only one the model can still speak for.
 
-  What is NOT here: a check that a sheet fits one page before it is written.
-  scripts/build-sheet.mjs renders to a scratch file and refuses to move it into
-  place unless it is a single A3 page, so a sheet that does not fit never
-  reaches this directory in the first place.
+  The file-level checks are sheet-checks.mjs, shared with the generator, which
+  refuses to publish a render that fails them. That is not duplication: the
+  generator gates what may be written, this gates what is still distributed.
 */
 
 const dir = fileURLToPath(sheetDir);
 const currentPath = join(dir, sheetFilename);
 const current = statSync(currentPath, { throwIfNoEntry: false })?.isFile() ?? false;
-const builtPage = fileURLToPath(new URL("../dist/sheet/index.html", import.meta.url));
+
+const archive = readdirSync(dir, { withFileTypes: true })
+  .filter((e) => e.isFile() && e.name.endsWith(".pdf"))
+  .map((e) => e.name)
+  .sort();
+
+const manifest = readManifest();
 
 /*
-  A missing sheet is normally fine — a fresh clone has none until someone runs
-  `npm run naomi:pdf`, and the download card renders its disabled state. It is
-  not fine on CI, where this version is on its way to being published:
-  otherwise a version bumped without regenerating ships the site with its only
-  download silently gone, and every test below skips green.
+  Once this project has published a sheet, every later version owes one: the
+  download card is derived from the model's version, so bumping it without
+  regenerating ships the site with its only download silently gone.
+
+  Derived from the record rather than from `process.env.CI`, which was the
+  wrong signal in two directions — it let a local `npm test` pass on a state
+  that would fail on push, and its stated excuse ("a fresh clone has no
+  sheet") stopped being true the moment sheets were committed to git.
 */
-const required = Boolean(process.env.CI);
+const required = Object.keys(manifest).length > 0;
 
-const archive = (() => {
-  try {
-    return readdirSync(dir)
-      .filter((f) => f.endsWith(".pdf"))
-      .sort();
-  } catch {
-    return [];
+// One parse per file however many blocks ask for it.
+const opened = new Map();
+const open = (path) => {
+  if (!opened.has(path)) {
+    const bytes = readFileSync(path);
+    opened.set(
+      path,
+      openPdf(bytes).then((doc) => ({ bytes, doc })),
+    );
   }
-})();
-
-const open = async (path) => {
-  const bytes = readFileSync(path);
-  const { getDocument } = await import("pdfjs-dist/legacy/build/pdf.mjs");
-  const doc = await getDocument({ data: new Uint8Array(bytes), useSystemFonts: false }).promise;
-  return { bytes, doc };
+  return opened.get(path);
 };
+
+// Releases each document's cached pages and font data rather than holding
+// every archived sheet's in memory until the file ends. `cleanup`, not
+// `destroy`: in pdfjs the document proxy has the former, the loading task the
+// latter, and the task is not what openPdf hands back.
+afterAll(async () => {
+  for (const pending of opened.values()) (await pending).doc.cleanup();
+});
 
 /*
   A renderer breaks a word at a hyphen and the hyphen ends the line, so
@@ -72,22 +78,13 @@ const open = async (path) => {
   on both sides and the question never arises. (Order matters: collapsing
   whitespace first would leave "false positive" and never match.)
 */
-const flat = (s) =>
-  s
-    .normalize("NFC")
-    .replace(/[\u00AD\u200B]/g, "") // soft hyphen, zero-width space
-    .replace(/-\s*/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
+const flat = (s) => s.normalize("NFC").replace(/-\s*/g, "").replace(/\s+/g, " ").trim();
 
-it("has a sheet to check", () => {
-  if (required && !current) {
-    throw new Error(
-      `no sheet at ${currentPath}. This is CI, so v${matrix.version} must ship ` +
-        "with its sheet — run `npm run naomi:pdf` and commit the result.",
-    );
-  }
-  expect(required ? current : true).toBe(true);
+it.runIf(required)("ships a sheet for the current version", () => {
+  expect(
+    current,
+    `no sheet at ${currentPath} — run \`npm run naomi:pdf\` and commit the result`,
+  ).toBe(true);
 });
 
 /* ---- everything we still hand out ------------------------------------ */
@@ -100,52 +97,36 @@ describe.each(archive)("%s", (filename) => {
     ({ bytes, doc } = await open(join(dir, filename)));
   });
 
-  it("is a single page", () => {
-    expect(doc.numPages).toBe(1);
-  });
-
-  it("is A3 landscape", async () => {
-    const [, , width, height] = (await doc.getPage(1)).view;
-    expect(Math.abs(width - A3_LANDSCAPE.width)).toBeLessThan(PAGE_TOLERANCE);
-    expect(Math.abs(height - A3_LANDSCAPE.height)).toBeLessThan(PAGE_TOLERANCE);
+  it("is a single A3 landscape page", async () => {
+    // The whole point of the artefact. Content that outgrows A3 fails here
+    // rather than being handed to a reader with a level stranded on page two.
+    expect(await pageFaults(doc)).toEqual([]);
   });
 
   it("embeds the fonts it sets in", () => {
-    /*
-      The failure this guards is silent: a render that could not reach the
-      vendored woff2 falls back to a system face and the PDF still looks
-      entirely plausible.
-
-      Read from the PDF's own /FontName entries, which Chrome writes
-      uncompressed, rather than through pdfjs — these are Type 3 fonts (Chrome
-      flattens a variable instance), and pdfjs reports those only as
-      "sans-serif"/"monospace", which would pass whatever had happened.
-    */
-    const names = (bytes.toString("latin1").match(/\/FontName\s*\/[^\s/>\]]+/g) ?? []).join(" ");
-    for (const family of ["SourceSerif4", "Fraunces", "JetBrainsMono", "Caveat"]) {
-      expect(names).toContain(family);
-    }
-    // Positively, not by forbidding every fallback: one is expected and
-    // documented — "→" is in no Google latin subset, so the corner label's
-    // arrow comes from a host font (assets/fonts/README.md). A generic serif
-    // standing in for the body text is the failure worth naming.
-    expect(names).not.toMatch(/Times|Helvetica|Georgia|DejaVu|Liberation/);
+    // Silent when it goes wrong: a render that could not reach the vendored
+    // woff2 falls back to a system face and still looks entirely plausible.
+    expect(fontFaults(bytes)).toEqual([]);
   });
 
   it("is a plausible size for what it carries", () => {
-    // No %PDF- check: getDocument in beforeAll cannot resolve on anything
-    // else, so reaching this at all has already proved it.
-    expect(bytes.length).toBeGreaterThan(MIN_BYTES);
-    expect(bytes.length).toBeLessThan(5_000_000);
+    expect(sizeFaults(bytes)).toEqual([]);
   });
 });
 
-/* ---- is the one we ship still the one the model describes? ------------ */
+/* ---- and the one the model can still speak for ------------------------ */
 
-describe.runIf(current)("sheets.json", () => {
-  const entry = readManifest()[sheetFilename];
+describe.runIf(current)(`${sheetFilename} — against the current model`, () => {
+  const entry = manifest[sheetFilename];
+  let text;
 
-  it("records the sheet we ship", () => {
+  beforeAll(async () => {
+    const { doc } = await open(currentPath);
+    const content = await (await doc.getPage(1)).getTextContent();
+    text = flat(content.items.map((i) => i.str + (i.hasEOL ? "\n" : "")).join(""));
+  });
+
+  it("is the sheet sheets.json describes", () => {
     expect(entry, `no entry for ${sheetFilename} — run \`npm run naomi:pdf\``).toBeDefined();
     // Ties the record to the artefact: without this the manifest could
     // describe a sheet that was replaced by hand.
@@ -163,19 +144,7 @@ describe.runIf(current)("sheets.json", () => {
     expect(
       entry.content,
       "the committed sheet predates the current page — run `npm run naomi:pdf`",
-    ).toBe(contentDigest(builtPage));
-  });
-});
-
-/* ---- and what the model can still speak for -------------------------- */
-
-describe.runIf(current)(`${sheetFilename} content`, () => {
-  let text;
-
-  beforeAll(async () => {
-    const { doc } = await open(currentPath);
-    const content = await (await doc.getPage(1)).getTextContent();
-    text = flat(content.items.map((i) => i.str + (i.hasEOL ? "\n" : "")).join(""));
+    ).toBe(contentDigest(fileURLToPath(builtSheetPage)));
   });
 
   it("carries every behaviour in every cell", () => {

@@ -1,6 +1,6 @@
 import { statSync } from "node:fs";
 
-import { MIN_BYTES, publicPath, sheetDir, sheetFilename } from "../scripts/sheet-file.mjs";
+import { publicPath, readable, sheetDir, sheetFilename } from "../scripts/sheet-file.mjs";
 
 /*
   The printable sheet, as the download card sees it.
@@ -17,11 +17,6 @@ import { MIN_BYTES, publicPath, sheetDir, sheetFilename } from "../scripts/sheet
   facts live in scripts/sheet-file.mjs for exactly that reason.
 */
 
-// Two decimals of a megabyte is noise on a download card; whole KB up to a
-// megabyte, one decimal past it.
-const readable = (bytes) =>
-  bytes < 1_048_576 ? `${Math.round(bytes / 1024)} KB` : `${(bytes / 1_048_576).toFixed(1)} MB`;
-
 /*
   `throwIfNoEntry: false` rather than a try/catch: absent is the expected case
   and wants `undefined`, but EACCES or a broken symlink is a real problem and
@@ -35,9 +30,9 @@ const stats = statSync(new URL(sheetFilename, sheetDir), { throwIfNoEntry: false
   thing for it to do: a fresh clone builds before anyone has run
   `npm run naomi:pdf`, and a version bump lands before its sheet does.
 
-  Plausibility rather than bare presence — a half-written file should read as
-  "no sheet" and show the disabled card, not as a live download.
+  Presence is the whole test. The generator renders to a scratch name and
+  renames it into place, which is atomic within the directory, so a
+  half-written file cannot exist at this path — what a plausible sheet weighs
+  is the test's business, not the card's.
 */
-export default stats && stats.size >= MIN_BYTES
-  ? { path: publicPath, size: readable(stats.size) }
-  : null;
+export default stats ? { path: publicPath, size: readable(stats.size) } : null;
