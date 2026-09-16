@@ -211,10 +211,6 @@ every remaining string is still present) and a behaviour **moved** between
 cells (every string is still somewhere). `sheets.json` closes both with a
 digest of the built page's text, in the order the page says it.
 
-Derived from the page, not from a list of model fields. A hand-written list was
-tried first and had already missed `site.fullTitle` on the day it was written —
-a second model of what the template prints has nothing keeping it in step.
-
 | Field     | What it is                                                                                                                                        |
 | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `content` | Digest of the built page's text. **Enforced.**                                                                                                    |

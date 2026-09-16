@@ -17,12 +17,6 @@ import {
   They differ only in what they do about a fault — reject, or fail — so the
   faults themselves are defined here rather than in both.
 
-  That split used to be by hand, and it had already drifted: the font check
-  existed only on the test side, so a render that fell back to a system face
-  was written into static/downloads/ and committed, and was not noticed until
-  the next `npm test`. Precisely what rendering to a scratch file was meant to
-  prevent.
-
   Each check returns a list of faults, empty when there is nothing wrong, so a
   caller can report all of them rather than only the first.
 
