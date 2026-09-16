@@ -245,7 +245,7 @@ to token is five hand-written rules; `_data/matrix.js` asserts every id in the
 model has one.
 
 The site version is the model's version. `naomi.model.version` renders as a
-chip locked up with the wordmark (`_includes/layouts/base.njk`) and, with
+chip locked up with the wordmark (`_includes/partials/masthead.njk`) and, with
 `naomi.model.date`, as a provenance line in the footer
 (`_includes/partials/site-footer.njk`). Both come from one object in the
 canonical file, so they cannot be bumped out of step.
@@ -254,8 +254,9 @@ canonical file, so they cannot be bumped out of step.
 the version chip is outlined: the version is a fact and the status is a claim
 about it. Both chips are chrome and travel on every page, because where the
 model is does not depend on which page you are reading. Which part of it is
-unfinished does, so `status.note` renders once, as the aside over the index —
-the cells being the part still under test.
+unfinished does, so `status.note` renders once, as the aside over the hosted
+index — the cells being the part still under test. The masthead is shared with
+the printable sheet, so the chip reaches it; the note does not.
 
 ## Content
 

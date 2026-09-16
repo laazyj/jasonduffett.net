@@ -1,5 +1,5 @@
 {#
-  The masthead: the wordmark and its version chip on the left, the model's own
+  The masthead: the wordmark and its chips on the left, the model's own
   definition on the right, closed by the spot rule.
 
   Shared by the hosted pages (layouts/base.njk) and the printable sheet
@@ -11,12 +11,10 @@
   chrome carries the masthead on every page; only the pages that are *about*
   the model carry its definition.
 
-  The status chip rides with the version because it says the same kind of
-  thing: where the model is, not what this page is. 0.1.0 says pre-1.0 to
-  whoever reads semver and the chip says it to everyone else, so both travel
-  on every page — the printed sheet included, where a reader has no site to
-  check the caveat against. Which part of it is unfinished is the index's
-  business, and the note over the index says that.
+  The status chip travels with the version, so it reaches the printed sheet
+  too — where a reader has no site to check the caveat against. `status.note`,
+  which says which part of the model is unfinished, is on the hosted index
+  only.
 #}
 <header class="masthead">
   <div class="masthead-lockup">
