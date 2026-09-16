@@ -1,10 +1,10 @@
 {
   "naomi-v0.1.0.pdf": {
-    "generated": "2026-09-15",
+    "generated": "2026-09-16",
     "chrome": "Google Chrome 152.0.7977.84",
-    "bytes": 312641,
-    "sha256": "594bd53b17becad91859fd57d9c20940791e0baa3a0ef2b012339a0563654e5e",
-    "content": "ef8047cc402993aa4a24a68bc38b34168a56683f7427277dc195134f3eafc2fe",
-    "render": "29bb83d864e88f57d9f848ad5eab9e8e20d4ad4994418d876798ee86a5127795"
+    "bytes": 316245,
+    "sha256": "773f254ca7f3ded46341935db024c20c4ab40d2f9b89a241966fd5610be8b1b5",
+    "content": "a15d49ec8404faa45fb41320d8e1d5ae5732e273c1543fa8d6fc11441b809036",
+    "render": "7f7bcefde84d6fb4a4bd9b34431cbbbb18f524e302c6335f6a38bbc0ba510586"
   }
 }
