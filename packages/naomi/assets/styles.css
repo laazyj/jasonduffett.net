@@ -442,14 +442,10 @@ body {
     max-width: var(--measure);
   }
 
-  /* The index opts out: the matrix gets the whole frame, not the column.
-     The note over it does not — a sentence about the index is prose, and
-     keeps the measure the rule above already gave it. */
-  .section--full {
-    display: block;
-  }
-
-  .section--full > :not(.section-title, .provisional) {
+  /* A 25-cell table cannot set to the measure, so the matrix spans the rail
+     as well. Everything else in its section stays in the column. */
+  .section > .m-wrap {
+    grid-column: 1 / -1;
     max-width: none;
   }
 }
@@ -589,7 +585,6 @@ a.download:hover {
 .links a,
 .prose-block a,
 .prose a,
-.provisional a,
 footer.site a {
   color: var(--ink);
   text-decoration-color: var(--rule);
@@ -599,7 +594,6 @@ footer.site a {
 .links a:hover,
 .prose-block a:hover,
 .prose a:hover,
-.provisional a:hover,
 footer.site a:hover {
   color: var(--spot);
   text-decoration-color: var(--spot);

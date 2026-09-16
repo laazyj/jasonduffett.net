@@ -32,7 +32,7 @@ permalink: /
     </div>
   </section>
 
-  <section class="section section--full" aria-labelledby="index-heading">
+  <section class="section" aria-labelledby="index-heading">
     <h2 class="section-title" id="index-heading">The index</h2>
     {#
       The disclaimer sits over the index rather than in the standfirst because
@@ -44,7 +44,6 @@ permalink: /
     <p class="provisional">
       <span class="provisional-label">{{ matrix.status.label }}</span>
       {{ matrix.status.note }}
-      <a href="{{ site.article.href }}">The introduction says why</a>.
     </p>
     {% include "partials/matrix.njk" %}
   </section>
