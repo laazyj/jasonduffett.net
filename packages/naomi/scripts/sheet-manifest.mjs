@@ -35,9 +35,7 @@ export const sha256 = (input) => createHash("sha256").update(input).digest("hex"
 
 /*
   The text of the built page, which is the honest version of "everything the
-  sheet says". Derived rather than listed: an earlier hand-written list of the
-  model fields the sheet prints had already missed `site.fullTitle` on the day
-  it was written, which is what a second model of the template always does.
+  sheet says". Derived rather than listed.
 
   Taken from the HTML rather than from the PDF because it has to be exact —
   extracting text from a PDF brings its own wrinkles (a word broken at a

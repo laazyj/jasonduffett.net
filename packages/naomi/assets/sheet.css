@@ -99,11 +99,6 @@ html {
      that edge so the model has somewhere to grow before the number has to
      move.
 
-     The margin used to be wider, to absorb any difference between the Chrome
-     that renders here and the one on CI. CI no longer renders, and
-     scripts/build-sheet.mjs refuses to publish a sheet that has spilled, so a
-     misfit cannot reach anyone — the margin now only saves re-tuning.
-
      This number depends on the `print` in styles.css's wide-layout queries:
      take that away, the masthead stacks again, and this has to come back
      down.
