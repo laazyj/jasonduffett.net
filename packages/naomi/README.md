@@ -170,6 +170,10 @@ anything not in `dist` is deleted on deploy — a sheet lives in the repo, is
 passthrough-copied forward by every build, and a link printed on paper keeps
 resolving after the model has moved on.
 
+That is a promise about _released_ versions. Renumbering a pre-release — v0.1.0
+to v0.1, say — replaces its sheet rather than archiving it, and the old URL
+stops resolving.
+
 ### Testing it
 
 `test/sheet.test.js` checks two different things, because we distribute two

@@ -151,6 +151,10 @@ const target = join(outDir, sheetFilename);
 const scratch = `${target}.pending`;
 mkdirSync(outDir, { recursive: true });
 
+// static/ is passthrough-copied to the site, so a scratch file left by a
+// render that was killed between writing and renaming would be published.
+rmSync(scratch, { force: true });
+
 const flags = [
   "--headless",
   "--disable-gpu",

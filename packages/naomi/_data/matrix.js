@@ -132,6 +132,14 @@ if (rungs !== spine.shortForm) {
   fail(`framing.spine.shortForm says "${spine.shortForm}" but the levels read "${rungs}"`);
 }
 
+// Major.minor, and no third part: the version names where the model is, which
+// is not a thing that gets a patch release. It is also interpolated straight
+// into the sheet's filename and its manifest key, so a stray "0.1.0" would
+// quietly publish a second artefact alongside the first.
+if (!/^\d+\.\d+$/.test(source.model.version)) {
+  fail(`model.version is "${source.model.version}" — it should be major.minor`);
+}
+
 export default {
   ...required(source.model, ["version", "date"], "model"),
   // Asserted rather than merely forwarded: the model is pre-1.0, and a

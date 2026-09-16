@@ -2,14 +2,13 @@
   "model": {
     "id": "naomi",
     "name": "Native AI Operational Maturity Index (NAOMI)",
-    "version": "0.1.0",
+    "version": "0.1",
     "date": "2026-08-30",
     "status": {
       "label": "Pre-release",
-      "note": "The pillars and the levels are steady. The cells are demonstrative — a first draft, still being tested in anger on the way to 1.0, so expect individual lines to move."
+      "note": "The pillars and the levels are steady. The cells are demonstrative and being tested."
     }
   },
-
   "framing": {
     "aiNative": {
       "definition": "In an AI-Native software organisation, agentic delegation is the default mode of production, not an accelerator applied to a human-authored baseline.",
@@ -33,7 +32,6 @@
       }
     }
   },
-
   "levels": [
     {
       "ordinal": -1,
@@ -76,7 +74,6 @@
       "entitlement": "The safe-delegation boundary moves itself as evidence accumulates."
     }
   ],
-
   "pillars": [
     {
       "id": "flow-recoverability",
@@ -172,7 +169,6 @@
         }
       ]
     },
-
     {
       "id": "verification",
       "name": "Verification",
@@ -267,7 +263,6 @@
         }
       ]
     },
-
     {
       "id": "context",
       "name": "Context",
@@ -362,7 +357,6 @@
         }
       ]
     },
-
     {
       "id": "product-integrity",
       "name": "Product Integrity",
@@ -457,7 +451,6 @@
         }
       ]
     },
-
     {
       "id": "control-accountability",
       "name": "Control & Accountability",
