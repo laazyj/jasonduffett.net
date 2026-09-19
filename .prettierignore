@@ -2,6 +2,7 @@
 **/node_modules
 package-lock.json
 **/cdk.out
+**/coverage
 .claude
 .nx
 # Pinned: any reformat churns the BucketDeployment asset hash and the site-stack snapshot.

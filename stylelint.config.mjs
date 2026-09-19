@@ -10,7 +10,7 @@ export default {
   extends: ["stylelint-config-standard"],
 
   // Mirror ESLint's ignores — only lint source CSS, never build output or deps.
-  ignoreFiles: ["**/dist/**", "**/node_modules/**", "**/cdk.out/**"],
+  ignoreFiles: ["**/dist/**", "**/node_modules/**", "**/cdk.out/**", "**/coverage/**"],
 
   // Teach Stylelint's value-syntax database the one prefixed function we hand-
   // write. These sites ship CSS verbatim (no Autoprefixer), so the older-Safari

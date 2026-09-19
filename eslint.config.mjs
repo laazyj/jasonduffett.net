@@ -6,7 +6,7 @@ import tseslint from "typescript-eslint";
 import eslintConfigPrettier from "eslint-config-prettier/flat";
 
 export default defineConfig(
-  { ignores: ["**/dist/", "**/node_modules/", "**/cdk.out/"] },
+  { ignores: ["**/dist/", "**/node_modules/", "**/cdk.out/", "**/coverage/"] },
   // JS/TS rules, scoped to code files so they don't run against Markdown
   // (the base configs carry no `files` key and would otherwise apply globally
   // now that the Markdown block below makes ESLint lint *.md too).
