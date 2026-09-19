@@ -9,6 +9,7 @@
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests",
+    "coverage": "vitest run --coverage --passWithNoTests",
     "test:update": "vitest run -u --passWithNoTests",
     "test:watch": "vitest",
     "cdk": "cdk",
@@ -89,6 +90,7 @@
   },
   "devDependencies": {
     "@types/node": "^26.4.1",
+    "@vitest/coverage-v8": "^5.0.0",
     "aws-cdk": "^2.1139.0",
     "vitest": "^5.0.0"
   }
