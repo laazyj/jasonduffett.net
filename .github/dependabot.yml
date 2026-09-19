@@ -4,7 +4,16 @@ updates:
     directory: /
     schedule:
       interval: weekly
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 10
+    # Dependabot assigns each dependency to the FIRST group it matches, so the
+    # specific families below must stay above the minor-and-patch catch-all.
+    # That ordering is what keeps them out of the batch — no exclude-patterns
+    # needed, and none wanted: a second mechanism to keep in sync would drift.
+    #
+    # A group takes every SemVer level unless it says otherwise, so each family
+    # below carries majors too — a lockstep bump can never split across two
+    # PRs. minor-and-patch is the one group that restricts, leaving an
+    # unexpected major on anything else to arrive as its own PR.
     groups:
       # composurecdk is pre-1.0, so a minor bump is breaking by semver
       # convention. Keep these out of the routine batch and review
@@ -12,12 +21,56 @@ updates:
       composurecdk:
         patterns:
           - "@composurecdk/*"
-        update-types: [minor, patch, major]
+      # nx releases the runner and every plugin on one version; a split PR
+      # would pair mismatched versions. Bumps may also need `nx migrate`.
+      nx:
+        patterns:
+          - "nx"
+          - "@nx/*"
+      # The CDK library, its CLI and constructs move against one framework
+      # version, and a bump here is the one that changes synthesised
+      # templates — worth reading the cdk diff on its own.
+      aws-cdk:
+        patterns:
+          - "aws-cdk"
+          - "aws-cdk-lib"
+          - "@aws-cdk/*"
+          - "constructs"
+      # vitest and its vite peers are version-locked to each other.
+      vitest:
+        patterns:
+          - "vitest"
+          - "@vitest/*"
+          - "vite"
+          - "@vitejs/*"
+      # Eleventy and its plugins build clara, naomi and site alike, so a bump
+      # here is the one that can change published output in all three at once.
+      eleventy:
+        patterns:
+          - "@11ty/*"
+      # Lint and format only ever fail `npm run lint` / `format:check`, never
+      # the build, and the fix is usually `lint:fix` / `format`. Batching them
+      # keeps that one kind of red CI in one PR.
+      lint-and-format:
+        patterns:
+          - "eslint"
+          - "@eslint/*"
+          - "eslint-config-*"
+          - "eslint-plugin-*"
+          - "typescript-eslint"
+          - "@typescript-eslint/*"
+          - "prettier"
+          - "prettier-plugin-*"
+          - "stylelint"
+          - "stylelint-config-*"
+      # A compiler bump can surface new type errors in any package, so keep it
+      # off the batch that would otherwise get the blame.
+      typescript:
+        patterns:
+          - "typescript"
       minor-and-patch:
         patterns:
           - "*"
-        exclude-patterns:
-          - "@composurecdk/*"
         update-types: [minor, patch]
 
   - package-ecosystem: github-actions
@@ -26,5 +79,8 @@ updates:
       interval: weekly
     open-pull-requests-limit: 5
     groups:
+      # Every action moves as one batch, majors included: these are pinned to
+      # commit SHAs, so the version in the comment is the only thing to read.
       actions:
-        update-types: [minor, patch, major]
+        patterns:
+          - "*"
