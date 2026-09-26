@@ -221,6 +221,15 @@ describe("app synthesis", () => {
         },
       );
     });
+
+    it("lets AWS Budgets publish to the alerts topic", () => {
+      const template = stackTemplate(app, "JasonDuffettNetUsEast1AlertsStack");
+      for (const Sid of ["AllowBudgetsPublish", "AllowPublishThroughSSLOnly"]) {
+        template.hasResourceProperties("AWS::SNS::TopicPolicy", {
+          PolicyDocument: { Statement: Match.arrayWith([Match.objectLike({ Sid })]) },
+        });
+      }
+    });
   });
 
   describe("CDN alarms", () => {
