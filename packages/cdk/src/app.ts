@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import { templateTextPolicy } from "@composurecdk/cloudformation";
 import { at, compose, ref } from "@composurecdk/core";
 import { createNsRecordBuilder, type HostedZoneBuilderResult } from "@composurecdk/route53";
+import { topicPolicyConflictPolicy } from "@composurecdk/sns";
 
 import { addCiOidc } from "./stacks/ci-oidc-stack.js";
 import { createSubsite, type SubsiteStacks } from "./subsite.js";
@@ -81,6 +82,11 @@ export function buildApp({
   templateTextPolicy(app, {
     fields: { "AWS::CloudFront::Function": ["functionCode"] },
   });
+
+  // An SNS topic holds one access policy and each TopicPolicy replaces it
+  // outright, so two policy resources on one topic silently race. Fail synth on
+  // that, rather than find out when an alert never arrives.
+  topicPolicyConflictPolicy(app);
 
   // -- Setup stacks across home region and us-east-1 where required by AWS -- //
 
