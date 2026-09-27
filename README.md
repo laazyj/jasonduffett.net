@@ -322,3 +322,7 @@ Everything on the [clara.jasonduffett.net](https://clara.jasonduffett.net) subsi
 its prose and all images — plus the hand-drawn profile sketch used as the apex
 hero, is © 2025–2026 Clara Dineen-Duffett, all rights reserved. See
 [`LICENSE-clara.md`](LICENSE-clara.md).
+
+Vendored fonts keep their own SIL Open Font License 1.1 terms, recorded beside
+the files: [`packages/site/scripts/fonts/`](packages/site/scripts/fonts/README.md)
+and [`packages/naomi/assets/fonts/`](packages/naomi/assets/fonts/README.md).
