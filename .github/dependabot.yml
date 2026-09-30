@@ -5,6 +5,13 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 10
+    # Hold version updates for a week so a compromised or broken publish is
+    # usually yanked before it reaches us (security updates skip this; 7 days
+    # is also zizmor's floor). Majors wait longer: they're the bumps that need
+    # `nx migrate` or change the cdk diff.
+    cooldown:
+      default-days: 7
+      semver-major-days: 14
     # Dependabot assigns each dependency to the FIRST group it matches, so the
     # specific families below must stay above the minor-and-patch catch-all.
     # That ordering is what keeps them out of the batch — no exclude-patterns
@@ -74,10 +81,18 @@ updates:
         update-types: [minor, patch]
 
   - package-ecosystem: github-actions
-    directory: /
+    # "/" only covers .github/workflows; the local composite actions pin
+    # third-party actions too.
+    directories:
+      - /
+      - /.github/actions/*
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    # Same reasoning as npm: a hijacked action tag is the classic supply-chain
+    # vector, and a week gives upstream time to notice and revert it.
+    cooldown:
+      default-days: 7
     groups:
       # Every action moves as one batch, majors included: these are pinned to
       # commit SHAs, so the version in the comment is the only thing to read.

@@ -15,44 +15,42 @@ Fix any issues before moving on. Use npm run lint:fix and npm run format to auto
 
 The husky `pre-commit` hook (`.husky/pre-commit`) runs a gitleaks secret scan
 against staged changes. gitleaks is a standalone binary that is deliberately
-**not** an npm dependency, so whether it is installed varies by environment —
-**check before assuming, don't reach for `--no-verify` pre-emptively.**
+**not** an npm dependency, so whether it is installed varies by environment.
+When it isn't on `PATH`, the hook prints a `not found in PATH; skipping`
+notice and lets the commit through, so always use a plain `git commit` —
+**never `--no-verify`**. A missing gitleaks doesn't block, so the only thing
+`--no-verify` would skip is a real finding.
 
-Default to a plain `git commit` and let the hook run. If you want to know up
-front whether the binary is present, test for it:
+When gitleaks does find something, remove the secret from the staged change.
+If it is a false positive that is public by design, add it to the
+`.gitleaks.toml` allowlist. When gitleaks is missing, GitHub's server-side
+secret scanning and push protection are the backstop once the branch is
+pushed.
 
-```sh
-command -v gitleaks
-```
+## GitHub Actions audit (zizmor)
 
-If it is on `PATH`, the scan runs and passes for secret-free changes — just
-commit normally. Only when the hook *actually* prints `gitleaks not found in
-PATH` and exits non-zero (expected when the binary is genuinely missing, not a
-failure to investigate) should you bypass it:
+`npm run lint` runs zizmor over `.github/` (via `npm run lint:actions`) when it
+is on `PATH`, and prints a skip note when it isn't. CI always runs it; see the
+README's "GitHub Actions audit". A skip is expected, so don't install zizmor to
+get past it. When it does run, its findings are real failures: fix them, or add
+a `# zizmor: ignore[<audit>]` comment with a stated reason only when the
+flagged behaviour is deliberate.
 
-```sh
-git commit --no-verify -m "..."
-```
-
-GitHub's server-side secret scanning and push protection are the backstop once
-the branch is pushed, so skipping the local scan is safe for secret-free
-changes. Do **not** use `--no-verify` if you are committing something that
-might actually be a secret.
+**IMPORTANT**: gitleaks and zizmor are the only analyser tools that may be
+skipped, and only when they are not installed.
 
 ## Build system
 
 Use npx nx to run build/test scripts — this is an nx monorepo.
 
-**Install dependencies with npm 11** (`npm install -g npm@11`, or `npx npm@11
-install` for a one-off). The lockfile is generated under npm 11, and npm 10
-rewrites it on `npm install` — silently stripping the `libc` fields npm 11
-wrote and adding ~40 lines of unrelated churn to the diff. That churn is not a
-defect in the lockfile and does not want committing. Node 22 ships npm 10, so a
-default install on it needs the pin, and CI pins it for the same reason (the
-`Pin npm` step in [pr.yml](.github/workflows/pr.yml) and
-[deploy.yml](.github/workflows/deploy.yml)).
+**Use the Node version in [`.nvmrc`](.nvmrc)** (`nvm use` / `fnm use`). CI
+reads the same file. Node 24 ships npm 11, which the lockfile is generated
+with. npm 10 (bundled with Node 22) rewrites the lockfile on `npm install` —
+silently stripping the `libc` fields npm 11 wrote and adding ~40 lines of
+unrelated churn to the diff. That churn is not a defect in the lockfile and
+does not want committing.
 
 `npm ci` is safe under either version — it never writes the lockfile — so
-running the suite against an npm 10 install will not dirty the tree. The pin
+running the suite on an older Node will not dirty the tree. The version
 matters the moment you run `npm install`, `npm update`, or anything else that
 resolves a new dependency.

@@ -1,0 +1,16 @@
+name: setup
+description: Node from .nvmrc with the npm cache, and dependencies installed.
+
+runs:
+  using: composite
+  steps:
+    # .nvmrc is the one Node version for CI and local dev alike. Node 24 ships
+    # npm 11, the version the lockfile is generated with (see AGENTS.md §
+    # Build system), so no separate npm pin is needed.
+    - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      with:
+        node-version-file: .nvmrc
+        cache: npm
+
+    - shell: bash
+      run: npm ci

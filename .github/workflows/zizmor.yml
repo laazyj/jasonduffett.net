@@ -1,0 +1,46 @@
+name: zizmor
+
+# Static analysis of the workflows and dependabot.yml for GitHub Actions
+# security issues (credential persistence, template injection, over-broad
+# permissions, missing Dependabot cooldown, and so on).
+#
+# Runs on every PR into main, like pr.yml, whatever files it touches: a
+# .github/** path filter would leave unrelated PRs waiting forever if this is
+# made a required check. A PR into another branch (e.g. a stacked PR) is
+# audited once its changes reach a PR into main.
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions: {}
+
+concurrency:
+  group: zizmor-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  zizmor:
+    name: zizmor
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Annotations rather than SARIF (Advanced Security): in SARIF mode zizmor
+      # exits 0 on findings, leaving blocking to code scanning's severity
+      # threshold. Annotations keep "any finding fails this check".
+      # Online audits stay on so impostor-commit vets every pinned SHA.
+      #
+      # The action's default `version: latest` resolves to an image digest
+      # baked into each action release, so the SHA pin below also pins zizmor.
+      # New audits therefore arrive through the Dependabot actions batch, where
+      # any new findings show up on that PR rather than on unrelated ones.
+      - uses: zizmorcore/zizmor-action@cc914d7f3750a2d13d75c7f184a1060aa0e9d482 # v0.6.4
+        with:
+          advanced-security: false
+          annotations: true

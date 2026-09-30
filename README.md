@@ -32,6 +32,8 @@ Security issues: see [`SECURITY.md`](SECURITY.md).
 
 ## Site — develop locally
 
+Use the Node version in [`.nvmrc`](.nvmrc) (`nvm use`), then `npm install`.
+
 ```sh
 npm run site:start     # hot-reload dev server at http://localhost:8080
 npm run site:build     # write ./packages/site/dist
@@ -298,7 +300,8 @@ hosted-zone name servers:
 A husky-managed pre-commit hook runs [gitleaks](https://github.com/gitleaks/gitleaks)
 against staged changes (config in [`.gitleaks.toml`](.gitleaks.toml); allowlist
 covers DNS verification tokens that are public by design). `npm install` wires
-the hook automatically; you only need gitleaks installed on `PATH`:
+the hook automatically. Install gitleaks on `PATH` to enable the scan; without
+it the hook prints a notice and skips it:
 
 ```sh
 brew install gitleaks    # macOS
@@ -308,6 +311,26 @@ brew install gitleaks    # macOS
 GitHub's server-side secret scanning + push protection runs as a second layer.
 The pre-commit hook stops accidental leaks before they leave the laptop; GitHub catches
 anything that slips through.
+
+## GitHub Actions audit
+
+[zizmor](https://docs.zizmor.sh/) audits the workflows and `dependabot.yml` for
+Actions security issues (persisted checkout credentials, template injection,
+over-broad permissions, Dependabot updates without a cooldown). The
+[`zizmor` workflow](.github/workflows/zizmor.yml) runs it on every PR and fails
+the check on any finding.
+
+Locally, `npm run lint` runs it too (via `npm run lint:actions`, offline) if
+zizmor is on `PATH`, and skips it with a note if not. Install it with:
+
+```sh
+brew install zizmor      # macOS
+# or: pipx install zizmor  |  cargo install zizmor
+```
+
+Run it by hand with `zizmor .github/` (add `--offline` if you have no
+`GH_TOKEN` set). A deliberate exception gets an inline
+`# zizmor: ignore[<audit>]` comment on the flagged line, with a note saying why.
 
 ## License
 
