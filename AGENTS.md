@@ -11,39 +11,31 @@ npm run format:check
 
 Fix any issues before moving on. Use npm run lint:fix and npm run format to auto-fix.
 
-## Committing (gitleaks pre-commit hook)
+## Committing (pre-commit hook)
 
-The husky `pre-commit` hook (`.husky/pre-commit`) runs a gitleaks secret scan
-against staged changes. gitleaks is a standalone binary that is deliberately
-**not** an npm dependency, so whether it is installed varies by environment —
-**check before assuming, don't reach for `--no-verify` pre-emptively.**
+The husky `pre-commit` hook (`.husky/pre-commit`) runs two checks, each
+backed by a standalone binary that is deliberately **not** an npm dependency:
 
-Default to a plain `git commit` and let the hook run. If you want to know up
-front whether the binary is present, test for it:
+- **gitleaks** scans staged changes for secrets.
+- **zizmor** audits `.github/` for Actions security issues, only when the
+  commit touches `.github/`.
 
-```sh
-command -v gitleaks
-```
+Each is optional: if the binary isn't on `PATH`, the hook prints a
+`not found in PATH; skipping` notice and carries on. So always use a plain
+`git commit` — **never `--no-verify`**. A missing tool no longer blocks, so
+the only thing `--no-verify` would skip is a real finding from a tool that
+is installed.
 
-If it is on `PATH`, the scan runs and passes for secret-free changes — just
-commit normally. Only when the hook *actually* prints `gitleaks not found in
-PATH` and exits non-zero (expected when the binary is genuinely missing, not a
-failure to investigate) should you bypass it:
+When a check fails, it is a real finding:
 
-```sh
-git commit --no-verify -m "..."
-```
+- **gitleaks:** remove the secret from the staged change. If it is a false
+  positive that is public by design, add it to the `.gitleaks.toml`
+  allowlist.
+- **zizmor:** fix it, or add an inline `# zizmor: ignore[<audit>]` with a
+  comment saying why. The `zizmor` workflow fails on the same thing in CI.
 
-GitHub's server-side secret scanning and push protection are the backstop once
-the branch is pushed, so skipping the local scan is safe for secret-free
-changes. Do **not** use `--no-verify` if you are committing something that
-might actually be a secret.
-
-When a commit touches `.github/`, the hook also runs `zizmor --offline` if it is
-installed and skips it otherwise. A zizmor failure is a real finding (the
-`zizmor` workflow fails on the same thing in CI): fix it, or add an inline
-`# zizmor: ignore[<audit>]` with a comment saying why — don't `--no-verify` past
-it.
+When gitleaks is missing, GitHub's server-side secret scanning and push
+protection are still the backstop once the branch is pushed.
 
 ## Build system
 

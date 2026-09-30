@@ -300,7 +300,8 @@ hosted-zone name servers:
 A husky-managed pre-commit hook runs [gitleaks](https://github.com/gitleaks/gitleaks)
 against staged changes (config in [`.gitleaks.toml`](.gitleaks.toml); allowlist
 covers DNS verification tokens that are public by design). `npm install` wires
-the hook automatically; you only need gitleaks installed on `PATH`:
+the hook automatically. Install gitleaks on `PATH` to enable the scan; without
+it the hook prints a notice and skips it:
 
 ```sh
 brew install gitleaks    # macOS
