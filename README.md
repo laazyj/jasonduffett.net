@@ -320,9 +320,8 @@ over-broad permissions, Dependabot updates without a cooldown). The
 [`zizmor` workflow](.github/workflows/zizmor.yml) runs it on every PR and fails
 the check on any finding.
 
-Locally it's optional: the pre-commit hook runs it (offline) whenever a commit
-touches `.github/`, and skips it with a notice if the binary isn't installed.
-To have it catch issues before CI does:
+Locally, `npm run lint` runs it too (via `npm run lint:actions`, offline) if
+zizmor is on `PATH`, and skips it with a note if not. Install it with:
 
 ```sh
 brew install zizmor      # macOS

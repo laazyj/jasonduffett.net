@@ -11,31 +11,33 @@ npm run format:check
 
 Fix any issues before moving on. Use npm run lint:fix and npm run format to auto-fix.
 
-## Committing (pre-commit hook)
+## Committing (gitleaks pre-commit hook)
 
-The husky `pre-commit` hook (`.husky/pre-commit`) runs two checks, each
-backed by a standalone binary that is deliberately **not** an npm dependency:
+The husky `pre-commit` hook (`.husky/pre-commit`) runs a gitleaks secret scan
+against staged changes. gitleaks is a standalone binary that is deliberately
+**not** an npm dependency, so whether it is installed varies by environment.
+When it isn't on `PATH`, the hook prints a `not found in PATH; skipping`
+notice and lets the commit through, so always use a plain `git commit` —
+**never `--no-verify`**. A missing gitleaks doesn't block, so the only thing
+`--no-verify` would skip is a real finding.
 
-- **gitleaks** scans staged changes for secrets.
-- **zizmor** audits `.github/` for Actions security issues, only when the
-  commit touches `.github/`.
+When gitleaks does find something, remove the secret from the staged change.
+If it is a false positive that is public by design, add it to the
+`.gitleaks.toml` allowlist. When gitleaks is missing, GitHub's server-side
+secret scanning and push protection are the backstop once the branch is
+pushed.
 
-Each is optional: if the binary isn't on `PATH`, the hook prints a
-`not found in PATH; skipping` notice and carries on. So always use a plain
-`git commit` — **never `--no-verify`**. A missing tool no longer blocks, so
-the only thing `--no-verify` would skip is a real finding from a tool that
-is installed.
+## GitHub Actions audit (zizmor)
 
-When a check fails, it is a real finding:
+`npm run lint` runs zizmor over `.github/` (via `npm run lint:actions`) when it
+is on `PATH`, and prints a skip note when it isn't. CI always runs it; see the
+README's "GitHub Actions audit". A skip is expected, so don't install zizmor to
+get past it. When it does run, its findings are real failures: fix them, or add
+a `# zizmor: ignore[<audit>]` comment with a stated reason only when the
+flagged behaviour is deliberate.
 
-- **gitleaks:** remove the secret from the staged change. If it is a false
-  positive that is public by design, add it to the `.gitleaks.toml`
-  allowlist.
-- **zizmor:** fix it, or add an inline `# zizmor: ignore[<audit>]` with a
-  comment saying why. The `zizmor` workflow fails on the same thing in CI.
-
-When gitleaks is missing, GitHub's server-side secret scanning and push
-protection are still the backstop once the branch is pushed.
+**IMPORTANT**: gitleaks and zizmor are the only analyser tools that may be
+skipped, and only when they are not installed.
 
 ## Build system
 

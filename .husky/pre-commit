@@ -1,25 +1,13 @@
 #!/usr/bin/env sh
-# Pre-commit checks. Each tool is optional: a missing binary prints a notice
-# and skips its check rather than blocking the commit, so environments without
-# it (CI sandboxes, agent containers) can commit without --no-verify. A tool
-# that is installed and finds something still blocks.
+# Pre-commit secret scan. Catches credentials before they leave the laptop;
+# GitHub's server-side secret scanning and push protection are the backstop.
+# Optional: a missing gitleaks prints a notice and skips rather than blocking,
+# so environments without it (CI sandboxes, agent containers) can commit
+# without --no-verify. An installed gitleaks that finds something still
+# blocks. See README.md "Pre-commit secret scan" for setup.
 
-# Secret scan. Catches credentials before they leave the laptop; GitHub's
-# server-side secret scanning and push protection are the backstop. See
-# README.md "Pre-commit secret scan" for setup.
 if command -v gitleaks >/dev/null 2>&1; then
-  gitleaks protect --staged --redact --no-banner --config .gitleaks.toml || exit 1
+  gitleaks protect --staged --redact --no-banner --config .gitleaks.toml
 else
   echo "pre-commit: gitleaks not found in PATH; skipping secret scan (\`brew install gitleaks\`)." >&2
-fi
-
-# GitHub Actions audit, enforced in CI by the zizmor workflow. Only runs when
-# the commit touches .github/, and offline so it needs no token and stays fast.
-# See README.md "GitHub Actions audit" for setup.
-if git diff --cached --name-only --diff-filter=ACMR | grep -q '^\.github/'; then
-  if command -v zizmor >/dev/null 2>&1; then
-    zizmor --offline --no-progress .github/
-  else
-    echo "pre-commit: zizmor not found in PATH; skipping Actions audit (\`brew install zizmor\`)." >&2
-  fi
 fi

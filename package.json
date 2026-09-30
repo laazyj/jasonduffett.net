@@ -4,9 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "lint": "npm run lint:js && npm run lint:css",
+    "lint": "npm run lint:js && npm run lint:css && npm run lint:actions",
     "lint:js": "eslint .",
     "lint:css": "stylelint \"packages/**/*.css\"",
+    "lint:actions": "if command -v zizmor >/dev/null 2>&1; then zizmor --quiet --strict-collection --offline .; else echo 'lint:actions: zizmor not found in PATH, skipping (the zizmor workflow covers CI).'; fi",
     "lint:fix": "npm run lint:js:fix && npm run lint:css:fix",
     "lint:js:fix": "eslint --fix .",
     "lint:css:fix": "stylelint --fix \"packages/**/*.css\"",
