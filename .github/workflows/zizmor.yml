@@ -31,7 +31,9 @@ jobs:
         with:
           persist-credentials: false
 
-      # Annotations rather than SARIF, so no Advanced Security is needed.
+      # Annotations rather than SARIF (Advanced Security): in SARIF mode zizmor
+      # exits 0 on findings, leaving blocking to code scanning's severity
+      # threshold. Annotations keep "any finding fails this check".
       # Online audits stay on so impostor-commit vets every pinned SHA.
       #
       # The action's default `version: latest` resolves to an image digest
