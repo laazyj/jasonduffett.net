@@ -32,6 +32,8 @@ Security issues: see [`SECURITY.md`](SECURITY.md).
 
 ## Site — develop locally
 
+Use the Node version in [`.nvmrc`](.nvmrc) (`nvm use`), then `npm install`.
+
 ```sh
 npm run site:start     # hot-reload dev server at http://localhost:8080
 npm run site:build     # write ./packages/site/dist

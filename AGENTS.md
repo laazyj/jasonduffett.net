@@ -49,16 +49,14 @@ it.
 
 Use npx nx to run build/test scripts — this is an nx monorepo.
 
-**Install dependencies with npm 11** (`npm install -g npm@11`, or `npx npm@11
-install` for a one-off). The lockfile is generated under npm 11, and npm 10
-rewrites it on `npm install` — silently stripping the `libc` fields npm 11
-wrote and adding ~40 lines of unrelated churn to the diff. That churn is not a
-defect in the lockfile and does not want committing. Node 22 ships npm 10, so a
-default install on it needs the pin, and CI pins it for the same reason (the
-`Pin npm` step in the shared [setup action](.github/actions/setup/action.yml)
-used by the pr and deploy workflows).
+**Use the Node version in [`.nvmrc`](.nvmrc)** (`nvm use` / `fnm use`). CI
+reads the same file. Node 24 ships npm 11, which the lockfile is generated
+with. npm 10 (bundled with Node 22) rewrites the lockfile on `npm install` —
+silently stripping the `libc` fields npm 11 wrote and adding ~40 lines of
+unrelated churn to the diff. That churn is not a defect in the lockfile and
+does not want committing.
 
 `npm ci` is safe under either version — it never writes the lockfile — so
-running the suite against an npm 10 install will not dirty the tree. The pin
+running the suite on an older Node will not dirty the tree. The version
 matters the moment you run `npm install`, `npm update`, or anything else that
 resolves a new dependency.
