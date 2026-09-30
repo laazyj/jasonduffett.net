@@ -2,9 +2,12 @@ name: zizmor
 
 # Static analysis of the workflows and dependabot.yml for GitHub Actions
 # security issues (credential persistence, template injection, over-broad
-# permissions, missing Dependabot cooldown, and so on). Runs on every PR rather
-# than only on .github/** changes so it can be made a required check without
-# leaving unrelated PRs waiting on a check that never starts.
+# permissions, missing Dependabot cooldown, and so on).
+#
+# Runs on every PR into main, like pr.yml, whatever files it touches: a
+# .github/** path filter would leave unrelated PRs waiting forever if this is
+# made a required check. A PR into another branch (e.g. a stacked PR) is
+# audited once its changes reach a PR into main.
 on:
   pull_request:
     branches: [main]
