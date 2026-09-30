@@ -9,4 +9,16 @@ if ! command -v gitleaks >/dev/null 2>&1; then
   exit 1
 fi
 
-gitleaks protect --staged --redact --no-banner --config .gitleaks.toml
+gitleaks protect --staged --redact --no-banner --config .gitleaks.toml || exit 1
+
+# GitHub Actions audit. Optional locally — the zizmor workflow enforces it in
+# CI — so a missing binary skips rather than blocks. Only runs when the commit
+# touches .github/, and offline so it needs no token and stays fast. See
+# README.md "GitHub Actions audit" for setup.
+if git diff --cached --name-only --diff-filter=ACMR | grep -q '^\.github/'; then
+  if command -v zizmor >/dev/null 2>&1; then
+    zizmor --offline --no-progress .github/ || exit 1
+  else
+    echo "pre-commit: zizmor not found in PATH; skipping Actions audit (\`brew install zizmor\`)." >&2
+  fi
+fi

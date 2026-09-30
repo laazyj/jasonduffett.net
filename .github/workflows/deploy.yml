@@ -30,6 +30,8 @@ jobs:
       INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
@@ -41,8 +43,10 @@ jobs:
       # `libc` fields npm 11 writes). `npm ci` never rewrites the lockfile, so
       # this is belt-and-braces: it keeps a future divergence from surfacing
       # here as a mystery install failure. See AGENTS.md § Build system.
+      # zizmor flags this as an install outside the lockfile; it's the package
+      # manager itself, so it can't live in the lockfile it produces.
       - name: Pin npm
-        run: npm install -g npm@11
+        run: npm install -g npm@11 # zizmor: ignore[adhoc-packages]
 
       - run: npm ci
 
