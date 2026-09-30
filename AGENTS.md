@@ -39,6 +39,12 @@ the branch is pushed, so skipping the local scan is safe for secret-free
 changes. Do **not** use `--no-verify` if you are committing something that
 might actually be a secret.
 
+When a commit touches `.github/`, the hook also runs `zizmor --offline` if it is
+installed and skips it otherwise. A zizmor failure is a real finding (the
+`zizmor` workflow fails on the same thing in CI): fix it, or add an inline
+`# zizmor: ignore[<audit>]` with a comment saying why — don't `--no-verify` past
+it.
+
 ## Build system
 
 Use npx nx to run build/test scripts — this is an nx monorepo.
@@ -49,8 +55,8 @@ rewrites it on `npm install` — silently stripping the `libc` fields npm 11
 wrote and adding ~40 lines of unrelated churn to the diff. That churn is not a
 defect in the lockfile and does not want committing. Node 22 ships npm 10, so a
 default install on it needs the pin, and CI pins it for the same reason (the
-`Pin npm` step in [pr.yml](.github/workflows/pr.yml) and
-[deploy.yml](.github/workflows/deploy.yml)).
+`Pin npm` step in the shared [setup action](.github/actions/setup/action.yml)
+used by the pr and deploy workflows).
 
 `npm ci` is safe under either version — it never writes the lockfile — so
 running the suite against an npm 10 install will not dirty the tree. The pin

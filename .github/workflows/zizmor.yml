@@ -28,10 +28,8 @@ jobs:
         with:
           persist-credentials: false
 
-      # Findings surface as PR annotations and fail the check, rather than as
-      # SARIF in the Security tab, so this works without GitHub Advanced
-      # Security. Online audits stay on (the default): impostor-commit checks
-      # every SHA-pinned `uses:` really belongs to the action's repo.
+      # Annotations rather than SARIF, so no Advanced Security is needed.
+      # Online audits stay on so impostor-commit vets every pinned SHA.
       #
       # The action's default `version: latest` resolves to an image digest
       # baked into each action release, so the SHA pin below also pins zizmor.

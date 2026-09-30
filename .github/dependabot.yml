@@ -5,12 +5,10 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 10
-    # Hold version updates until a release has been public for a while, so a
-    # compromised or broken publish is usually yanked before it reaches us.
-    # Majors wait longer: they're the bumps most likely to need `nx migrate`
-    # or change the cdk diff, so let early adopters find the sharp edges.
-    # Security updates ignore cooldown and still arrive immediately. Seven days
-    # is also zizmor's floor for its dependabot-cooldown audit.
+    # Hold version updates for a week so a compromised or broken publish is
+    # usually yanked before it reaches us (security updates skip this; 7 days
+    # is also zizmor's floor). Majors wait longer: they're the bumps that need
+    # `nx migrate` or change the cdk diff.
     cooldown:
       default-days: 7
       semver-major-days: 14
@@ -83,7 +81,11 @@ updates:
         update-types: [minor, patch]
 
   - package-ecosystem: github-actions
-    directory: /
+    # "/" only covers .github/workflows; the local composite actions pin
+    # third-party actions too.
+    directories:
+      - /
+      - /.github/actions/*
     schedule:
       interval: weekly
     open-pull-requests-limit: 5

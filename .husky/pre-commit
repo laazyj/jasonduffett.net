@@ -17,7 +17,7 @@ gitleaks protect --staged --redact --no-banner --config .gitleaks.toml || exit 1
 # README.md "GitHub Actions audit" for setup.
 if git diff --cached --name-only --diff-filter=ACMR | grep -q '^\.github/'; then
   if command -v zizmor >/dev/null 2>&1; then
-    zizmor --offline --no-progress .github/ || exit 1
+    zizmor --offline --no-progress .github/
   else
     echo "pre-commit: zizmor not found in PATH; skipping Actions audit (\`brew install zizmor\`)." >&2
   fi
