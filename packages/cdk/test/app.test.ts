@@ -157,6 +157,7 @@ describe("app synthesis", () => {
           HealthCheckConfig: Match.objectLike({
             Type: "HTTPS",
             FullyQualifiedDomainName: subdomain,
+            MeasureLatency: false,
           }),
         },
       );
