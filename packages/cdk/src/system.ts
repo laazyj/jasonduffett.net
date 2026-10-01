@@ -224,9 +224,12 @@ export function createSystem(stacks: SystemStacks, options: SystemOptions) {
       // with the site for operational locality. AWS/Route53 metrics emit only
       // in us-east-1, so the recommended alarm is suppressed here and
       // re-created in cdnAlarmsStack via the standalone alarm builder.
+      // Latency measurement is a paid optional feature (composureCDK defaults it
+      // on); nothing alarms on it, so it's off to keep within the budget.
       healthCheck: createHealthCheckBuilder()
         .type(HealthCheckType.HTTPS)
         .fqdn(domain)
+        .measureLatency(false)
         .recommendedAlarms(false),
       healthCheckAlarms: createHealthCheckAlarmBuilder().healthCheck(
         ref<HealthCheckBuilderResult>("healthCheck"),

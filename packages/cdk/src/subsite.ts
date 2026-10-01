@@ -203,9 +203,11 @@ export function createSubsite(stacks: SubsiteStacks, options: SubsiteOptions) {
       // Route 53 health check on the public subdomain. AWS/Route53 metrics emit
       // only in us-east-1, so the recommended alarm is suppressed here and
       // re-created in cdnAlarmsStack via the standalone alarm builder.
+      // Latency measurement off for cost, as on the apex (see system.ts).
       healthCheck: createHealthCheckBuilder()
         .type(HealthCheckType.HTTPS)
         .fqdn(subdomain)
+        .measureLatency(false)
         .recommendedAlarms(false),
       healthCheckAlarms: createHealthCheckAlarmBuilder().healthCheck(
         ref<HealthCheckBuilderResult>("healthCheck"),
