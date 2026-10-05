@@ -106,9 +106,9 @@ tags:
   }
 </style>
 
-I remember, circa 2010, reading [Continuous Delivery](https://www.amazon.co.uk/dp/0321601912) by Jez Humble and David Farley. One of the most useful takeaways for my team at the time, and the idea that has stuck with me over the years, was [The Agile Maturity Model Applied to Building and Releasing Software](https://info.thoughtworks.com/rs/thoughtworks2/images/agile_maturity_model.pdf). A simple grid. Five practice areas along the top, five levels down the side, and a short description in every cell.
+I remember, circa 2010, reading [Continuous Delivery](https://www.amazon.co.uk/dp/0321601912) by Jez Humble and David Farley. One of the most useful takeaways for my team at the time, and the idea that has stuck with me over the years, was [The Agile Maturity Model Applied to Building and Releasing Software](https://info.thoughtworks.com/rs/thoughtworks2/images/agile_maturity_model.pdf). A simple grid with five practice areas along the top, five levels down the side, and a short description in every cell.
 
-I printed it out and stuck it on a concrete pillar that was in the centre of the office — an old warehouse at Chelsea Wharf. This was our _North Star_. It set the direction we were steering by, and named the rungs of the ladder we were climbing. Every few weeks we'd stare at it, stare at our backlog (a brick wall covered in sticky notes), and argue about the value of the recommendations in the next rung: how they applied to our system, and whether it was the right time to bring them into the backlog.
+Back then, I printed it out and stuck it on a concrete pillar that was in the centre of the office — an old warehouse at Chelsea Wharf. This was our _North Star_. It set the direction we were steering by, and named the rungs of the ladder we were climbing. Every few weeks we'd stare at it, stare at our backlog (a brick wall covered in sticky notes), and argue about the value of the recommendations in the next rung: how they applied to our system, and whether it was the right time to bring them into the backlog.
 
 This approach truly helped us accelerate the customer value we were delivering: our builds became more reliable, our deployments more frequent, and our time-to-market shrank dramatically. I continue to believe that shape is a practical and meaningful way to convey a big idea. It allows teams to come at it from different levels of experience and maturity without being overwhelmed by the gap between where they are today and where they are headed.
 
@@ -122,9 +122,9 @@ To [quote Martin Fowler](https://martinfowler.com/bliki/MaturityModel.html):
 
 A maturity model is a prompt for a conversation. Its value is that it locates the team's current situation in a cell and the cell above that describes concrete steps for improvement. So "we should get better at testing" becomes "we should make a red build block the merge". That is the entire mechanism.
 
-It is not a score. Fowler again, in the same piece: using a maturity model to say one group is better than another is "a classic example of ruining an informational metric by incentivizing it." Using the model as a way of scoring teams against each other removes nuance and destroys the accountability a team has for understanding their particular situation and product. Teams will optimise for the text and miss the value, destroying trust in the mechanism along the way.
+It is not a score. Fowler again, in the same piece: using a maturity model to say one group is better than another is "a classic example of ruining an informational metric by incentivizing it" (i.e. [Goodhart's law](https://en.wikipedia.org/wiki/Goodhart%27s_law)). Using the model as a way of scoring teams against each other removes nuance and destroys the accountability a team has for understanding their particular situation and product. Teams will optimise for the text and miss the value, destroying trust in the mechanism along the way.
 
-So: informational, self-assessed, used to produce a list. Not a benchmark, not a target, not an input to anyone's performance review. A North Star is a direction you steer by rather than a place you arrive at, and that is the only sense in which I mean it. Every model is a simplification — wrong, but hopefully useful. Please hold what follows the same way.
+Not a benchmark, not a target, not an input to anyone's performance review. This model is a meant as a useful simplification: informational, self-assessed, used as guide based on the team's current situation and needs.
 
 ## What I mean by "AI Native"
 
@@ -140,11 +140,11 @@ The distinction describes the key transformation software organisations must mak
 
 Three observable markers identify an AI Native organisation:
 
-1. **Most changes are drafted by machines.** The scarce human resource is intent and verification, not typing.
+1. **Most changes are drafted by machines.** Scarce human resource provides intent and verification, not typing.
 2. **The engineering system is deliberately built as a harness for agents** — tests, CI signals, docs, instruction files, permissions — and not merely as an aid to humans.
 3. **Friction that used to be structural is now elective.** When the production cost of building anything falls to near zero, the cost-driven filters that quietly governed what got built stop working, and have to be deliberately replaced.
 
-That third marker is the one that changed the shape of the model, and I come back to it when I get to the pillars.
+That third marker is critical and not always obvious to an engineering team blasting out PRs and relishing their new velocity. I'll come back to it when I get to the pillars.
 
 One thing this definition deliberately does not say: nothing here is about whether the product contains AI. An AI Native organisation building a basic CRUD app and an AI Native organisation building a model-serving platform are measured identically. The definition is about how the organisation produces software, not what the software does.
 
@@ -160,7 +160,7 @@ Build, environments and release collapse into one. They were separate because ea
 
 **Verification** — _a change is known to be correct by someone who didn't write it._
 
-The old testing pillar, widened. I think this is the bottleneck for most organisations right now: the constraint on an AI Native team is verification capacity, not production capacity. You can produce far more change than you can convincingly verify. So this pillar covers review as a first-class practice rather than a formality, mutation testing to show the suite can detect anything at all, feedback signals shaped for agents to iterate against unattended, and evals where the behaviour is not deterministic enough to assert.
+The old testing pillar, widened. I think this is the bottleneck for most organisations today: the constraint on an AI Native team is verification capacity, not production capacity. You can produce far more change than you can convincingly verify. So this pillar covers review as a first-class practice rather than a formality, mutation testing to show the suite can detect anything at all, feedback signals shaped for agents to iterate against unattended, and evals where the behaviour is not deterministic enough to assert.
 
 **Context** — _the system is understandable to whoever, or whatever, works on it next._
 
@@ -168,7 +168,7 @@ The old data management pillar, widened a long way — from test data to the who
 
 **Product Integrity** — _what ships is deliberate, wanted, and coherent with what is already there._
 
-This one has no ancestor in the 2009 model because it didn't need one. The cost of building was a governor on scope. Weak ideas died of attrition, in the gap between proposing them and finding the engineering time to deliver them. By removing this friction we lose the filter — so now we have to build it intentionally. Validated demand before build, outcomes measured rather than output counted, a subtraction path that actually works so features can be retired, and coherence held by someone with the authority to say no.
+This one has no ancestor in the 2009 model because it didn't need one. The cost of building was a natural limiter on scope. Weak ideas died of attrition in the gap between proposing them and finding the engineering time to deliver. By removing this friction we lose the filter — so now we have to build it intentionally. Validated demand before build, outcomes measured rather than output counted, a subtraction path that works so features can be retired, and coherence held by someone with the authority to say no.
 
 **Control & Accountability** — _every change has a named human owner and a bounded blast radius._
 
@@ -176,7 +176,7 @@ Wholly new surface. Agent permissions and sandboxing, governance of data access 
 
 ## The levels
 
-I kept the level names. All five of them, unchanged: **−1 Regressive, 0 Repeatable, 1 Consistent, 2 Quantitatively Managed, 3 Optimizing**. They are good names, they are familiar to anyone who has met the older models, and there is no value in inventing new words for the same five ideas.
+I kept the level names unchanged: **−1 Regressive, 0 Repeatable, 1 Consistent, 2 Quantitatively Managed, 3 Optimizing**. They are good names, they are familiar to anyone who has met the older models, and there is no value in inventing new words for the same five ideas.
 
 What I did change is the spine — the thing that actually increases as you go up. The 2009 spine was _manual → automated_. That has very little left to say when automation is the starting condition rather than the goal.
 
@@ -196,7 +196,7 @@ Three of those four can be mechanised. Visibility becomes provenance and an audi
 Which makes autonomy the wrong spine, for four reasons:
 
 1. It measures what was given up, not what replaced it.
-2. Its top rung is a value claim, not a maturity claim. Out-of-the-loop is cheaper, not better. Gamed upward — and every model gets gamed upward — it rewards under-supervising the riskiest work.
+2. The highest level isn't "most advanced," it's "least supervised." That's a judgement about what's desirable, not a measure of how capable you are.
 3. It is contextual and non-monotonic. It moves several times a day depending on the change in hand. It is a dial, not a ladder.
 4. Its top rung abandons the one thing that cannot be mechanised.
 
@@ -217,7 +217,7 @@ Autonomy is still a useful instrument, just for a different job: deciding how mu
 
 What actually increases, rung by rung, is how independent the outcome is from any individual's attention. Or, less formally: **what stays true when nobody is watching.**
 
-That runs: nothing holds it → a person holds it → the system holds it → the system knows whether it is holding → the system improves its own hold.
+That runs: _nothing holds it → a person holds it → the system holds it → the system knows whether it is holding → the system improves its own hold_.
 
 | Level  | Assurance       | What it means                                                                       | What it entitles you to                                                                                                       |
 | ------ | --------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
