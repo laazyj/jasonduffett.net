@@ -33,6 +33,6 @@
     "@11ty/eleventy-plugin-rss": "^3.1.0",
     "@11ty/eleventy-plugin-syntaxhighlight": "^5.0.0",
     "@resvg/resvg-js": "^2.6.2",
-    "satori": "^0.33.5"
+    "satori": "^0.35.0"
   }
 }
