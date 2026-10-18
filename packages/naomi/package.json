@@ -50,7 +50,7 @@
   "devDependencies": {
     "@11ty/eleventy": "^3.1.6",
     "@vitest/coverage-v8": "^5.0.3",
-    "pdfjs-dist": "^6.3.289",
+    "pdfjs-dist": "^6.4.299",
     "vitest": "^5.0.0"
   }
 }
