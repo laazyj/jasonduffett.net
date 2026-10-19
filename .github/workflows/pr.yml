@@ -75,13 +75,18 @@ jobs:
         run: npm run cdk:synth
 
       # Posts a single sticky PR comment with a collapsible, colour-coded diff
-      # per stack. Pinned to the v2.0.9 commit SHA (third-party action in an
-      # AWS-credentialed job) — bump deliberately; Dependabot proposes updates.
+      # per stack. Temporarily pinned to our fork's commit SHA to dogfood the
+      # ignoreAssetChanges input (corymhall/cdk-diff-action#162); reverts to the
+      # upstream SHA pin once that lands. SHA-pinned: third-party code in an
+      # AWS-credentialed job.
       - name: post diff comment
-        uses: corymhall/cdk-diff-action@ad67041313333f7f2bd26b33f18fb134610a971e # v2.0.9
+        uses: laazyj/cdk-diff-action@89d0fc69259398b43feeb4c80bced98634eb9ff7 # feat/ignore-asset-changes
         with:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           cdkOutDir: packages/cdk/cdk.out
           # Surface the diff only; the diff is informational and never gates the
           # PR check (matches prior behaviour).
           failOnDestructiveChanges: false
+          # Drop the BucketDeployment content-hash churn that would otherwise
+          # show as a (destructive) update on every content PR — not infra.
+          ignoreAssetChanges: true
