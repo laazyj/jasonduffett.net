@@ -1,0 +1,42 @@
+{% set pageCat = "labs" %}
+{% set headTitle = labs.name %}
+{% set headSheet = "/assets/labs/labs.css" %}
+{% set headIcon = "/assets/labs/mark.svg" %}
+{% set headFeed = "/labs/feed.xml" %}
+{% set showLicense = site.defaultLicense and not noLicense %}<!doctype html>
+<html lang="{{ site.language }}">
+<head>
+  {% include "partials/head.njk" %}
+</head>
+<body class="labs">
+  <div class="parent-strip">
+    <a class="parent-home" href="{{ '/' | rel }}">jason duffett<span aria-hidden="true">.</span></a>
+    <nav aria-label="jasonduffett.net">
+      {% for cat in categories %}{% if cat != "labs" %}<a href="{{ ('/' + cat + '/') | rel }}">{{ cat }}</a>{% endif %}{% endfor %}
+      <a href="{{ '/about/' | rel }}">about</a>
+    </nav>
+  </div>
+
+  <header class="labs-head">
+    <a class="labs-home" href="{{ '/labs/' | rel }}"><img src="{{ '/assets/labs/lockup-labs-light.svg' | rel }}" alt="Composure Labs" width="172" height="36" /></a>
+    <nav aria-label="Composure Labs">
+      <a href="{{ '/labs/' | rel }}#writing">Writing</a>
+      <a href="{{ '/labs/' | rel }}#packages">Packages</a>
+      <a href="{{ labs.github }}">GitHub</a>
+      <a href="{{ labs.npm }}">npm</a>
+    </nav>
+  </header>
+
+  {{ content | safe }}
+
+  <footer class="labs-foot">
+    <img src="{{ '/assets/labs/lockup-labs-dark.svg' | rel }}" alt="Composure Labs" width="133" height="28" />
+    <p>
+      A section of <a href="{{ '/' | rel }}">jasonduffett.net</a>.
+      &copy; {{ currentYear }} {{ site.author.name }}{% if showLicense %}, <a rel="license" href="{{ site.defaultLicense }}">{{ site.licenseName }}</a>{% endif %}.
+      <a href="{{ '/labs/feed.xml' | rel }}">RSS</a>{% if analytics.measurementId %}, <a href="#" data-consent-reopen>cookies</a>{% endif %}
+    </p>
+  </footer>
+  {% include "partials/consent-banner.njk" %}
+</body>
+</html>

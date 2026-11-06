@@ -1,0 +1,37 @@
+---
+permalink: /labs/feed.xml
+eleventyExcludeFromCollections: true
+layout: null
+tags: []
+metadata:
+  title: Composure Labs
+  subtitle: The tooling around ComposureCDK
+  language: en-GB
+  url: https://jasonduffett.net/labs/
+  feedUrl: https://jasonduffett.net/labs/feed.xml
+  author:
+    name: Jason Duffett
+---
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>{{ metadata.title }}</title>
+  <subtitle>{{ metadata.subtitle }}</subtitle>
+  <link href="{{ metadata.feedUrl }}" rel="self" />
+  <link href="{{ metadata.url }}" />
+  <updated>{{ collections.labs | getNewestCollectionItemDate | dateToRfc3339 }}</updated>
+  <id>{{ metadata.url }}</id>
+  <author>
+    <name>{{ metadata.author.name }}</name>
+  </author>
+  {% for post in collections.labs | reverse %}
+  {% set absolutePostUrl %}{{ post.url | htmlBaseUrl(metadata.url) }}{% endset %}
+  <entry>
+    <title>{{ post.data.title }}</title>
+    <link href="{{ absolutePostUrl }}" />
+    <updated>{{ post.date | dateToRfc3339 }}</updated>
+    <id>{{ absolutePostUrl }}</id>
+    {% if not post.data.noLicense %}<rights>© {{ post.date | year }} {{ metadata.author.name }}, {{ site.licenseName }}</rights>{% endif %}
+    <content type="html">{{ post.templateContent | htmlToAbsoluteUrls(absolutePostUrl) }}</content>
+  </entry>
+  {% endfor %}
+</feed>

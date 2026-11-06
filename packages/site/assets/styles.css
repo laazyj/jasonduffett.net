@@ -15,6 +15,7 @@
   --tech: #ff7a3d;
   --music: #5dadff;
   --misc: #c4d65a;
+  --labs: #b85416;
   --code-bg: #1a1612;
   --measure: 38rem;
   --accent: var(--tech);
@@ -35,6 +36,10 @@
 
 [data-category="misc"] {
   --accent: var(--misc);
+}
+
+[data-category="labs"] {
+  --accent: var(--labs);
 }
 
 * {
@@ -643,6 +648,43 @@ ul.posts .tag {
 
 .tag.misc {
   color: var(--misc);
+}
+
+/* Ember can't carry small type on ink, so the word stays paper and the
+   brackets take the colour. */
+.tag.labs {
+  color: var(--paper);
+}
+
+.tag.labs::before,
+.tag.labs::after {
+  color: var(--labs);
+}
+
+.labs-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  margin: 0 0 1rem;
+  padding: 0.9rem 1.2rem;
+  background: var(--ink-2);
+  border: 1px dashed var(--rule);
+  font-family: var(--hand);
+  font-size: 1.25rem;
+  line-height: 1.2;
+  color: var(--paper-dim);
+  text-decoration: none;
+}
+
+.labs-strip:hover {
+  color: var(--paper);
+}
+
+.labs-strip img {
+  display: block;
+  width: auto;
+  height: 1.6rem;
 }
 
 /* ------------------------------ Article -------------------------- */

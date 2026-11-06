@@ -1,0 +1,55 @@
+---
+layout: layouts/labs-base.njk
+title: "The tooling around ComposureCDK"
+summary: "First-party packages for AWS infrastructure, and the writing that goes with them."
+eleventyExcludeFromCollections: true
+permalink: /labs/
+---
+<section class="labs-hero">
+  <svg class="labs-hero-art" viewBox="80 80 400 400" aria-hidden="true"><circle cx="170" cy="170" r="84" fill="#b85416"/><path d="M252 252 L362.4 273.4 A76 76 0 1 1 273.4 362.4 Z" fill="#f6f1ea"/></svg>
+  <div class="labs-hero-text">
+    <h1>The tooling around ComposureCDK.</h1>
+    <p>First-party packages for composable, lifecycle-managed AWS infrastructure, released on their own schedule. All of them are pre-release today, and each gets an introduction as it nears 1.0.</p>
+  </div>
+</section>
+
+<main class="labs-main">
+  <section class="labs-section" id="writing">
+    <h2>Writing</h2>
+    <ol class="labs-writing">
+      {% for post in collections.labs | reverse %}
+      <li>
+        <time datetime="{{ post.date | htmlDateString }}">{{ post.date | readableDate }}</time>
+        <a href="{{ post.url | rel }}">{{ post.data.title }}</a>
+        {% if post.data.summary %}<p>{{ post.data.summary }}</p>{% endif %}
+      </li>
+      {% endfor %}
+    </ol>
+  </section>
+
+  <section class="labs-section" id="packages">
+    <h2>Packages</h2>
+    <ul class="labs-ledger">
+      {% for pkg in labs.packages %}
+      <li>
+        <h3><a href="{{ pkg.repo }}">{{ pkg.name }}</a></h3>
+        <p>{{ pkg.summary }}</p>
+        <p class="ledger-meta">Pre-release, v{{ pkg.version }}. {{ pkg.builtOn }}.</p>
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <section class="labs-section" id="composurecdk">
+    <h2>ComposureCDK</h2>
+    <div class="labs-cdk">
+      <img src="{{ '/assets/labs/lockup-cdk-light.svg' | rel }}" alt="ComposureCDK" width="172" height="36" />
+      <p>{{ labs.composurecdk.summary }} Its series lives on the main blog for now.</p>
+      <ol>
+        {% for thread in collections.seriesIndex %}{% if thread.key == "composure-cdk" %}{% for post in thread.posts %}
+        <li><a href="{{ post.url | rel }}">{{ post.data.title }}</a></li>
+        {% endfor %}{% endif %}{% endfor %}
+      </ol>
+    </div>
+  </section>
+</main>
