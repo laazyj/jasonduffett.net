@@ -1,0 +1,5 @@
+{
+  "layout": "layouts/post.njk",
+  "tags": ["labs"],
+  "permalink": "/labs/{{ page.fileSlug }}/"
+}
