@@ -1,0 +1,11 @@
+{% set related = collections.labsPosts | byProject(project) %}
+{% if related.length > 1 %}
+<aside class="labs-more">
+  <h2>more on this project</h2>
+  <ul>
+    {% for post in related | reverse %}{% if post.url != page.url %}
+    <li><a href="{{ post.url | rel }}">{{ post.data.title }}</a></li>
+    {% endif %}{% endfor %}
+  </ul>
+</aside>
+{% endif %}
