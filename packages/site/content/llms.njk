@@ -24,3 +24,8 @@ eleventyExcludeFromCollections: true
 {% for post in collections.misc | reverse %}
 - [{{ post.data.title | safe }}]({{ site.url }}{{ post.url }}){% if post.data.summary %}: {{ post.data.summary | safe }}{% endif %}
 {% endfor %}
+
+## Composure Labs
+{% for post in collections.labs | reverse %}
+- [{{ post.data.title | safe }}]({{ site.url }}{{ post.url }}){% if post.data.summary %}: {{ post.data.summary | safe }}{% endif %}
+{% endfor %}

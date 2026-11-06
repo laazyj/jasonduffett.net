@@ -1,0 +1,594 @@
+/* ------------------------------------------------------------------
+   Composure Labs. A self-contained stylesheet: nothing here depends on
+   styles.css, so the section can move to its own host unchanged.
+   Ember is for marks, rules and large type. Small type stays ink.
+   ------------------------------------------------------------------ */
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap");
+
+:root {
+  --ink: #0f0d0c;
+  --ink-soft: #3a332e;
+  --ember: #b85416;
+  --paper: #f6f1ea;
+  --paper-deep: #ebe3d7;
+  --muted: #6b6058;
+  --muted-on-ink: #a89d92;
+  --rule: #d8cfc2;
+  --accent: var(--ember);
+  --gutter: clamp(1.25rem, 5vw, 4rem);
+  --sans: "Inter", system-ui, -apple-system, sans-serif;
+  --serif: "Source Serif 4", georgia, serif;
+  --mono: "JetBrains Mono", ui-monospace, menlo, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 18px;
+}
+
+body.labs {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--serif);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--ember);
+  color: var(--paper);
+}
+
+:focus-visible {
+  outline: 2px solid var(--ember);
+  outline-offset: 2px;
+}
+
+/* ------------------------------ Parent strip ---------------------- */
+.parent-strip {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.25rem 1.5rem;
+  padding: 0.45rem var(--gutter);
+  background: var(--ink);
+  color: var(--muted-on-ink);
+  font-family: var(--sans);
+  font-size: 0.72rem;
+}
+
+.parent-strip a {
+  color: var(--muted-on-ink);
+  text-decoration: none;
+}
+
+.parent-strip a:hover {
+  color: var(--paper);
+}
+
+.parent-strip nav {
+  display: flex;
+  gap: 0.9rem;
+}
+
+.parent-home {
+  font-weight: 600;
+}
+
+/* ------------------------------ Header ---------------------------- */
+.labs-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 2rem;
+  padding: 1.1rem var(--gutter);
+  border-bottom: 1px solid var(--rule);
+}
+
+.labs-home img {
+  display: block;
+  width: auto;
+  height: 2rem;
+}
+
+.labs-head nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.1rem;
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+.labs-head nav a {
+  color: var(--ink);
+  text-decoration: none;
+  padding-bottom: 0.1rem;
+  border-bottom: 2px solid transparent;
+}
+
+.labs-head nav a:hover {
+  border-bottom-color: var(--ember);
+}
+
+/* ------------------------------ Hero ------------------------------ */
+
+/* The mark itself, at a scale where its two shapes read as a landscape. */
+.labs-hero {
+  position: relative;
+  overflow: hidden;
+  background: var(--ink);
+  color: var(--paper);
+  padding: clamp(14rem, 44vw, 6rem) var(--gutter) 3.5rem;
+}
+
+@media (width >= 900px) {
+  .labs-hero {
+    padding: 6.5rem var(--gutter) 6rem;
+    min-height: 34rem;
+    display: flex;
+    align-items: flex-end;
+  }
+}
+
+.labs-hero-art {
+  position: absolute;
+  top: -2.5rem;
+  right: -3rem;
+  width: 17rem;
+  height: 17rem;
+}
+
+@media (width >= 900px) {
+  .labs-hero-art {
+    top: -5rem;
+    right: -5rem;
+    width: 42rem;
+    height: 42rem;
+  }
+}
+
+.labs-hero-text {
+  position: relative;
+  max-width: 34rem;
+}
+
+.labs-hero h1 {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: clamp(2.05rem, 6.4vw, 4.6rem);
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  margin: 0 0 1.25rem;
+}
+
+.labs-hero p {
+  font-family: var(--sans);
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--muted-on-ink);
+  margin: 0;
+  max-width: 30rem;
+}
+
+/* ------------------------------ Sections -------------------------- */
+.labs-main {
+  padding: 0 var(--gutter) 2rem;
+}
+
+.labs-section {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.5rem 2.5rem;
+  padding: 2.75rem 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.labs-section:last-child {
+  border-bottom: 0;
+}
+
+@media (width >= 900px) {
+  .labs-section {
+    grid-template-columns: 11rem minmax(0, 46rem);
+  }
+}
+
+.labs-section > h2 {
+  font-family: var(--sans);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.4;
+  margin: 0.15rem 0 0.75rem;
+}
+
+.labs-writing,
+.labs-ledger {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 2rem;
+}
+
+.labs-writing time,
+.ledger-meta {
+  display: block;
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.labs-writing a {
+  display: block;
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: clamp(1.45rem, 3vw, 2.1rem);
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+  color: var(--ink);
+  text-decoration: none;
+  margin: 0.2rem 0 0.45rem;
+}
+
+.labs-writing a:hover {
+  color: var(--ember);
+}
+
+.labs-writing p,
+.labs-ledger p,
+.labs-cdk p {
+  margin: 0;
+  font-size: 0.98rem;
+  line-height: 1.5;
+}
+
+.labs-ledger h3 {
+  font-family: var(--mono);
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem;
+  overflow-wrap: anywhere;
+}
+
+.labs-ledger h3 a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--ember);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+.labs-ledger .ledger-meta {
+  margin-top: 0.3rem;
+  font-size: 0.78rem;
+}
+
+.labs-cdk img {
+  display: block;
+  width: auto;
+  height: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+.labs-cdk ol {
+  margin: 1rem 0 0;
+  padding-left: 1.25rem;
+}
+
+.labs-cdk a {
+  color: var(--ink);
+  text-decoration-color: var(--ember);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+/* ------------------------------ Article --------------------------- */
+.labs-post {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0 3.5rem;
+  padding: 3rem var(--gutter) 4rem;
+}
+
+@media (width >= 1000px) {
+  .labs-post {
+    grid-template-columns: minmax(0, 38rem) 15rem;
+    grid-template-areas:
+      "head head"
+      "prose rail";
+    justify-content: start;
+  }
+
+  .labs-post-head {
+    grid-area: head;
+  }
+
+  .labs-rail {
+    grid-area: rail;
+    position: sticky;
+    top: 1.5rem;
+    align-self: start;
+  }
+
+  .labs-prose {
+    grid-area: prose;
+  }
+}
+
+.labs-post-head h1 {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: clamp(2.3rem, 6.6vw, 4.6rem);
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  margin: 0 0 1rem;
+  max-width: 17em;
+  overflow-wrap: break-word;
+}
+
+.labs-post-meta {
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin: 0 0 2.5rem;
+}
+
+.labs-post-meta a {
+  color: inherit;
+}
+
+.labs-rail {
+  border-top: 3px solid var(--ember);
+  padding-top: 0.75rem;
+  margin-bottom: 2.5rem;
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.rail-name {
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  font-weight: 700;
+  margin: 0 0 0.2rem;
+  overflow-wrap: anywhere;
+}
+
+.rail-status {
+  color: var(--muted);
+  margin: 0 0 0.75rem;
+}
+
+.labs-post .rail-install {
+  margin: 0 0 0.75rem;
+  padding: 0.6rem 0.7rem;
+  font-size: 0.7rem;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.rail-links {
+  display: flex;
+  gap: 0.9rem;
+  margin: 0;
+}
+
+.rail-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.labs-rail a {
+  color: var(--ink);
+  text-decoration-color: var(--ember);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+.labs-prose p,
+.labs-prose ul,
+.labs-prose ol {
+  margin: 0 0 1.3rem;
+}
+
+.labs-prose ul,
+.labs-prose ol {
+  padding-left: 1.3rem;
+}
+
+.labs-prose li::marker {
+  color: var(--ember);
+}
+
+.labs-prose h2 {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 1.5rem;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  margin: 2.75rem 0 0.75rem;
+}
+
+.labs-prose h3 {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 1.1rem;
+  letter-spacing: -0.01em;
+  margin: 2rem 0 0.5rem;
+}
+
+.labs-prose a {
+  color: var(--ink);
+  text-decoration-color: var(--ember);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+.labs-prose a:hover {
+  text-decoration-thickness: 3px;
+}
+
+.labs-prose blockquote {
+  margin: 1.75rem 0;
+  padding: 0.1rem 0 0.1rem 1.25rem;
+  border-left: 3px solid var(--ember);
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+.labs-prose hr {
+  border: 0;
+  border-top: 1px solid var(--rule);
+  margin: 2.5rem 0;
+}
+
+.labs-prose :not(pre) > code {
+  font-family: var(--mono);
+  font-size: 0.84em;
+  background: var(--paper-deep);
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+}
+
+.labs-post pre {
+  --code-string: #ff7a3d;
+  --code-keyword: #5dadff;
+  --code-number: #c4d65a;
+
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  line-height: 1.6;
+  padding: 1rem 1.15rem;
+  margin: 1.5rem 0;
+  border-radius: 6px;
+  overflow-x: auto;
+}
+
+.labs-post pre code {
+  font-family: inherit;
+}
+
+.token.comment {
+  color: var(--muted-on-ink);
+  font-style: italic;
+}
+
+.token.keyword,
+.token.builtin,
+.token.function {
+  color: var(--code-keyword);
+}
+
+.token.string,
+.token.char,
+.token.attr-value {
+  color: var(--code-string);
+}
+
+.token.number,
+.token.boolean,
+.token.constant,
+.token.class-name {
+  color: var(--code-number);
+}
+
+.token.punctuation,
+.token.operator {
+  color: var(--muted-on-ink);
+}
+
+/* ------------------------------ Footer ---------------------------- */
+.labs-foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem 2.5rem;
+  background: var(--ink);
+  color: var(--muted-on-ink);
+  padding: 2rem var(--gutter);
+  font-family: var(--sans);
+  font-size: 0.78rem;
+}
+
+.labs-foot img {
+  display: block;
+  width: auto;
+  height: 1.8rem;
+}
+
+.labs-foot p {
+  margin: 0;
+}
+
+.labs-foot a {
+  color: var(--paper);
+}
+
+/* ------------------------------ Consent banner -------------------- */
+.consent {
+  position: fixed;
+  inset: auto 0 0;
+  z-index: 10;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 1.5rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem var(--gutter);
+  background: var(--ink);
+  color: var(--paper);
+  border-top: 4px solid var(--ember);
+  font-family: var(--sans);
+  font-size: 0.85rem;
+}
+
+.consent[hidden] {
+  display: none;
+}
+
+.consent-msg {
+  margin: 0;
+  flex: 1 1 20rem;
+}
+
+.consent-msg a {
+  color: var(--paper);
+}
+
+.consent-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.consent-btn {
+  font: inherit;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  background: var(--paper);
+  color: var(--ink);
+  border: 1px solid var(--paper);
+  border-radius: 2px;
+}
+
+.consent-btn--ghost {
+  background: transparent;
+  color: var(--paper);
+}
