@@ -2,6 +2,7 @@
 title: "Permission granted. Dependency inverted."
 date: 2026-08-10
 series: composure-cdk
+project: composurecdk
 seriesPart: 3
 ogImage: "/assets/og-after-you-no-after-you.jpg"
 summary: "CDK's grant methods live on the resource, but the policy they write lands on the consumer. That backwards arrow is invisible in a single stack, spreads into every L3 construct you build, and eventually shows up as a circular reference in a template you didn't write. composureCDK declares the grant where the dependency already points."

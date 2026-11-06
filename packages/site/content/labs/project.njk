@@ -1,0 +1,34 @@
+---
+layout: layouts/base.njk
+section: labs
+pagination:
+  data: labs.projects
+  size: 1
+  alias: p
+permalink: "/labs/{{ p.key }}/"
+eleventyExcludeFromCollections: true
+eleventyComputed:
+  title: "{{ p.name }}"
+  summary: "{{ p.summary }}"
+---
+<header class="project-head">
+  <a class="project-back" href="{{ '/labs/' | rel }}"><img src="{{ '/assets/labs/lockup-labs-dark.svg' | rel }}" alt="Composure Labs" width="133" height="28" /></a>
+  <h1>{{ p.name }}</h1>
+  <p class="project-summary">{{ p.summary }}</p>
+</header>
+
+<div class="project-state">
+  <p class="bench-version">v{{ p.version }}</p>
+  {% include "partials/labs-track.njk" %}
+</div>
+
+<pre class="project-install"><code>npm install {{ p.package }}</code></pre>
+<p class="project-links"><a href="{{ p.repo }}">GitHub</a> <a href="{{ p.npm }}">npm</a></p>
+
+<div class="section-heading">
+  {% include "partials/ornaments/sparkle.njk" %}
+  <span>writing</span>
+</div>
+
+{% set posts = collections.labsPosts | byProject(p.key) %}
+{% include "partials/post-list.njk" %}

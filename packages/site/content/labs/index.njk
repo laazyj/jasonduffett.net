@@ -1,0 +1,36 @@
+---
+layout: layouts/base.njk
+title: "Composure Labs"
+summary: "The tooling around ComposureCDK: what exists, how close each package is to 1.0, and everything written about it."
+section: labs
+eleventyExcludeFromCollections: true
+permalink: /labs/
+---
+<header class="labs-mast">
+  <img class="labs-lockup" src="{{ '/assets/labs/lockup-labs-dark.svg' | rel }}" alt="Composure Labs" width="303" height="64" />
+  <p class="intro">the tooling around <strong>ComposureCDK</strong>. what exists, how close it is to 1.0, and everything i&rsquo;ve written about it.</p>
+</header>
+
+<div class="section-heading">
+  {% include "partials/ornaments/sparkle.njk" %}
+  <span>the bench</span>
+</div>
+
+<div class="bench">
+  {% for p in labs.projects %}{% if p.root %}
+  <div class="bench-root">{% include "partials/labs-row.njk" %}</div>
+  {% endif %}{% endfor %}
+  <div class="bench-branch">
+    {% for p in labs.projects %}{% if p.builtOn == "Builds on ComposureCDK" %}{% include "partials/labs-row.njk" %}{% endif %}{% endfor %}
+  </div>
+  <p class="bench-caption">and one that stands on its own</p>
+  {% for p in labs.projects %}{% if p.builtOn == "Builds on nothing IaC-specific" %}{% include "partials/labs-row.njk" %}{% endif %}{% endfor %}
+</div>
+
+<div class="section-heading">
+  {% include "partials/ornaments/sparkle.njk" %}
+  <span>everything written</span>
+</div>
+
+{% set posts = collections.labsPosts %}
+{% include "partials/post-list.njk" %}

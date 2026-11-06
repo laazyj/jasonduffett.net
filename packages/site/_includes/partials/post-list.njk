@@ -9,7 +9,7 @@
       <span class="post-meta">
         <time datetime="{{ post.date | htmlDateString }}">{{ post.date | shortDate }}</time><span class="reading-time">{{ post.templateContent | readingTime }}m</span>
       </span>
-      <a class="title" href="{{ post.url | rel }}">{{ post.data.title }}</a>
+      <a class="title" href="{{ post.url | rel }}">{{ post.data.title }}{% if post.data.project %}<img class="title-mark" src="{{ '/assets/labs/mark.svg' | rel }}" alt="Composure Labs" width="16" height="16" />{% endif %}</a>
       {% if cat %}<span class="tag {{ cat }}">{{ cat }}</span>{% endif %}
     </li>
     {% endfor %}

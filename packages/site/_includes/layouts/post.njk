@@ -3,6 +3,7 @@ layout: layouts/base.njk
 ---
 <article id="post">
   <header class="post-head">
+    {% if project %}{% include "partials/labs-strip.njk" %}{% endif %}
     <h1>{{ title }}</h1>
     <div class="meta">
       <time datetime="{{ page.date | htmlDateString }}">{{ page.date | readableDate }}</time>
@@ -15,4 +16,6 @@ layout: layouts/base.njk
   </header>
 
   {{ content | safe }}
+
+  {% if project %}{% include "partials/labs-more.njk" %}{% endif %}
 </article>
