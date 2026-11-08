@@ -158,8 +158,8 @@ export function createSystem(stacks: SystemStacks, options: SystemOptions) {
         .addSubscription("email", new EmailSubscription(alertEmail)),
 
       // Notifies usEast1Alerts at AWS-recommended thresholds (80% actual, 100%
-      // forecasted). The builder auto-creates the SNS topic policy granting
-      // budgets.amazonaws.com:Publish — distinct from the alarmActionsPolicy
+      // forecasted). The builder adds a budgets.amazonaws.com:Publish grant
+      // to the topic's own access policy — distinct from the alarmActionsPolicy
       // wired in the afterBuild block below.
       // 6 USD covers steady-state CloudFront + Route 53 + S3 for a low-traffic
       // personal blog with healthy headroom; raise it if you add anything
