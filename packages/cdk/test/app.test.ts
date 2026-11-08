@@ -118,6 +118,28 @@ describe("app synthesis", () => {
     });
   });
 
+  describe("budget alerts topic", () => {
+    // An SNS topic has a single access policy, so a second TopicPolicy on the
+    // same topic would overwrite the first. Budgets must keep its publish grant
+    // on the topic's one policy, or budget alerts fail without any error.
+    it("has one topic policy, granting AWS Budgets publish", () => {
+      const alerts = stackTemplate(app, "JasonDuffettNetUsEast1AlertsStack");
+      alerts.resourceCountIs("AWS::SNS::TopicPolicy", 1);
+      alerts.hasResourceProperties("AWS::SNS::TopicPolicy", {
+        PolicyDocument: {
+          Statement: Match.arrayWith([
+            Match.objectLike({
+              Sid: "AllowBudgetsPublish",
+              Effect: "Allow",
+              Action: "SNS:Publish",
+              Principal: { Service: "budgets.amazonaws.com" },
+            }),
+          ]),
+        },
+      });
+    });
+  });
+
   describe("subsite delegation", () => {
     it("gives every subsite a delegated child zone under the parent", () => {
       const dns = stackTemplate(app, "JasonDuffettNetDnsStack");
