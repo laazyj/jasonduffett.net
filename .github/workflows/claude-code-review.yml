@@ -13,7 +13,12 @@ on:
 jobs:
   claude-review:
     # Only review PRs from the owner, maintainers and regular contributors.
-    if: contains(fromJSON('["OWNER","MEMBER","COLLABORATOR","CONTRIBUTOR"]'), github.event.pull_request.author_association)
+    # Skip Dependabot PRs: dependabot[bot] passes the association check, but
+    # runs it triggers get only Dependabot secrets (no CLAUDE_CODE_OAUTH_TOKEN),
+    # and claude-code-action rejects bot actors, so the job always failed.
+    if: >-
+      contains(fromJSON('["OWNER","MEMBER","COLLABORATOR","CONTRIBUTOR"]'), github.event.pull_request.author_association)
+      && github.event.pull_request.user.login != 'dependabot[bot]'
     runs-on: ubuntu-latest
     permissions:
       contents: read
