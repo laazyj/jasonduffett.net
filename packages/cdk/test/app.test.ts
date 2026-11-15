@@ -255,6 +255,18 @@ describe("app synthesis", () => {
     });
   });
 
+  describe("alert topics", () => {
+    it("creates no SNS delivery-failure alarms in any stack", () => {
+      for (const name of STACK_NAMES) {
+        stackTemplate(app, name).resourcePropertiesCountIs(
+          "AWS::CloudWatch::Alarm",
+          { Namespace: "AWS/SNS" },
+          0,
+        );
+      }
+    });
+  });
+
   describe("CDN alarms", () => {
     // Recommended-alarm coverage from composureCDK — if this drops to zero,
     // someone has flipped `recommendedAlarms(false)` on the cdn builder.
