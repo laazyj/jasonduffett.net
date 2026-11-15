@@ -6,6 +6,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 import { constraints } from "@composurecdk/cloudformation";
 
 import { buildApp, type SubsiteKey } from "../src/app.js";
+import { HEALTH_CHECK_REGIONS } from "../src/system.js";
 
 const STACK_NAMES = [
   "JasonDuffettNetDnsStack",
@@ -180,6 +181,7 @@ describe("app synthesis", () => {
             Type: "HTTPS",
             FullyQualifiedDomainName: subdomain,
             MeasureLatency: false,
+            Regions: HEALTH_CHECK_REGIONS,
           }),
         },
       );
@@ -252,6 +254,15 @@ describe("app synthesis", () => {
           PolicyDocument: { Statement: Match.arrayWith([Match.objectLike({ Sid })]) },
         });
       }
+    });
+  });
+
+  describe("health check", () => {
+    it("polls the apex from the limited checker regions only", () => {
+      stackTemplate(app, "JasonDuffettNetSiteStack").hasResourceProperties(
+        "AWS::Route53::HealthCheck",
+        { HealthCheckConfig: Match.objectLike({ Regions: HEALTH_CHECK_REGIONS }) },
+      );
     });
   });
 

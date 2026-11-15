@@ -54,6 +54,12 @@ const HOSTED_ZONE_LOGICAL_ID = "HostedZone";
 // volume meaningfully shows up against the budget alarm.
 const LOG_BUCKET_LIFECYCLE_RULES = [{ expiration: Duration.days(90) }];
 
+// Route 53 health checkers poll from every supported region by default, each
+// region running several checkers every 30 seconds — about 1.4M requests per
+// site per month, each also a CloudFront Function execution. Three regions is
+// the minimum Route 53 accepts.
+export const HEALTH_CHECK_REGIONS = ["us-east-1", "us-west-2", "eu-west-1"];
+
 export interface SystemStacks {
   /** Route 53 hosted zone + records. Region is cosmetic — Route 53 is global. */
   readonly dnsStack: Stack;
@@ -230,6 +236,7 @@ export function createSystem(stacks: SystemStacks, options: SystemOptions) {
         .type(HealthCheckType.HTTPS)
         .fqdn(domain)
         .measureLatency(false)
+        .regions(HEALTH_CHECK_REGIONS)
         .recommendedAlarms(false),
       healthCheckAlarms: createHealthCheckAlarmBuilder().healthCheck(
         ref<HealthCheckBuilderResult>("healthCheck"),

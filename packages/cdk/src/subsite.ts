@@ -36,6 +36,8 @@ import {
 import { createTopicBuilder, type TopicBuilderResult } from "@composurecdk/sns";
 import { outputs } from "@composurecdk/cloudformation";
 
+import { HEALTH_CHECK_REGIONS } from "./system.js";
+
 /**
  * Viewer-request CloudFront Function shared by every subsite. Unlike the apex
  * site there is no `www`→apex canonicalisation and no legacy redirect map —
@@ -203,11 +205,12 @@ export function createSubsite(stacks: SubsiteStacks, options: SubsiteOptions) {
       // Route 53 health check on the public subdomain. AWS/Route53 metrics emit
       // only in us-east-1, so the recommended alarm is suppressed here and
       // re-created in cdnAlarmsStack via the standalone alarm builder.
-      // Latency measurement off for cost, as on the apex (see system.ts).
+      // Latency off and checker regions limited for cost (see system.ts).
       healthCheck: createHealthCheckBuilder()
         .type(HealthCheckType.HTTPS)
         .fqdn(subdomain)
         .measureLatency(false)
+        .regions(HEALTH_CHECK_REGIONS)
         .recommendedAlarms(false),
       healthCheckAlarms: createHealthCheckAlarmBuilder().healthCheck(
         ref<HealthCheckBuilderResult>("healthCheck"),
