@@ -15,6 +15,9 @@ const COLORS = {
   tech: "#ff7a3d",
   music: "#5dadff",
   misc: "#c4d65a",
+  labsPaper: "#f6f1ea",
+  labsEmber: "#b85416",
+  labsMuted: "#a89d92",
 };
 
 async function loadFonts() {
@@ -154,6 +157,44 @@ function card({ title, category, sketchDataUrl, squiggle, byline = "by Jason Duf
   );
 }
 
+// Follows the brand kit's social previews: lockup, title, then the place.
+function labsCard({ title }) {
+  return div(
+    {
+      width: "1200px",
+      height: "630px",
+      background: COLORS.ink,
+      color: COLORS.labsPaper,
+      fontFamily: "Inter",
+    },
+    div(
+      {
+        flexDirection: "column",
+        justifyContent: "space-between",
+        padding: "72px 104px",
+        width: "100%",
+      },
+      [
+        div({ fontSize: "44px", fontWeight: 600, letterSpacing: "-0.018em", gap: "12px" }, [
+          div({}, "Composure"),
+          div({ color: COLORS.labsEmber, fontWeight: 400 }, "Labs"),
+        ]),
+        div(
+          {
+            fontSize: "76px",
+            fontWeight: 600,
+            lineHeight: 1.08,
+            letterSpacing: "-0.02em",
+            maxWidth: "960px",
+          },
+          title,
+        ),
+        div({ fontSize: "28px", color: COLORS.labsMuted }, "jasonduffett.net/labs"),
+      ],
+    ),
+  );
+}
+
 async function renderPng({ tree, fonts }) {
   const svg = await satori(tree, { width: 1200, height: 630, fonts });
   return new Resvg(svg).render().asPng();
@@ -197,7 +238,11 @@ function decodeHtmlEntities(s) {
     .replace(/&amp;/g, "&");
 }
 
-export async function buildOg({ distDir, sitePackageDir, categories = ["tech", "music", "misc"] }) {
+export async function buildOg({
+  distDir,
+  sitePackageDir,
+  categories = ["tech", "music", "misc", "labs"],
+}) {
   if (process.env.SKIP_OG_BUILD === "1") return 0;
 
   const fonts = await loadFonts();
@@ -226,7 +271,10 @@ export async function buildOg({ distDir, sitePackageDir, categories = ["tech", "
 
   for await (const post of walkPosts(distDir, categories)) {
     const png = await renderPng({
-      tree: card({ ...post, sketchDataUrl, squiggle: ornaments.squiggle }),
+      tree:
+        post.category === "labs"
+          ? labsCard(post)
+          : card({ ...post, sketchDataUrl, squiggle: ornaments.squiggle }),
       fonts,
     });
     await writeFile(path.join(ogDir, `${post.slug}.png`), png);

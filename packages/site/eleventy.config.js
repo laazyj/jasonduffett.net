@@ -7,7 +7,7 @@ import syntaxHighlight from "@11ty/eleventy-plugin-syntaxhighlight";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const CATEGORIES = ["tech", "music", "misc"];
+const CATEGORIES = ["tech", "music", "misc", "labs"];
 
 export default function (eleventyConfig) {
   eleventyConfig.addPlugin(rssPlugin);

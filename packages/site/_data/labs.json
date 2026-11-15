@@ -1,0 +1,29 @@
+{
+  "name": "Composure Labs",
+  "github": "https://github.com/composure-labs",
+  "npm": "https://www.npmjs.com/org/composure-labs",
+  "composurecdk": {
+    "repo": "https://github.com/laazyj/composureCDK",
+    "npm": "https://www.npmjs.com/org/composurecdk"
+  },
+  "packages": [
+    {
+      "name": "dynamodb-guard",
+      "package": "@composure-labs/dynamodb-guard",
+      "status": "Pre-release",
+      "dependsOn": "CDK and ESLint optional",
+      "summary": "Catches DynamoDB expressions that DynamoDB would reject, such as a reserved word like status used without an alias, before you deploy. Runs as an ESLint rule, a unit-test helper or a CDK synth check.",
+      "repo": "https://github.com/composure-labs/dynamodb-guard",
+      "npm": "https://www.npmjs.com/package/@composure-labs/dynamodb-guard"
+    },
+    {
+      "name": "composurecdk-stream-dlq",
+      "package": "@composure-labs/composurecdk-stream-dlq",
+      "status": "Pre-release",
+      "dependsOn": "Built on ComposureCDK",
+      "summary": "Saves a Lambda stream consumer's failed batches to S3 before the stream's retention window drops them, and alarms when one arrives. Manual replay is still to come.",
+      "repo": "https://github.com/composure-labs/composurecdk-stream-dlq",
+      "npm": "https://www.npmjs.com/package/@composure-labs/composurecdk-stream-dlq"
+    }
+  ]
+}

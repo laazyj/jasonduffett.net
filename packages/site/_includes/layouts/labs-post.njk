@@ -1,0 +1,34 @@
+---
+layout: layouts/labs-base.njk
+isPost: true
+---
+<article class="labs-post" id="post">
+  <header class="labs-post-head">
+    <h1>{{ title }}</h1>
+    <p class="labs-post-meta">
+      <time datetime="{{ page.date | htmlDateString }}">{{ page.date | readableDate }}</time>,
+      by <a rel="author" href="{{ '/about/' | rel }}">{{ site.author.name }}</a>,
+      {{ content | readingTime }} min read
+    </p>
+  </header>
+
+  <aside class="labs-rail">
+    {% set railPkg = false %}
+    {% for pkg in labs.packages %}{% if pkg.name == project %}{% set railPkg = pkg %}{% endif %}{% endfor %}
+    {% if railPkg %}
+    <h2 class="rail-name">{{ railPkg.name }}</h2>
+    <p class="rail-status">{{ railPkg.status }}</p>
+    <pre class="rail-install"><code>npm i {{ railPkg.package }}</code></pre>
+    <p class="rail-links"><a href="{{ railPkg.repo }}">GitHub</a> <a href="{{ railPkg.npm }}">npm</a></p>
+    {% else %}
+    <h2 class="rail-name">Packages</h2>
+    <ul class="rail-list">
+      {% for pkg in labs.packages %}<li><a href="{{ pkg.repo }}">{{ pkg.name }}</a></li>{% endfor %}
+    </ul>
+    {% endif %}
+  </aside>
+
+  <div class="labs-prose">
+    {{ content | safe }}
+  </div>
+</article>

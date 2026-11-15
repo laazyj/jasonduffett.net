@@ -4,12 +4,15 @@
     {% if page.url.startsWith("/" + cat + "/") %}{% set pageCat = cat %}{% endif %}
   {% endfor %}
 {% endif %}
-{% set showLicense = site.defaultLicense and not noLicense %}<!doctype html>
+{% set showLicense = site.defaultLicense and not noLicense %}
+{% set siteName = siteName or site.title %}
+{% set stylesheet = stylesheet or "/assets/styles.css" %}
+{% set feed = feed or "/feed.xml" %}<!doctype html>
 <html lang="{{ site.language }}">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>{% if title %}{{ title }} — {{ site.title }}{% else %}{{ site.title }} — {{ site.tagline }}{% endif %}</title>
+  <title>{% if title %}{{ title }} — {{ siteName }}{% else %}{{ siteName }} — {{ site.tagline }}{% endif %}</title>
   <meta name="description" content="{{ summary or site.description }}" />
   <meta http-equiv="content-language" content="{{ site.language }}" />
   <meta name="author" content="{{ site.author.name }}" />
@@ -22,24 +25,28 @@
   <meta name="tdm-reservation" content="0" />
   <meta name="tdm-policy" content="{{ site.url }}{{ site.licensePolicyUrl }}" />
   {% endif %}
+  {% if icon %}
+  <link rel="icon" href="{{ icon | rel }}" type="image/svg+xml" />
+  {% else %}
   <link rel="icon" href="{{ '/favicon.ico' | rel }}" sizes="32x32" />
   <link rel="icon" href="{{ '/favicon.svg' | rel }}" type="image/svg+xml" />
+  {% endif %}
   <link rel="apple-touch-icon" href="{{ '/apple-touch-icon.png' | rel }}" />
   <link rel="manifest" href="{{ '/site.webmanifest' | rel }}" />
-  <link rel="stylesheet" href="{{ '/assets/styles.css' | rel }}" />
-  <link rel="alternate" type="application/rss+xml" href="{{ '/feed.xml' | rel }}" title="{{ site.title }}" />
+  <link rel="stylesheet" href="{{ stylesheet | rel }}" />
+  <link rel="alternate" type="application/rss+xml" href="{{ feed | rel }}" title="{{ siteName }}" />
   {% set ogImageUrl = site.url + (ogImage or ('/og/' + page.fileSlug + '.png' if isPost else site.defaultOgImage)) %}
-  <meta property="og:title" content="{{ title or site.title }}" />
+  <meta property="og:title" content="{{ title or siteName }}" />
   <meta property="og:description" content="{{ summary or site.description }}" />
   <meta property="og:type" content="{{ 'article' if isPost else 'website' }}" />
   <meta property="og:url" content="{{ site.url }}{{ page.url }}" />
-  <meta property="og:site_name" content="{{ site.title }}" />
+  <meta property="og:site_name" content="{{ siteName }}" />
   <meta property="og:locale" content="en_GB" />
   <meta property="og:image" content="{{ ogImageUrl }}" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="{{ title or site.title }}" />
+  <meta name="twitter:title" content="{{ title or siteName }}" />
   <meta name="twitter:description" content="{{ summary or site.description }}" />
   <meta name="twitter:image" content="{{ ogImageUrl }}" />
   {% if isPost %}
@@ -76,7 +83,7 @@
       <span class="footer-squiggle">{% include "partials/ornaments/squiggle.njk" %}</span>
       <span class="footer-meta">
         &copy; {{ currentYear }} {{ site.author.name }}{% if showLicense %} · <a rel="license" href="{{ site.defaultLicense }}">{{ site.licenseName }}</a>{% endif %}
-        · <a href="{{ '/feed.xml' | rel }}">rss</a>
+        · <a href="{{ feed | rel }}">rss</a>
         · <a href="{{ '/about/' | rel }}">about</a>
         {% if analytics.measurementId %}· <a href="#" data-consent-reopen>cookies</a>{% endif %}
       </span>
