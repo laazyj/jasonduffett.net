@@ -9,6 +9,14 @@ isPost: true
       <time datetime="{{ page.date | htmlDateString }}">{{ page.date | readableDate }}</time>,
       by <a rel="author" href="{{ '/about/' | rel }}">{{ site.author.name }}</a>,
       {{ content | readingTime }} min read
+      {% set originals = collections.posts | byUrls(revisits) %}
+      {% if originals.length %}
+      <br />Revisits
+      {% for original in originals %}
+      <a href="{{ original.url | rel }}">{{ original.data.title }}</a>
+      (<time datetime="{{ original.date | htmlDateString }}">{{ original.date | readableDate }}</time>){% if not loop.last %},{% endif %}
+      {% endfor %}
+      {% endif %}
     </p>
   </header>
 

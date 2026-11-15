@@ -15,5 +15,9 @@ isPost: true
     <span class="post-divider">{% include "partials/ornaments/squiggle.njk" %}</span>
   </header>
 
+  {% for update in collections.labs | revisiting(page.url) %}
+  <p class="newer-version">Updated in Composure Labs: <a href="{{ update.url | rel }}">{{ update.data.title }}</a></p>
+  {% endfor %}
+
   {{ content | safe }}
 </article>

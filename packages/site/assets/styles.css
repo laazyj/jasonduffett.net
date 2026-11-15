@@ -688,6 +688,15 @@ article header.post-head {
   margin: 1rem 0 2.5rem;
 }
 
+.newer-version {
+  margin: 0 0 2rem;
+  padding: 0.8rem 1rem;
+  border: 1px dashed var(--rule);
+  font-family: var(--ui);
+  font-size: 0.9rem;
+  color: var(--paper-dim);
+}
+
 article h1 {
   font-family: var(--display);
   font-style: italic;

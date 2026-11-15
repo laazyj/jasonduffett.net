@@ -110,6 +110,20 @@ export default function (eleventyConfig) {
     return Math.max(1, Math.round(words / 225));
   });
 
+  // A Labs article's `revisits` front matter lists the URLs of the older
+  // posts it updates. byUrls resolves them, failing the build on a URL that
+  // matches no post; revisiting finds the articles that list a given URL.
+  eleventyConfig.addFilter("byUrls", (posts, urls = []) =>
+    urls.map((url) => {
+      const post = posts.find((p) => p.url === url);
+      if (!post) throw new Error(`revisits: no post at ${url}`);
+      return post;
+    }),
+  );
+  eleventyConfig.addFilter("revisiting", (posts, url) =>
+    posts.filter((p) => (p.data.revisits || []).includes(url)),
+  );
+
   // Group a collection into [{ year, posts[] }] in reverse-chronological order.
   eleventyConfig.addFilter("byYear", (posts) => {
     const groups = new Map();
