@@ -165,7 +165,16 @@ body {
   font-size: clamp(2.05rem, 6.4vw, 4.6rem);
   line-height: 1.02;
   letter-spacing: -0.03em;
+  margin: 0 0 1.25rem;
+}
+
+.labs-hero p {
+  font-family: var(--sans);
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--muted-on-ink);
   margin: 0;
+  max-width: 30rem;
 }
 
 /* ------------------------------ Sections -------------------------- */
