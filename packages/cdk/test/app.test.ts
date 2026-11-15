@@ -194,6 +194,11 @@ describe("app synthesis", () => {
 
       // CloudFront + health-check alarms live together in the us-east-1 alarm stack.
       const alarms = stackTemplate(app, `JasonDuffettNet${name}CdnAlarmsStack`);
+      alarms.resourcePropertiesCountIs(
+        "AWS::CloudWatch::Alarm",
+        { Namespace: "AWS/CloudFront" },
+        1,
+      );
       alarms.hasResourceProperties(
         "AWS::CloudWatch::Alarm",
         Match.objectLike({ MetricName: "5xxErrorRate", Namespace: "AWS/CloudFront" }),
@@ -256,12 +261,17 @@ describe("app synthesis", () => {
   });
 
   describe("CDN alarms", () => {
-    // Recommended-alarm coverage from composureCDK — if this drops to zero,
-    // someone has flipped `recommendedAlarms(false)` on the cdn builder.
-    it("creates multiple CloudWatch alarms in the edge region", () => {
-      const template = stackTemplate(app, "JasonDuffettNetCdnAlarmsStack");
-      const alarmCount = Object.keys(template.findResources("AWS::CloudWatch::Alarm")).length;
-      expect(alarmCount).toBeGreaterThanOrEqual(5);
+    it("alarms on the apex 5xx error rate only", () => {
+      const alarms = stackTemplate(app, "JasonDuffettNetCdnAlarmsStack");
+      alarms.resourcePropertiesCountIs(
+        "AWS::CloudWatch::Alarm",
+        { Namespace: "AWS/CloudFront" },
+        1,
+      );
+      alarms.hasResourceProperties("AWS::CloudWatch::Alarm", {
+        MetricName: "5xxErrorRate",
+        Namespace: "AWS/CloudFront",
+      });
     });
   });
 });
