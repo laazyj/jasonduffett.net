@@ -1015,38 +1015,6 @@
       },
       "Type": "AWS::CloudWatch::Alarm",
     },
-    "jasonduffettnetnaomisiteAlertsNumberOfNotificationsFailedToRedriveToDlqAlarmFCA384F6": {
-      "Properties": {
-        "AlarmActions": [
-          {
-            "Ref": "jasonduffettnetnaomisiteAlerts1E1007A8",
-          },
-        ],
-        "AlarmDescription": "SNS topic failed to redrive a message to a subscription dead-letter queue; messages may be lost. Threshold: > 0 failed redrives in 1 minute.",
-        "AlarmName": "jason-duffett-net-naomi-site-stack/jasonduffett-net/naomi/site-alerts/number-of-notifications-failed-to-redrive-to-dlq",
-        "ComparisonOperator": "GreaterThanThreshold",
-        "DatapointsToAlarm": 1,
-        "Dimensions": [
-          {
-            "Name": "TopicName",
-            "Value": {
-              "Fn::GetAtt": [
-                "jasonduffettnetnaomisiteAlerts1E1007A8",
-                "TopicName",
-              ],
-            },
-          },
-        ],
-        "EvaluationPeriods": 1,
-        "MetricName": "NumberOfNotificationsFailedToRedriveToDlq",
-        "Namespace": "AWS/SNS",
-        "Period": 60,
-        "Statistic": "Sum",
-        "Threshold": 0,
-        "TreatMissingData": "notBreaching",
-      },
-      "Type": "AWS::CloudWatch::Alarm",
-    },
     "jasonduffettnetnaomisiteAlertsNumberOfNotificationsFilteredOutInvalidAttributesAlarm0C22D68C": {
       "Properties": {
         "AlarmActions": [
@@ -1071,38 +1039,6 @@
         ],
         "EvaluationPeriods": 1,
         "MetricName": "NumberOfNotificationsFilteredOut-InvalidAttributes",
-        "Namespace": "AWS/SNS",
-        "Period": 60,
-        "Statistic": "Sum",
-        "Threshold": 0,
-        "TreatMissingData": "notBreaching",
-      },
-      "Type": "AWS::CloudWatch::Alarm",
-    },
-    "jasonduffettnetnaomisiteAlertsNumberOfNotificationsRedrivenToDlqAlarmD16F73D3": {
-      "Properties": {
-        "AlarmActions": [
-          {
-            "Ref": "jasonduffettnetnaomisiteAlerts1E1007A8",
-          },
-        ],
-        "AlarmDescription": "SNS topic is redriving messages to a subscription dead-letter queue, indicating delivery failures. Threshold: > 0 redrives in 1 minute.",
-        "AlarmName": "jason-duffett-net-naomi-site-stack/jasonduffett-net/naomi/site-alerts/number-of-notifications-redriven-to-dlq",
-        "ComparisonOperator": "GreaterThanThreshold",
-        "DatapointsToAlarm": 1,
-        "Dimensions": [
-          {
-            "Name": "TopicName",
-            "Value": {
-              "Fn::GetAtt": [
-                "jasonduffettnetnaomisiteAlerts1E1007A8",
-                "TopicName",
-              ],
-            },
-          },
-        ],
-        "EvaluationPeriods": 1,
-        "MetricName": "NumberOfNotificationsRedrivenToDlq",
         "Namespace": "AWS/SNS",
         "Period": 60,
         "Statistic": "Sum",

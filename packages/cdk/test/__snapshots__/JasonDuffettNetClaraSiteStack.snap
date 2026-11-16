@@ -1015,38 +1015,6 @@
       },
       "Type": "AWS::CloudWatch::Alarm",
     },
-    "jasonduffettnetclarasiteAlertsNumberOfNotificationsFailedToRedriveToDlqAlarm260CC68F": {
-      "Properties": {
-        "AlarmActions": [
-          {
-            "Ref": "jasonduffettnetclarasiteAlerts1D916E4A",
-          },
-        ],
-        "AlarmDescription": "SNS topic failed to redrive a message to a subscription dead-letter queue; messages may be lost. Threshold: > 0 failed redrives in 1 minute.",
-        "AlarmName": "jason-duffett-net-clara-site-stack/jasonduffett-net/clara/site-alerts/number-of-notifications-failed-to-redrive-to-dlq",
-        "ComparisonOperator": "GreaterThanThreshold",
-        "DatapointsToAlarm": 1,
-        "Dimensions": [
-          {
-            "Name": "TopicName",
-            "Value": {
-              "Fn::GetAtt": [
-                "jasonduffettnetclarasiteAlerts1D916E4A",
-                "TopicName",
-              ],
-            },
-          },
-        ],
-        "EvaluationPeriods": 1,
-        "MetricName": "NumberOfNotificationsFailedToRedriveToDlq",
-        "Namespace": "AWS/SNS",
-        "Period": 60,
-        "Statistic": "Sum",
-        "Threshold": 0,
-        "TreatMissingData": "notBreaching",
-      },
-      "Type": "AWS::CloudWatch::Alarm",
-    },
     "jasonduffettnetclarasiteAlertsNumberOfNotificationsFilteredOutInvalidAttributesAlarm2E478FC6": {
       "Properties": {
         "AlarmActions": [
@@ -1071,38 +1039,6 @@
         ],
         "EvaluationPeriods": 1,
         "MetricName": "NumberOfNotificationsFilteredOut-InvalidAttributes",
-        "Namespace": "AWS/SNS",
-        "Period": 60,
-        "Statistic": "Sum",
-        "Threshold": 0,
-        "TreatMissingData": "notBreaching",
-      },
-      "Type": "AWS::CloudWatch::Alarm",
-    },
-    "jasonduffettnetclarasiteAlertsNumberOfNotificationsRedrivenToDlqAlarm4F2F251C": {
-      "Properties": {
-        "AlarmActions": [
-          {
-            "Ref": "jasonduffettnetclarasiteAlerts1D916E4A",
-          },
-        ],
-        "AlarmDescription": "SNS topic is redriving messages to a subscription dead-letter queue, indicating delivery failures. Threshold: > 0 redrives in 1 minute.",
-        "AlarmName": "jason-duffett-net-clara-site-stack/jasonduffett-net/clara/site-alerts/number-of-notifications-redriven-to-dlq",
-        "ComparisonOperator": "GreaterThanThreshold",
-        "DatapointsToAlarm": 1,
-        "Dimensions": [
-          {
-            "Name": "TopicName",
-            "Value": {
-              "Fn::GetAtt": [
-                "jasonduffettnetclarasiteAlerts1D916E4A",
-                "TopicName",
-              ],
-            },
-          },
-        ],
-        "EvaluationPeriods": 1,
-        "MetricName": "NumberOfNotificationsRedrivenToDlq",
         "Namespace": "AWS/SNS",
         "Period": 60,
         "Statistic": "Sum",

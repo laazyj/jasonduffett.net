@@ -120,38 +120,6 @@
       },
       "Type": "AWS::CloudWatch::Alarm",
     },
-    "jasonduffettnetusEast1AlertsNumberOfNotificationsFailedToRedriveToDlqAlarm35409896": {
-      "Properties": {
-        "AlarmActions": [
-          {
-            "Ref": "jasonduffettnetusEast1AlertsED7A8D43",
-          },
-        ],
-        "AlarmDescription": "SNS topic failed to redrive a message to a subscription dead-letter queue; messages may be lost. Threshold: > 0 failed redrives in 1 minute.",
-        "AlarmName": "jason-duffett-net-us-east1-alerts-stack/jasonduffett-net/us-east1-alerts/number-of-notifications-failed-to-redrive-to-dlq",
-        "ComparisonOperator": "GreaterThanThreshold",
-        "DatapointsToAlarm": 1,
-        "Dimensions": [
-          {
-            "Name": "TopicName",
-            "Value": {
-              "Fn::GetAtt": [
-                "jasonduffettnetusEast1AlertsED7A8D43",
-                "TopicName",
-              ],
-            },
-          },
-        ],
-        "EvaluationPeriods": 1,
-        "MetricName": "NumberOfNotificationsFailedToRedriveToDlq",
-        "Namespace": "AWS/SNS",
-        "Period": 60,
-        "Statistic": "Sum",
-        "Threshold": 0,
-        "TreatMissingData": "notBreaching",
-      },
-      "Type": "AWS::CloudWatch::Alarm",
-    },
     "jasonduffettnetusEast1AlertsNumberOfNotificationsFilteredOutInvalidAttributesAlarmD8CD7B38": {
       "Properties": {
         "AlarmActions": [
@@ -176,38 +144,6 @@
         ],
         "EvaluationPeriods": 1,
         "MetricName": "NumberOfNotificationsFilteredOut-InvalidAttributes",
-        "Namespace": "AWS/SNS",
-        "Period": 60,
-        "Statistic": "Sum",
-        "Threshold": 0,
-        "TreatMissingData": "notBreaching",
-      },
-      "Type": "AWS::CloudWatch::Alarm",
-    },
-    "jasonduffettnetusEast1AlertsNumberOfNotificationsRedrivenToDlqAlarmE4CDFA99": {
-      "Properties": {
-        "AlarmActions": [
-          {
-            "Ref": "jasonduffettnetusEast1AlertsED7A8D43",
-          },
-        ],
-        "AlarmDescription": "SNS topic is redriving messages to a subscription dead-letter queue, indicating delivery failures. Threshold: > 0 redrives in 1 minute.",
-        "AlarmName": "jason-duffett-net-us-east1-alerts-stack/jasonduffett-net/us-east1-alerts/number-of-notifications-redriven-to-dlq",
-        "ComparisonOperator": "GreaterThanThreshold",
-        "DatapointsToAlarm": 1,
-        "Dimensions": [
-          {
-            "Name": "TopicName",
-            "Value": {
-              "Fn::GetAtt": [
-                "jasonduffettnetusEast1AlertsED7A8D43",
-                "TopicName",
-              ],
-            },
-          },
-        ],
-        "EvaluationPeriods": 1,
-        "MetricName": "NumberOfNotificationsRedrivenToDlq",
         "Namespace": "AWS/SNS",
         "Period": 60,
         "Statistic": "Sum",
