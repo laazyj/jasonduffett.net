@@ -15,6 +15,7 @@
   --tech: #ff7a3d;
   --music: #5dadff;
   --misc: #c4d65a;
+  --labs: #b85416;
   --code-bg: #1a1612;
   --measure: 38rem;
   --accent: var(--tech);
@@ -35,6 +36,10 @@
 
 [data-category="misc"] {
   --accent: var(--misc);
+}
+
+[data-section="labs"] {
+  --accent: var(--labs);
 }
 
 * {
@@ -157,6 +162,18 @@ header.site nav .nav-music[aria-current="page"] {
 header.site nav .nav-misc:hover,
 header.site nav .nav-misc[aria-current="page"] {
   color: var(--misc);
+}
+
+header.site nav .nav-labs {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+header.site nav .nav-labs img {
+  display: block;
+  width: 1rem;
+  height: 1rem;
 }
 
 /* ------------------------------ Hero (home) ---------------------- */
@@ -987,6 +1004,297 @@ article pre.language-tab {
     justify-self: center;
     margin-top: 1rem;
   }
+}
+
+/* ------------------------------ Composure Labs -------------------- */
+
+/* Ember is for marks, rules and large type: 3.99:1 on ink is too low for
+   small text, so small text in this section stays paper. */
+[data-section="labs"] footer.site a:hover {
+  color: var(--paper);
+}
+
+.labs-mast {
+  margin: 1.5rem 0 1rem;
+}
+
+.labs-lockup {
+  display: block;
+  width: min(19rem, 100%);
+  height: auto;
+}
+
+.labs-mast .intro {
+  margin: 1.25rem 0 0;
+}
+
+.bench-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.9rem 2.5rem;
+  padding: 1.25rem 1.4rem;
+  background: var(--ink-2);
+  border: 1px dashed var(--rule);
+}
+
+@media (width >= 820px) {
+  .bench-row {
+    grid-template-columns: minmax(0, 1fr) 24rem;
+    align-items: center;
+  }
+}
+
+.bench-root .bench-row {
+  border-left: 3px solid var(--labs);
+}
+
+.bench-name {
+  font-family: var(--mono);
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 0 0 0.3rem;
+  overflow-wrap: anywhere;
+}
+
+.bench-name a {
+  color: var(--paper);
+  text-decoration: underline;
+  text-decoration-color: var(--labs);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+
+.bench-about p {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  color: var(--paper-dim);
+}
+
+.bench-version {
+  font-family: var(--hand);
+  font-weight: 700;
+  font-size: 1.35rem;
+  line-height: 1;
+  margin: 0 0 0.6rem;
+  color: var(--paper);
+}
+
+/* Composed-on packages hang off the library they build on. */
+.bench-branch {
+  position: relative;
+  margin: 0 0 0 1.4rem;
+  padding: 1.25rem 0 0 1.6rem;
+  border-left: 1px dashed var(--labs);
+}
+
+.bench-branch .bench-row {
+  position: relative;
+}
+
+.bench-branch .bench-row::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: calc(-1.6rem - 1px);
+  width: 1.6rem;
+  border-top: 1px dashed var(--labs);
+}
+
+.bench-caption {
+  font-family: var(--hand);
+  font-weight: 500;
+  font-size: 1.3rem;
+  line-height: 1.2;
+  color: var(--muted);
+  margin: 1.75rem 0 0.75rem;
+}
+
+.track {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  font-family: var(--ui);
+  font-size: 0.72rem;
+  line-height: 1.25;
+  color: var(--muted);
+}
+
+.track-stop {
+  position: relative;
+  padding: 1.15rem 0.5rem 0 0;
+}
+
+.track-stop::before {
+  content: "";
+  position: absolute;
+  top: 0.32rem;
+  left: 0;
+  right: 0;
+  border-top: 2px solid var(--rule);
+}
+
+.track-stop:last-child::before {
+  display: none;
+}
+
+.track-stop::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  background: var(--ink-2);
+  border: 2px solid var(--muted);
+}
+
+.track-stop.is-past::before {
+  border-top-color: var(--labs);
+}
+
+.track-stop.is-past::after,
+.track-stop.is-current::after {
+  background: var(--labs);
+  border-color: var(--labs);
+}
+
+.track-stop.is-current {
+  color: var(--paper);
+}
+
+ul.posts .title-mark {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  margin-left: 0.5rem;
+  vertical-align: -0.12em;
+}
+
+[data-section="labs"] ul.posts .title-mark {
+  display: none;
+}
+
+.labs-strip {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem 0.6rem;
+  margin-bottom: 1.1rem;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--paper);
+}
+
+article a.labs-strip {
+  text-decoration: none;
+}
+
+article .labs-strip img {
+  display: block;
+  width: 1.4rem;
+  height: 1.4rem;
+  background: none;
+  padding: 0;
+  border-radius: 0;
+}
+
+.labs-strip-name {
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: var(--labs);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+
+.labs-strip-status {
+  color: var(--muted);
+}
+
+.labs-more {
+  margin-top: 3.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px dashed var(--rule);
+}
+
+article .labs-more h2 {
+  font-family: var(--hand);
+  font-style: normal;
+  font-weight: 700;
+  font-size: 1.5rem;
+  margin: 0 0 0.6rem;
+}
+
+article .labs-more ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.project-head {
+  max-width: var(--measure);
+  margin: 1rem 0 2rem;
+}
+
+.project-back img {
+  display: block;
+  width: auto;
+  height: 1.55rem;
+  margin-bottom: 1.5rem;
+}
+
+.project-head h1 {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: clamp(1.5rem, 4.6vw, 2.5rem);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  margin: 0 0 0.8rem;
+  overflow-wrap: anywhere;
+}
+
+.project-summary {
+  font-size: 1.15rem;
+  line-height: 1.45;
+  color: var(--paper-dim);
+  margin: 0;
+}
+
+.project-state {
+  max-width: 30rem;
+  margin: 0 0 2rem;
+}
+
+.project-install {
+  max-width: var(--measure);
+  background: var(--code-bg);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--labs);
+  border-radius: 4px;
+  padding: 0.8rem 1.15rem;
+  overflow-x: auto;
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  margin: 0 0 0.75rem;
+}
+
+.project-links {
+  display: flex;
+  gap: 1rem;
+  font-family: var(--ui);
+  font-size: 0.82rem;
+  margin: 0;
+}
+
+.project-links a {
+  color: var(--paper);
+  text-decoration-color: var(--labs);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
 }
 
 /* ------------------------------ Footer --------------------------- */

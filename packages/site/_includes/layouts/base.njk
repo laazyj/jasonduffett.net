@@ -51,7 +51,7 @@
   {% endif %}
   {% include "partials/analytics.njk" %}
 </head>
-<body{% if pageCat %} data-category="{{ pageCat }}"{% endif %}>
+<body{% if pageCat %} data-category="{{ pageCat }}"{% endif %}{% if section %} data-section="{{ section }}"{% endif %}>
   {% include "partials/ornaments/defs.njk" %}
   <div class="noise" aria-hidden="true"></div>
   <div class="wrap">
@@ -64,6 +64,7 @@
         {% for cat in categories %}
         <a class="nav-cat nav-{{ cat }}" href="{{ ('/' + cat + '/') | rel }}" {% if pageCat == cat %}aria-current="page"{% endif %}>{{ cat }}</a>
         {% endfor %}
+        <a class="nav-labs" href="{{ '/labs/' | rel }}" {% if section == "labs" %}aria-current="page"{% endif %}><img src="{{ '/assets/labs/mark.svg' | rel }}" alt="" width="16" height="16" />labs</a>
         <a class="nav-about" href="{{ '/about/' | rel }}" {% if page.url == "/about/" %}aria-current="page"{% endif %}>about</a>
       </nav>
     </header>

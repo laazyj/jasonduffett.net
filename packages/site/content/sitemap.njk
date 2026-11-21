@@ -7,7 +7,9 @@ eleventyExcludeFromCollections: true
   <url><loc>{{ site.url }}/</loc></url>
   <url><loc>{{ site.url }}/tech/</loc></url>
   <url><loc>{{ site.url }}/music/</loc></url>
-  <url><loc>{{ site.url }}/about/</loc></url>
+  <url><loc>{{ site.url }}/labs/</loc></url>
+  {% for p in labs.projects %}<url><loc>{{ site.url }}/labs/{{ p.key }}/</loc></url>
+  {% endfor %}<url><loc>{{ site.url }}/about/</loc></url>
   {% for post in collections.posts | reverse %}
   <url>
     <loc>{{ site.url }}{{ post.url }}</loc>

@@ -135,6 +135,21 @@ export default function (eleventyConfig) {
       .sort((a, b) => a.date - b.date),
   );
 
+  // Composure Labs is a lens across categories: a post joins it by naming a
+  // `project`, and keeps its category and its URL.
+  eleventyConfig.addCollection("labsPosts", (api) =>
+    api
+      .getAll()
+      .filter(
+        (item) => item.data.project && (item.data.tags || []).some((t) => CATEGORIES.includes(t)),
+      )
+      .sort((a, b) => a.date - b.date),
+  );
+
+  eleventyConfig.addFilter("byProject", (posts, key) =>
+    posts.filter((post) => post.data.project === key),
+  );
+
   eleventyConfig.on("eleventy.after", async ({ dir }) => {
     const { buildOg } = await import("./scripts/build-og.mjs");
     const count = await buildOg({

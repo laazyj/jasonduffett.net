@@ -1,0 +1,11 @@
+{% set stripProject = false %}
+{% for p in labs.projects %}{% if p.key == project %}{% set stripProject = p %}{% endif %}{% endfor %}
+<a class="labs-strip" href="{{ (('/labs/' + stripProject.key + '/') if stripProject else '/labs/') | rel }}">
+  <img src="{{ '/assets/labs/mark.svg' | rel }}" alt="" width="24" height="24" />
+  {% if stripProject %}
+  <span class="labs-strip-name">{{ stripProject.name }}</span>
+  <span class="labs-strip-status">v{{ stripProject.version }}, {{ labs.stages[stripProject.stage] }}</span>
+  {% else %}
+  <span class="labs-strip-name">Composure Labs</span>
+  {% endif %}
+</a>

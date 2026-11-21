@@ -1,0 +1,10 @@
+<div class="bench-row">
+  <div class="bench-about">
+    <h3 class="bench-name"><a href="{{ ('/labs/' + p.key + '/') | rel }}">{{ p.name }}</a></h3>
+    <p>{{ p.summary }}</p>
+  </div>
+  <div class="bench-state">
+    <p class="bench-version">v{{ p.version }}</p>
+    {% include "partials/labs-track.njk" %}
+  </div>
+</div>

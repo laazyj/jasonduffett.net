@@ -1,0 +1,5 @@
+<ol class="track" aria-label="Release progress">
+  {% for stage in labs.stages %}
+  <li class="track-stop{% if loop.index0 < p.stage %} is-past{% elif loop.index0 == p.stage %} is-current{% endif %}"{% if loop.index0 == p.stage %} aria-current="step"{% endif %}>{{ stage }}</li>
+  {% endfor %}
+</ol>
