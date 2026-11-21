@@ -1,0 +1,40 @@
+{
+  "name": "Composure Labs",
+  "line": "Composure Labs builds the tooling around ComposureCDK, the library for composable, lifecycle-managed AWS infrastructure.",
+  "github": "https://github.com/composure-labs",
+  "npm": "https://www.npmjs.com/org/composure-labs",
+  "composurecdk": {
+    "key": "composurecdk",
+    "name": "ComposureCDK",
+    "package": "@composurecdk/core",
+    "version": "0.11.2",
+    "stage": 1,
+    "summary": "Composable, lifecycle-managed AWS infrastructure. The library everything here sits around.",
+    "repo": "https://github.com/laazyj/composureCDK",
+    "npm": "https://www.npmjs.com/org/composurecdk"
+  },
+  "packages": [
+    {
+      "key": "dynamodb-guard",
+      "name": "dynamodb-guard",
+      "package": "@composure-labs/dynamodb-guard",
+      "version": "0.3.0",
+      "stage": 1,
+      "builtOn": "Builds on nothing IaC-specific",
+      "summary": "Catch DynamoDB expression mistakes before deploy: at synth, in unit tests and in lint.",
+      "repo": "https://github.com/composure-labs/dynamodb-guard",
+      "npm": "https://www.npmjs.com/package/@composure-labs/dynamodb-guard"
+    },
+    {
+      "key": "composurecdk-stream-dlq",
+      "name": "composurecdk-stream-dlq",
+      "package": "@composure-labs/composurecdk-stream-dlq",
+      "version": "0.1.0",
+      "stage": 0,
+      "builtOn": "Builds on ComposureCDK",
+      "summary": "No-loss failure capture for Lambda stream consumers, built on ComposureCDK.",
+      "repo": "https://github.com/composure-labs/composurecdk-stream-dlq",
+      "npm": "https://www.npmjs.com/package/@composure-labs/composurecdk-stream-dlq"
+    }
+  ]
+}
