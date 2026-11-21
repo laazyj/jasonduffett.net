@@ -156,12 +156,17 @@ export function createSystem(stacks: SystemStacks, options: SystemOptions) {
         .validationZone(hostedZone),
 
       // CloudWatch alarms can only target same-region SNS topics, so one topic per region.
+      // The recommended SNS delivery-failure alarms are off: they would notify
+      // through the very topic they monitor, so a failing topic cannot report
+      // itself.
       usEast1Alerts: createTopicBuilder()
         .displayName(`${domain} us-east-1 alerts`)
-        .addSubscription("email", new EmailSubscription(alertEmail)),
+        .addSubscription("email", new EmailSubscription(alertEmail))
+        .recommendedAlarms(false),
       siteAlerts: createTopicBuilder()
         .displayName(`${domain} site alerts`)
-        .addSubscription("email", new EmailSubscription(alertEmail)),
+        .addSubscription("email", new EmailSubscription(alertEmail))
+        .recommendedAlarms(false),
 
       // Notifies usEast1Alerts at AWS-recommended thresholds (80% actual, 100%
       // forecasted). The builder adds a budgets.amazonaws.com:Publish grant

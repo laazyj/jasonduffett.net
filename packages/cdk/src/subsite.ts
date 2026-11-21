@@ -156,12 +156,16 @@ export function createSubsite(stacks: SubsiteStacks, options: SubsiteOptions) {
 
       // CloudWatch alarms can only target a same-region SNS topic, so one topic
       // per region — matching the apex split.
+      // Recommended SNS delivery-failure alarms are off, as on the apex (see
+      // system.ts).
       usEast1Alerts: createTopicBuilder()
         .displayName(`${subdomain} us-east-1 alerts`)
-        .addSubscription("email", new EmailSubscription(alertEmail)),
+        .addSubscription("email", new EmailSubscription(alertEmail))
+        .recommendedAlarms(false),
       siteAlerts: createTopicBuilder()
         .displayName(`${subdomain} site alerts`)
-        .addSubscription("email", new EmailSubscription(alertEmail)),
+        .addSubscription("email", new EmailSubscription(alertEmail))
+        .recommendedAlarms(false),
 
       bucket: createBucketBuilder().lifecycleRules([
         { noncurrentVersionExpiration: Duration.days(30) },
