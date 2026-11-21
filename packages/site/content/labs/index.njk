@@ -1,0 +1,57 @@
+---
+layout: layouts/base.njk
+title: "Composure Labs"
+summary: "The tooling around ComposureCDK: first-party packages for AWS infrastructure, and the writing that goes with them."
+eleventyExcludeFromCollections: true
+permalink: /labs/
+---
+<header class="labs-mast">
+  <img class="labs-lockup" src="{{ '/assets/labs/lockup-labs-dark.svg' | rel }}" alt="Composure Labs" width="303" height="64" />
+  <p class="intro">the tooling around <strong>ComposureCDK</strong>. everything here is pre-release for now, and each package gets a proper introduction as it nears 1.0.</p>
+</header>
+
+<div class="section-heading">
+  {% include "partials/ornaments/sparkle.njk" %}
+  <span>on the shelf</span>
+</div>
+
+<ul class="shelf">
+  {% for pkg in labs.packages %}
+  <li class="shelf-card">
+    <h2 class="shelf-name">{{ pkg.name }}</h2>
+    <p class="shelf-summary">{{ pkg.summary }}</p>
+    <p class="shelf-status">pre-release, v{{ pkg.version }}</p>
+    <p class="shelf-links"><a href="{{ pkg.repo }}">GitHub</a> <a href="{{ pkg.npm }}">npm</a></p>
+  </li>
+  {% endfor %}
+</ul>
+
+<div class="section-heading">
+  {% include "partials/ornaments/sparkle.njk" %}
+  <span>writing</span>
+</div>
+
+{% set posts = collections.labs %}
+{% include "partials/post-list.njk" %}
+
+{% for thread in collections.seriesIndex %}
+{% if thread.key == "composure-cdk" %}
+<div class="section-heading">
+  {% include "partials/ornaments/sparkle.njk" %}
+  <span>where it started</span>
+</div>
+<ul class="threads labs-threads">
+  <li class="thread">
+    <h3 class="thread-title">ComposureCDK, so far</h3>
+    <ol class="thread-parts">
+      {% for post in thread.posts %}
+      <li>
+        <span class="thread-part-num">{{ post.data.seriesPart }}</span>
+        <a href="{{ post.url | rel }}">{{ post.data.title }}</a>
+      </li>
+      {% endfor %}
+    </ol>
+  </li>
+</ul>
+{% endif %}
+{% endfor %}

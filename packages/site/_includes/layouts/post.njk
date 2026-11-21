@@ -3,6 +3,7 @@ layout: layouts/base.njk
 ---
 <article id="post">
   <header class="post-head">
+    {% if "labs" in tags %}<a class="post-lockup" href="{{ '/labs/' | rel }}"><img src="{{ '/assets/labs/lockup-labs-dark.svg' | rel }}" alt="Composure Labs" width="133" height="28" /></a>{% endif %}
     <h1>{{ title }}</h1>
     <div class="meta">
       <time datetime="{{ page.date | htmlDateString }}">{{ page.date | readableDate }}</time>
@@ -15,4 +16,16 @@ layout: layouts/base.njk
   </header>
 
   {{ content | safe }}
+
+  {% if "labs" in tags %}
+  <aside class="imprint">
+    <img src="{{ '/assets/labs/mark.svg' | rel }}" alt="" width="64" height="64" />
+    <div>
+      <p>Published under <a href="{{ '/labs/' | rel }}">Composure Labs</a>, the tooling around ComposureCDK.</p>
+      {% for pkg in labs.packages %}{% if pkg.key == project %}
+      <p class="imprint-pkg"><code>{{ pkg.package }}</code> is pre-release, v{{ pkg.version }}. <a href="{{ pkg.repo }}">GitHub</a>, <a href="{{ pkg.npm }}">npm</a>.</p>
+      {% endif %}{% endfor %}
+    </div>
+  </aside>
+  {% endif %}
 </article>

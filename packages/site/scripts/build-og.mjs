@@ -15,6 +15,7 @@ const COLORS = {
   tech: "#ff7a3d",
   music: "#5dadff",
   misc: "#c4d65a",
+  labs: "#b85416",
 };
 
 async function loadFonts() {
