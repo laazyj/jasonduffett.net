@@ -185,6 +185,7 @@ export function createSubsite(stacks: SubsiteStacks, options: SubsiteOptions) {
               functionName: `${siteStack.stackName}-rewrite`,
               code: FunctionCode.fromInline(PRETTY_URL_FUNCTION_CODE),
               comment: "pretty-URL -> /index.html rewrite",
+              recommendedAlarms: false,
             },
           ],
         })
@@ -204,7 +205,12 @@ export function createSubsite(stacks: SubsiteStacks, options: SubsiteOptions) {
         ])
         // CloudFront metrics only emit in us-east-1; alarms must live there too.
         .recommendedAlarms(false),
-      cdnAlarms: createCloudFrontAlarmBuilder().distribution(ref<DistributionBuilderResult>("cdn")),
+      // Only the 5xx error-rate alarm is kept: origin latency needs paid additional
+      // metrics, and a broken rewrite function (its own alarms are off above)
+      // also surfaces as 5xx errors and a failing health check.
+      cdnAlarms: createCloudFrontAlarmBuilder()
+        .distribution(ref<DistributionBuilderResult>("cdn"))
+        .recommendedAlarms({ originLatency: false }),
 
       // Route 53 health check on the public subdomain. AWS/Route53 metrics emit
       // only in us-east-1, so the recommended alarm is suppressed here and

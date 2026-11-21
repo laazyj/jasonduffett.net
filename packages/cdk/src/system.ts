@@ -209,6 +209,7 @@ export function createSystem(stacks: SystemStacks, options: SystemOptions) {
               functionName: `${siteStack.stackName}-redirect`,
               code: FunctionCode.fromInline(buildRedirectFunctionCode(domain, redirects)),
               comment: "www->apex 301 + old-URL redirect map",
+              recommendedAlarms: false,
             },
           ],
         })
@@ -228,7 +229,13 @@ export function createSystem(stacks: SystemStacks, options: SystemOptions) {
         ])
         // CloudFront metrics only emit in us-east-1; alarms must live there too.
         .recommendedAlarms(false),
-      cdnAlarms: createCloudFrontAlarmBuilder().distribution(ref<DistributionBuilderResult>("cdn")),
+      // Only the 5xx error-rate alarm is kept. Origin latency has no data without
+      // CloudFront's paid additional metrics, and the viewer-request function's
+      // own alarms (switched off on the function above) would fire only on a
+      // broken function, which the 5xx alarm and health check also catch.
+      cdnAlarms: createCloudFrontAlarmBuilder()
+        .distribution(ref<DistributionBuilderResult>("cdn"))
+        .recommendedAlarms({ originLatency: false }),
 
       // Route 53 health check on the public apex. Health checks are global
       // resources so the construct can live in any region; we co-locate it
