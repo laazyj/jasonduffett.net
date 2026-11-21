@@ -1,0 +1,60 @@
+---
+layout: layouts/labs-base.njk
+title: "The tooling around ComposureCDK"
+summary: "First-party packages for composable, lifecycle-managed AWS infrastructure. Composure Labs improves the operational health, security and maintainability of your infrastructure, using the CDK you already know."
+eleventyExcludeFromCollections: true
+permalink: /labs/
+---
+<section class="labs-hero">
+  <svg class="labs-hero-art" viewBox="80 80 400 400" aria-hidden="true"><circle cx="170" cy="170" r="84" fill="#b85416"/><path d="M252 252 L362.4 273.4 A76 76 0 1 1 273.4 362.4 Z" fill="#f6f1ea"/></svg>
+  <div class="labs-hero-text">
+    <h1>{{ title }}.</h1>
+    <p>{{ summary }}</p>
+  </div>
+</section>
+
+<main class="labs-main">
+  <section class="labs-section" id="writing">
+    <h2>Writing</h2>
+    {% if collections.labs.length %}
+    <ol class="labs-writing">
+      {% for post in collections.labs | reverse %}
+      <li>
+        <time datetime="{{ post.date | htmlDateString }}">{{ post.date | readableDate }}</time>
+        <a href="{{ post.url | rel }}">{{ post.data.title }}</a>
+        {% if post.data.summary %}<p>{{ post.data.summary }}</p>{% endif %}
+      </li>
+      {% endfor %}
+    </ol>
+    {% else %}
+    <p class="labs-empty">Nothing yet. Each package gets an article when it's close to 1.0.</p>
+    {% endif %}
+  </section>
+
+  <section class="labs-section" id="packages">
+    <h2>Packages</h2>
+    <ul class="labs-ledger">
+      {% for pkg in labs.packages %}
+      <li>
+        <h3><a href="{{ pkg.repo }}">{{ pkg.name }}</a></h3>
+        <p>{{ pkg.summary }}</p>
+        <p class="ledger-meta">{{ pkg.status }}. {{ pkg.dependsOn }}.</p>
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <section class="labs-section" id="composurecdk">
+    <h2>ComposureCDK</h2>
+    <div class="labs-cdk">
+      <img src="{{ '/assets/labs/lockup-cdk-light.svg' | rel }}" alt="ComposureCDK" width="172" height="36" />
+      <p>ComposureCDK describes AWS infrastructure as a flat map of components you can read and diff. <a href="{{ labs.composurecdk.repo }}">GitHub</a>, <a href="{{ labs.composurecdk.npm }}">npm</a>.</p>
+      <p>Earlier posts about it:</p>
+      <ol>
+        {% for thread in collections.seriesIndex %}{% if thread.key == "composure-cdk" %}{% for post in thread.posts %}
+        <li><a href="{{ post.url | rel }}">{{ post.data.title }}</a></li>
+        {% endfor %}{% endif %}{% endfor %}
+      </ol>
+    </div>
+  </section>
+</main>

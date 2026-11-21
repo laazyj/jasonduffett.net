@@ -1,0 +1,15 @@
+---
+permalink: /labs/feed.xml
+eleventyExcludeFromCollections: true
+layout: null
+tags: []
+metadata:
+  title: Composure Labs
+  subtitle: The tooling around ComposureCDK
+  language: en-GB
+  url: https://jasonduffett.net/labs/
+  feedUrl: https://jasonduffett.net/labs/feed.xml
+  author:
+    name: Jason Duffett
+---
+{% set feedPosts = collections.labs %}{% include "partials/atom-feed.njk" %}
