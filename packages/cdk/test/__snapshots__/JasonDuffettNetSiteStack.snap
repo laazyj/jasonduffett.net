@@ -514,7 +514,6 @@
     "jasonduffettnetbucketAccessLogsB5DC331A": {
       "DeletionPolicy": "Retain",
       "Properties": {
-        "AccessControl": "LogDeliveryWrite",
         "BucketEncryption": {
           "ServerSideEncryptionConfiguration": [
             {
@@ -535,7 +534,7 @@
         "OwnershipControls": {
           "Rules": [
             {
-              "ObjectOwnership": "ObjectWriter",
+              "ObjectOwnership": "BucketOwnerEnforced",
             },
           ],
         },
@@ -589,6 +588,40 @@
                   ],
                 },
               ],
+            },
+            {
+              "Action": "s3:PutObject",
+              "Condition": {
+                "ArnLike": {
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "jasonduffettnetbucketBA88DBB7",
+                      "Arn",
+                    ],
+                  },
+                },
+                "StringEquals": {
+                  "aws:SourceAccount": "111111111111",
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "logging.s3.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::GetAtt": [
+                        "jasonduffettnetbucketAccessLogsB5DC331A",
+                        "Arn",
+                      ],
+                    },
+                    "/logs/*",
+                  ],
+                ],
+              },
             },
           ],
           "Version": "2012-10-17",
