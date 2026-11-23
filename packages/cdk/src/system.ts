@@ -6,15 +6,12 @@ import {
   ViewerProtocolPolicy,
 } from "aws-cdk-lib/aws-cloudfront";
 import { S3BucketOrigin } from "aws-cdk-lib/aws-cloudfront-origins";
-import { SnsAction } from "aws-cdk-lib/aws-cloudwatch-actions";
 import { HealthCheckType } from "aws-cdk-lib/aws-route53";
 import { Source } from "aws-cdk-lib/aws-s3-deployment";
-import { EmailSubscription } from "aws-cdk-lib/aws-sns-subscriptions";
 
 import { compose, ref } from "@composurecdk/core";
 import { createCertificateBuilder, type CertificateBuilderResult } from "@composurecdk/acm";
 import { createBudgetBuilder } from "@composurecdk/budgets";
-import { alarmActionsPolicy } from "@composurecdk/cloudwatch";
 import {
   cloudfrontAliasTarget,
   createHealthCheckAlarmBuilder,
@@ -34,11 +31,17 @@ import {
   createDistributionBuilder,
   type DistributionBuilderResult,
 } from "@composurecdk/cloudfront";
-import { createTopicBuilder, type TopicBuilderResult } from "@composurecdk/sns";
+import { type TopicBuilderResult } from "@composurecdk/sns";
 import { outputs } from "@composurecdk/cloudformation";
 
 import { buildRedirectFunctionCode } from "./redirect-function.js";
 import { loadRedirects } from "./redirects.js";
+import {
+  alertTopic,
+  NOT_FOUND_ERROR_RESPONSES,
+  routeAlarmActions,
+  topicArnOutput,
+} from "./shared.js";
 import { ZONE_RECORDS } from "./zone-records.js";
 
 // Pinning the hosted zone's CFN logical ID decouples it from the construct
@@ -75,14 +78,6 @@ export interface SystemStacks {
    */
   readonly cdnAlarmsStack: Stack;
 }
-
-const topicArnOutput = (refName: "usEast1Alerts" | "siteAlerts", role: string) => ({
-  value: ref<TopicBuilderResult>(refName)
-    .get("topic")
-    .map((t) => t.topicArn),
-  description: `Subscribe here to receive ${role}.`,
-  scope: refName,
-});
 
 export interface SystemOptions {
   /** Apex domain — e.g. `jasonduffett.net`. `www.{domain}` is computed from it. */
@@ -155,19 +150,9 @@ export function createSystem(stacks: SystemStacks, options: SystemOptions) {
         .subjectAlternativeNames([www])
         .validationZone(hostedZone),
 
-      // CloudWatch alarms can only target same-region SNS topics, so one topic per region.
-      // The recommended SNS delivery-failure alarms are off on both topics: the
-      // alarmActionsPolicy calls below would route them to the topic they
-      // monitor, so a failing topic could not report itself (@composurecdk/sns
-      // warns at synth if they are re-enabled that way).
-      usEast1Alerts: createTopicBuilder()
-        .displayName(`${domain} us-east-1 alerts`)
-        .addSubscription("email", new EmailSubscription(alertEmail))
-        .recommendedAlarms(false),
-      siteAlerts: createTopicBuilder()
-        .displayName(`${domain} site alerts`)
-        .addSubscription("email", new EmailSubscription(alertEmail))
-        .recommendedAlarms(false),
+      // One alert topic per region; see `alertTopic` in shared.ts.
+      usEast1Alerts: alertTopic(`${domain} us-east-1 alerts`, alertEmail),
+      siteAlerts: alertTopic(`${domain} site alerts`, alertEmail),
 
       // Notifies usEast1Alerts at AWS-recommended thresholds (80% actual, 100%
       // forecasted). The builder adds a budgets.amazonaws.com:Publish grant
@@ -214,20 +199,7 @@ export function createSystem(stacks: SystemStacks, options: SystemOptions) {
             },
           ],
         })
-        .errorResponses([
-          {
-            httpStatus: 403,
-            responseHttpStatus: 404,
-            responsePagePath: "/404.html",
-            ttl: Duration.seconds(60),
-          },
-          {
-            httpStatus: 404,
-            responseHttpStatus: 404,
-            responsePagePath: "/404.html",
-            ttl: Duration.seconds(60),
-          },
-        ])
+        .errorResponses(NOT_FOUND_ERROR_RESPONSES)
         // CloudFront metrics only emit in us-east-1; alarms must live there too.
         .recommendedAlarms(false),
       // Only the 5xx error-rate alarm is kept. Origin latency has no data without
@@ -320,13 +292,5 @@ export function createSystem(stacks: SystemStacks, options: SystemOptions) {
     .afterBuild((_scope, _id, { zone }) => {
       (zone.hostedZone.node.defaultChild as CfnResource).overrideLogicalId(HOSTED_ZONE_LOGICAL_ID);
     })
-    .afterBuild((_scope, _id, results) => {
-      const usEast1Action = new SnsAction(results.usEast1Alerts.topic);
-      alarmActionsPolicy(usEast1AlertsStack, { defaults: { alarmActions: [usEast1Action] } });
-      alarmActionsPolicy(certStack, { defaults: { alarmActions: [usEast1Action] } });
-      alarmActionsPolicy(cdnAlarmsStack, { defaults: { alarmActions: [usEast1Action] } });
-      alarmActionsPolicy(siteStack, {
-        defaults: { alarmActions: [new SnsAction(results.siteAlerts.topic)] },
-      });
-    });
+    .afterBuild(routeAlarmActions(stacks));
 }

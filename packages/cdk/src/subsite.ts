@@ -6,14 +6,11 @@ import {
   ViewerProtocolPolicy,
 } from "aws-cdk-lib/aws-cloudfront";
 import { S3BucketOrigin } from "aws-cdk-lib/aws-cloudfront-origins";
-import { SnsAction } from "aws-cdk-lib/aws-cloudwatch-actions";
 import { HealthCheckType } from "aws-cdk-lib/aws-route53";
 import { Source } from "aws-cdk-lib/aws-s3-deployment";
-import { EmailSubscription } from "aws-cdk-lib/aws-sns-subscriptions";
 
 import { compose, ref } from "@composurecdk/core";
 import { createCertificateBuilder, type CertificateBuilderResult } from "@composurecdk/acm";
-import { alarmActionsPolicy } from "@composurecdk/cloudwatch";
 import {
   cloudfrontAliasTarget,
   createHealthCheckAlarmBuilder,
@@ -33,9 +30,14 @@ import {
   createDistributionBuilder,
   type DistributionBuilderResult,
 } from "@composurecdk/cloudfront";
-import { createTopicBuilder, type TopicBuilderResult } from "@composurecdk/sns";
 import { outputs } from "@composurecdk/cloudformation";
 
+import {
+  alertTopic,
+  NOT_FOUND_ERROR_RESPONSES,
+  routeAlarmActions,
+  topicArnOutput,
+} from "./shared.js";
 import { HEALTH_CHECK_REGIONS } from "./system.js";
 
 /**
@@ -96,14 +98,6 @@ export interface SubsiteOptions {
   readonly alertEmail: string;
 }
 
-const topicArnOutput = (refName: "usEast1Alerts" | "siteAlerts", role: string) => ({
-  value: ref<TopicBuilderResult>(refName)
-    .get("topic")
-    .map((t) => t.topicArn),
-  description: `Subscribe here to receive ${role}.`,
-  scope: refName,
-});
-
 /**
  * Self-contained subsite for one subdomain of the apex — `clara.` and `naomi.`
  * are both built from here. Mirrors the apex `createSystem()` wiring (see
@@ -154,18 +148,9 @@ export function createSubsite(stacks: SubsiteStacks, options: SubsiteOptions) {
       // lands in certStack (us-east-1) and is wired to usEast1Alerts below.
       cert: createCertificateBuilder().domainName(subdomain).validationZone(zone),
 
-      // CloudWatch alarms can only target a same-region SNS topic, so one topic
-      // per region — matching the apex split.
-      // Recommended SNS delivery-failure alarms are off, as on the apex (see
-      // system.ts).
-      usEast1Alerts: createTopicBuilder()
-        .displayName(`${subdomain} us-east-1 alerts`)
-        .addSubscription("email", new EmailSubscription(alertEmail))
-        .recommendedAlarms(false),
-      siteAlerts: createTopicBuilder()
-        .displayName(`${subdomain} site alerts`)
-        .addSubscription("email", new EmailSubscription(alertEmail))
-        .recommendedAlarms(false),
+      // One alert topic per region, matching the apex; see `alertTopic` in shared.ts.
+      usEast1Alerts: alertTopic(`${subdomain} us-east-1 alerts`, alertEmail),
+      siteAlerts: alertTopic(`${subdomain} site alerts`, alertEmail),
 
       bucket: createBucketBuilder().lifecycleRules([
         { noncurrentVersionExpiration: Duration.days(30) },
@@ -189,20 +174,7 @@ export function createSubsite(stacks: SubsiteStacks, options: SubsiteOptions) {
             },
           ],
         })
-        .errorResponses([
-          {
-            httpStatus: 403,
-            responseHttpStatus: 404,
-            responsePagePath: "/404.html",
-            ttl: Duration.seconds(60),
-          },
-          {
-            httpStatus: 404,
-            responseHttpStatus: 404,
-            responsePagePath: "/404.html",
-            ttl: Duration.seconds(60),
-          },
-        ])
+        .errorResponses(NOT_FOUND_ERROR_RESPONSES)
         // CloudFront metrics only emit in us-east-1; alarms must live there too.
         .recommendedAlarms(false),
       // Only the 5xx error-rate alarm is kept: origin latency needs paid additional
@@ -277,13 +249,5 @@ export function createSubsite(stacks: SubsiteStacks, options: SubsiteOptions) {
         ),
       }),
     )
-    .afterBuild((_scope, _id, results) => {
-      const usEast1Action = new SnsAction(results.usEast1Alerts.topic);
-      alarmActionsPolicy(usEast1AlertsStack, { defaults: { alarmActions: [usEast1Action] } });
-      alarmActionsPolicy(certStack, { defaults: { alarmActions: [usEast1Action] } });
-      alarmActionsPolicy(cdnAlarmsStack, { defaults: { alarmActions: [usEast1Action] } });
-      alarmActionsPolicy(siteStack, {
-        defaults: { alarmActions: [new SnsAction(results.siteAlerts.topic)] },
-      });
-    });
+    .afterBuild(routeAlarmActions(stacks));
 }
