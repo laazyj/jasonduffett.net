@@ -156,9 +156,10 @@ export function createSystem(stacks: SystemStacks, options: SystemOptions) {
         .validationZone(hostedZone),
 
       // CloudWatch alarms can only target same-region SNS topics, so one topic per region.
-      // The recommended SNS delivery-failure alarms are off: they would notify
-      // through the very topic they monitor, so a failing topic cannot report
-      // itself.
+      // The recommended SNS delivery-failure alarms are off on both topics: the
+      // alarmActionsPolicy calls below would route them to the topic they
+      // monitor, so a failing topic could not report itself (@composurecdk/sns
+      // warns at synth if they are re-enabled that way).
       usEast1Alerts: createTopicBuilder()
         .displayName(`${domain} us-east-1 alerts`)
         .addSubscription("email", new EmailSubscription(alertEmail))

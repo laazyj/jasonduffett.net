@@ -501,7 +501,6 @@
     "jasonduffettnetclarabucketAccessLogsDB93A810": {
       "DeletionPolicy": "Retain",
       "Properties": {
-        "AccessControl": "LogDeliveryWrite",
         "BucketEncryption": {
           "ServerSideEncryptionConfiguration": [
             {
@@ -530,7 +529,7 @@
         "OwnershipControls": {
           "Rules": [
             {
-              "ObjectOwnership": "ObjectWriter",
+              "ObjectOwnership": "BucketOwnerEnforced",
             },
           ],
         },
@@ -584,6 +583,40 @@
                   ],
                 },
               ],
+            },
+            {
+              "Action": "s3:PutObject",
+              "Condition": {
+                "ArnLike": {
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "jasonduffettnetclarabucket844D8656",
+                      "Arn",
+                    ],
+                  },
+                },
+                "StringEquals": {
+                  "aws:SourceAccount": "111111111111",
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "logging.s3.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::GetAtt": [
+                        "jasonduffettnetclarabucketAccessLogsDB93A810",
+                        "Arn",
+                      ],
+                    },
+                    "/logs/*",
+                  ],
+                ],
+              },
             },
           ],
           "Version": "2012-10-17",
