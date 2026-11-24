@@ -235,7 +235,10 @@ npx cdk bootstrap aws://$ACCOUNT/us-east-1   # Cert stack (CloudFront requiremen
 `main` auto-deploys via GitHub Actions:
 
 - **`.github/workflows/pr.yml`** — runs on every PR: lint, format, build, test, plus
-  `cdk diff` posted as a comment so infra changes are visible at review time.
+  `cdk diff` posted as a comment so infra changes are visible at review time. The
+  diff builds the sites with the base commit's SHA in their `build-sha` tag, so a PR
+  that doesn't change a site shows no change to its stack (as long as that base
+  commit is what's deployed).
 - **`.github/workflows/deploy.yml`** — runs on push to `main`: full verify, fresh
   `site:build` (with `GITHUB_SHA` baked into a `<meta name="build-sha">` tag),
   `cdk deploy --all`, post-deploy smoke test (`packages/cdk/scripts/smoke-test.mjs`),

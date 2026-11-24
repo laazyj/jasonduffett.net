@@ -51,7 +51,10 @@ jobs:
       pull-requests: write
     env:
       ALERT_EMAIL: ${{ secrets.ALERT_EMAIL }}
+      # Same build inputs as deploy.yml, so the diff matches what's deployed.
       GA_MEASUREMENT_ID: ${{ vars.GA_MEASUREMENT_ID }}
+      CLARA_GA_MEASUREMENT_ID: ${{ vars.CLARA_GA_MEASUREMENT_ID }}
+      NAOMI_GA_MEASUREMENT_ID: ${{ vars.NAOMI_GA_MEASUREMENT_ID }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -67,12 +70,15 @@ jobs:
 
       # Synthesise the cloud assembly the diff action consumes. The nx synth
       # target builds the cdk package and the site first, writing to
-      # packages/cdk/cdk.out.
+      # packages/cdk/cdk.out. The sites' build-sha tag gets the base commit's
+      # SHA, so a PR that doesn't change a site shows no diff for it. GITHUB_*
+      # can't be set via env:, so it's overridden in the shell instead.
       - name: cdk synth
         env:
           CDK_DEFAULT_ACCOUNT: ${{ steps.aws.outputs.aws-account-id }}
           CDK_DEFAULT_REGION: ${{ env.AWS_REGION }}
-        run: npm run cdk:synth
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: GITHUB_SHA="$BASE_SHA" npm run cdk:synth
 
       # Posts a single sticky PR comment with a collapsible, colour-coded diff
       # per stack. Pinned to the v2.0.9 commit SHA (third-party action in an
